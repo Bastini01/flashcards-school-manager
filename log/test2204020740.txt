@@ -1,0 +1,124 @@
+00017 Ali Watak SYNCED
+00019 Violetta Dujmovic SYNCED
+00021 Cassandra Paul SYNCED
+00022 Tina Dinh SYNCED
+00023 愛麗 貝 SYNCED
+00024 馬修 郭 SYNCED
+00027 亞珂 辛 SYNCED
+00028 Sudapha P SYNCED
+00029 Riyoko Hoshino SYNCED
+00030 Ali Al-Jumaily SYNCED
+00031 Ryan Vellos SYNCED
+00032 Marco Diaz SYNCED
+00033 Santiago  Cabrera SYNCED
+00034 Ezrah Brandy SYNCED
+00035 Nicolla 云 嵐 Connor  柯 SYNCED
+00036 Andy Hirakawa SYNCED
+00037 Neiks P SYNCED
+00038 Emma Forbes SYNCED
+00039 Sahil Gaba SYNCED
+00040 Zachery Richards SYNCED
+00041 Sakshi Sharma SYNCED
+00042 Gabriela  Flores SYNCED
+00043 Youko Martinez SYNCED
+00045 Hanna Prera SYNCED
+00046 Javier Arévalo SYNCED
+00047 Astrid  Piedrasanta SYNCED
+00048 Nadia 敏 Chang 李 SYNCED
+00049 Génesis  Perez SYNCED
+00050 Asahel  Escober SYNCED
+00051 Oscar Tapia SYNCED
+00053 Paul H Nemra SYNCED
+00054 可成 孟 SYNCED
+00056 Thomas Hanlon SYNCED
+00057 lennox bedford SYNCED
+00058 Cristian Gomez SYNCED
+00059 Saida Sánchez SYNCED
+00060 Mynor Roberto Estrada SYNCED
+00061 Elí  Mendoza SYNCED
+00062 Charisa Eueipukdeekul SYNCED
+00063 Isabel Napky SYNCED
+00064 Maggie Huynh SYNCED
+00066 Klas Bergman SYNCED
+00067 Abigail Duarte SYNCED
+00068 Zara Krischer SYNCED
+00070 Abeni Humphrey SYNCED
+00071 Astrid Espinola SYNCED
+00074 YA LUN BAI SYNCED
+00075 Ximena Suarez SYNCED
+00076 Jenee Govia SYNCED
+00077 Lhakpa  Sherpa SYNCED
+00081 Isabella  Herrera SYNCED
+00082 Tyeis Duncan SYNCED
+00083 Desrenique Morris SYNCED
+00084 Lois  Robertson SYNCED
+00085 İlay Yanik SYNCED
+00087 Jonah Dunch SYNCED
+00091 Johann Pavon SYNCED
+00092 Brit Gaetan SYNCED
+00093 Steven Johns SYNCED
+00094 美珍 麥 SYNCED
+00095 Fatima Marroquin SYNCED
+00097 Skylar Messer SYNCED
+00099 Rachel Hutchins SYNCED
+00100 Bernelle  Joseph SYNCED
+00101 Nina Shahsavar SYNCED
+00102 Sven Riebesam SYNCED
+00104 Arno Bouguennec SYNCED
+00105 Joseph  勝福 Cavé 周 SYNCED
+00106 Matija  Profozic SYNCED
+00108 Puchit Hongsawat SYNCED
+00110 Abigail Heng SYNCED
+00112 Marco Sutti SYNCED
+00113 Will Nicholls SYNCED
+00114 Leina Lin SYNCED
+00115 Heiri Chang SYNCED
+00117 Hugo LAKOMSKY SYNCED
+gAction done  [{'emailTemplate': 'reminder0', 'studentIndex': 118}]
+00118 Alexandra Scheu SYNCED
+00119 Gian Luca Casali Valla AnkiWeb ID or password was incorrect; please try again.
+00120 Tenzin Lungri Tenzin lungri SYNCED
+00121 Sumi  yoon SYNCED
+00122 Noé Dodson SYNCED
+00123 Jena  Chen AnkiWeb ID or password was incorrect; please try again.
+gAction done  [{'statusUpdate': 'connection failed3', 'emailTemplate': 'wrongPassword', 'studentIndex': 124}]
+00124 Anton Vaisman (魏安) Vaisman SYNCED
+00125 唯衣　yuui  nishino SYNCED
+00126 NATTHA NAKARAWANAKUL SYNCED
+00127 珍妮 周 SYNCED
+00128 Alexander Socop SYNCED
+00130 Dallas Milne SYNCED
+00131 Wataru  kurihara SYNCED
+00132 John Caldwell SYNCED
+00133 Rajendra Bishwokarma SYNCED
+00134 華倫 許 new successful connection
+00134 華倫 許 SYNC ERROR:  A network error occurred.
+
+Error details: ⁨HTTP status client error (423 Locked) for url ()⁩
+gAction done  [{'statusUpdate': 'connection failed0', 'studentIndex': 135}]
+STUDENTS DONE
+41875 461 Traceback (most recent call last):
+  File "C:\inetpub\wwwroot\afc\main.py", line 160, in class_actions
+    wc=class_stats.class_report(st_cl_te, classId, 'week')
+  File "C:\inetpub\wwwroot\afc\class_stats.py", line 62, in class_report
+    df['本期複習的課'] = df.apply(
+  File "C:\Users\pierrehenry_bastin\AppData\Local\Programs\Python\Python310\lib\site-packages\pandas\core\frame.py", line 8833, in apply
+    return op.apply().__finalize__(self, method="apply")
+  File "C:\Users\pierrehenry_bastin\AppData\Local\Programs\Python\Python310\lib\site-packages\pandas\core\apply.py", line 727, in apply
+    return self.apply_standard()
+  File "C:\Users\pierrehenry_bastin\AppData\Local\Programs\Python\Python310\lib\site-packages\pandas\core\apply.py", line 851, in apply_standard
+    results, res_index = self.apply_series_generator()
+  File "C:\Users\pierrehenry_bastin\AppData\Local\Programs\Python\Python310\lib\site-packages\pandas\core\apply.py", line 867, in apply_series_generator
+    results[i] = self.f(v)
+  File "C:\inetpub\wwwroot\afc\class_stats.py", line 63, in <lambda>
+    lambda x: report(x['profileName'])[1]['chaps-words'],
+  File "C:\inetpub\wwwroot\afc\class_stats.py", line 59, in report
+    if period == 'week': return db.weeklyReport(x, db.getReviews(x))
+  File "C:\inetpub\wwwroot\afc\anki_db.py", line 79, in getReviews
+    reviewst = queryDb(profileName, query)
+  File "C:\inetpub\wwwroot\afc\anki_db.py", line 68, in queryDb
+    cursor.execute(query)
+sqlite3.OperationalError: no such table: revlog
+ no such table: revlog
+CLASSES DONE
+runtime:  29  min

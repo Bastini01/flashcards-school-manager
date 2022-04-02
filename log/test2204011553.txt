@@ -1,0 +1,17 @@
+00019 Violetta Dujmovic Traceback (most recent call last):
+  File "C:\inetpub\wwwroot\afc\.\main.py", line 64, in main
+    if status=='new' or profileName not in anki_profiles.getProfiles():
+  File "C:\inetpub\wwwroot\afc\.\anki_profiles.py", line 25, in getProfiles
+    profiles = pm.profiles()
+  File "C:\Users\pierrehenry_bastin\AppData\Local\Programs\Python\Python310\lib\site-packages\aqt\profiles.py", line 157, in profiles
+    n = names()
+  File "C:\Users\pierrehenry_bastin\AppData\Local\Programs\Python\Python310\lib\site-packages\aqt\profiles.py", line 155, in names
+    return self.db.list("select name from profiles where name != '_global'")
+  File "C:\Users\pierrehenry_bastin\AppData\Local\Programs\Python\Python310\lib\site-packages\anki\db.py", line 95, in list
+    return [x[0] for x in self.execute(*a, **kw)]
+  File "C:\Users\pierrehenry_bastin\AppData\Local\Programs\Python\Python310\lib\site-packages\anki\db.py", line 47, in execute
+    res = self._db.execute(sql, a)
+sqlite3.OperationalError: no such table: profiles
+ no such table: profiles
+STUDENTS DONE
+runtime:  0  min

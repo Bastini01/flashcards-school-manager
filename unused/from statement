@@ -1,0 +1,6 @@
+(
+    ([A] INNER JOIN [B] ON 
+    [A].ID = [B].ID) 
+    INNER JOIN [C] ON [B].[List Name] = [C].[Uw naam]
+    ) 
+    INNER JOIN [D] ON [B].[Response Type] = [D].F1;
