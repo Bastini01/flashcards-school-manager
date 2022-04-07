@@ -1,8 +1,0 @@
-00019 Violetta Dujmovic SYNCED
-00019 Violetta Dujmovic Traceback (most recent call last):
-  File "c:\inetpub\wwwroot\afc\main.py", line 97, in main
-    if syncResponse==True and c==True:
-UnboundLocalError: local variable 'c' referenced before assignment
- local variable 'c' referenced before assignment
-STUDENTS DONE
-runtime:  0  min

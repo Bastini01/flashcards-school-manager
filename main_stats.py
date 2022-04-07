@@ -1,3 +1,4 @@
+from os.path import join
 import pandas as pd
 import anki_db as db
 import config_notes, mtc_info, AllReviews
@@ -5,14 +6,14 @@ import datetime as dt
 import class_stats, mtc_info
 import google_apps as g
 
-studData=g.getStudents()
-emailLog=g.getEmailLog()
-gData=g.getData()
-gClass=gData['class']
-gs_c=gData['student_class']
-gTeacher=gData['teacher']
+# studData=g.getStudents()
+# emailLog=g.getEmailLog()
+# gData=g.getData()
+# gClass=gData['class']
+# gs_c=gData['student_class']
+# gTeacher=gData['teacher']
 
-st_cl_te = class_stats.st_cl_te(studData, gClass, gs_c, gTeacher, '21winter')
+# st_cl_te = class_stats.st_cl_te(studData, gClass, gs_c, gTeacher, '22spring')
 
 # st_cl_te.to_excel('st_cl_te.xlsx')
 
@@ -53,7 +54,7 @@ def classOverview():
     
     return df3
 # print(classOverview())
-classOverview().to_excel('class_list.xlsx')
+# classOverview().to_excel('class_list.xlsx')
 
 def print_class_reports(term = None):
     trm = mtc_info.get_current_term()['term'] if not term else term
@@ -94,112 +95,31 @@ def vocAnalysis(reviews, chapter=None):
     df=df.groupby(['TextbookChapter','Traditional Characters']).agg(['count', 'mean'])
     df['mean']=round((df['mean']-1)*3.33, 1)
     return df
-# vocAnalysis(pd.read_pickle('allReviews.pkl')).to_csv("vocAnalysis.txt")
 
-# def voc_analysis_to_pdf():
-#     path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-#     config = pdf.configuration(wkhtmltopdf=path_wkhtmltopdf)
-#     vocAnalysis=pd.read_pickle('vocAnalysi.pkl')
-#     # revs=AllReviews.getReviewDataAll()
-#     units=mtc_info.listUnits([1,1,1], 127)
-#     chapters=[]
-#     for i in units:
-#         c=[i[0], i[1]]
-#         if c not in  chapters: chapters.append(c)
-#     print([str(i) for i in chapters])
-#     html='<meta http-equiv="Content-type" content="text/html; charset=utf-8" />'
-    
-#     # page=[[],[]]
-#     # for c in chapters:
-#     #     chap=vocAnalysis[
-#     #         vocAnalysis.index.isin([str(c)],
-#     #         level='TextbookChapter')
-#     #         ].to_html()
-#     #     if len(page[0]) < 4:
-#     #         page[0].append(chap)
-#     #     elif len(page[1]) < 4:
-#     #         page[1].append(chap)
-#     #     else:
-#     #         html=html+"<html><body>"+tabulate(page, tablefmt='html')
-#     #         page=[[chap],[]]
-#     # html=html+tabulate(page, tablefmt='html')
-
-#     for c in chapters:
-#         chap=vocAnalysis[
-#             vocAnalysis.index.isin([str(c)],
-#             level='TextbookChapter')
-#             ]
-#         styler = chap.style.set_table_attributes("style='display:inline'")
-#         # styler = chap.style.set_properties(**{
-#         #     'font-size': '5pt'
-#         #         })
-#         # html=html+styler._repr_html_()
-#         html=html+styler.to_html()
-#     pdf.from_string(html, "pdftest.pdf", configuration=config)
-#     # chap=vocAnalysis[
-#     #         vocAnalysis.index.isin(['[1, 14]'],
-#     #         level='TextbookChapter')
-#     #         ].to_html()
-#     # pdf.from_string(html, "pdftest2.pdf", configuration=config)
-#     print(html)
-#     # print(html)
-
-def trendWeekly(allReviews): #still soms issues
-    allReviews=allReviews[allReviews['reviewTime'] >= dt.datetime(2021, 12, 1)]
-    # for i in range(len(allReviews)):
-    #     allReviews.loc[i,'年'] = allReviews.loc[i,'reviewTime'].isocalendar().year
-    #     allReviews.loc[i,'week'] = allReviews.loc[i,'reviewTime'].week
-    allReviews['年'] = allReviews.apply(lambda x: x['reviewTime'].isocalendar().year, axis=1)
+def trendWeekly(allReviews):
+    # allReviews = AllReviews.getReviewDataAll()
+    filterdf=allReviews[allReviews['reviewTime'] < dt.datetime(2021, 12, 1)]
+    allReviews.drop(index=filterdf.index, inplace=True)
+    allReviews['年'] = allReviews.apply(lambda x: x['reviewTime'].isocalendar().year, axis=1)  
     allReviews['week'] = allReviews.apply(lambda x: x['reviewTime'].week, axis=1)
     df=allReviews.groupby(['年', 'week', 'student']).agg(revs=('cardID', 'count'), studTime=('reviewDuration', 'sum'))
     df.reset_index(level=2, inplace=True)
     df['serious']=df.apply(lambda x: db.isSerious(30, x['student']), axis=1)
     df=df[df['serious'] == True]
-
-    ################# display serious and note serious distinction
-    # ind=df.index.tolist()
-    # for i in range(len(df)):
-    #     l=list(ind[i])
-    #     if df.loc[df.index[i],'cardID']>30: l.insert(3, 'serious')
-    #     else: l.insert(3, 'not serious')
-    #     ind[i]=tuple(l)
-    # nind=pd.Index(data=ind, name=('year', 'month', 'week', 'type', 'student'),  tupleize_cols=True)
-    # df.set_index(nind, inplace=True)
-
     df['studTime']=df.studTime/60000
     
-    # df=df.groupby(['week']).agg(
-    #     {'cardID': ['sum','count'],
-    #     'avgWeeklyReviews': 'mean',
-    #     'avgWeeklyTime(min)': 'mean'})
     df=df.groupby(['年', 'week']).agg(
         總共複習次數=('revs','sum'), 
         使用者人數=('student','count'),
         平均複習次數=('revs','mean'),
         平均複習時間=('studTime', 'mean'))
     df=df.astype('int32')
-
-    # fig, ax = plt.subplots()
-
-    # # hide axes
-    # fig.patch.set_visible(False)
-    # ax.axis('off')
-    # ax.axis('tight')
-    # ax.table(cellText=df.values, colLabels=df.columns, loc='center')
-
-    # fig.tight_layout()
-
-    # plt.show()
-    # #https://stackoverflow.com/questions/32137396/how-do-i-plot-only-a-table-in-matplotlib
-    # fig, ax =plt.subplots(figsize=(12,4))
-    # ax.axis('tight')
-    # ax.axis('off')
-    # the_table = ax.table(cellText=df.values,colLabels=df.columns,loc='center')
-
-    # # #https://stackoverflow.com/questions/4042192/reduce-left-and-right-margins-in-matplotlib-plot
-    # pp = PdfPages("foo.pdf")
-    # pp.savefig(fig, bbox_inches='tight')
-    # pp.close()
+    #####SEND MAIL
+    stlr = df.style.set_caption("WEEKLY TREND")
+    htmlReport = stlr.to_html()
+    # g.sendActions([{"emailTemplate":('statsReport', htmlReport)}])
+    filePath=join(r'C:\inetpub\wwwroot\afc\log',"weekly_trend"+dt.datetime.now().strftime('%y%m%d%H%M')+".xlsx")
+    df.to_excel(filePath)
     return df
-# trendWeekly(AllReviews.getReviewDataAll()).to_excel('weekly_trend.xlsx')
-# print(trendWeekly(AllReviews.getReviewDataAll()))
+# trendWeekly(AllReviews.getReviewDataAll()).to_excel('weekly_trend'+dt.datetime.now().strftime('%y%m%d%H%M')+'.xlsx')
+# trendWeekly(AllReviews.getReviewDataAll())

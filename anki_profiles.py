@@ -149,8 +149,10 @@ def sync(profileName, status='active'):
         #print(c.ListFields()[1][1])
         m=col.sync_media(SyncAuth)
     except Exception as e:
-        print(profileName+" SYNC ERROR: ", e)
-        return False
+        if '423' in str(e):
+            print(profileName+" SYNC ERROR: account not activated", e)
+            return 'not activated'
+        else: print(profileName+" SYNC ERROR: account not activated", e); return 'nok' 
     #Handle full sync required cases
     if len(c.ListFields())>1: 
         if c.ListFields()[1][1]==3:
@@ -161,11 +163,11 @@ def sync(profileName, status='active'):
             print(profileName+" FULL SYNC REQUIRED\n", c, m)
             return "fullSync"
     ##################""
-    print(profileName+" SYNCED")
+    # print(profileName+" SYNCED")
     col.save()
     col.close()
-    return True    
-# (sync("00001 Outlook PH"))
+    return 'ok'    
+# sync("00134 華倫 許")
 
 def first_sync(profileName):
     col = getCollection(profileName)
@@ -206,7 +208,7 @@ def get_all_syncStatus():
     for profileName in getProfiles():
         getSyncStatus(profileName)
 
-def handle_connection(profileName, email, status, statusDate, oth):
+def connection_reminder_schedule(status, statusDate):
     s=None
     if status[-1]=='x': return None
     if status[:3]=='new' or status=='active': s='0'
@@ -216,11 +218,28 @@ def handle_connection(profileName, email, status, statusDate, oth):
     elif status[-1]=='3' and today >= statusDate+tdelta(days=4): s='4'
     elif status[-1]=='4' and today >= statusDate+tdelta(days=7): s='5'
     elif status[-1]=='5' and today >= statusDate+tdelta(days=15): s='x'
+    return s
+
+
+def handle_connection(profileName, email, status, statusDate, oth):
+    s = connection_reminder_schedule(status, statusDate)
+    # if status[-1]=='x': return None
+    # if status[:3]=='new' or status=='active': s='0'
+    # elif status[-1]=='0' and today >= statusDate+tdelta(days=1): s='1'        
+    # elif status[-1]=='1' and today >= statusDate+tdelta(days=1): s='2'
+    # elif status[-1]=='2' and today >= statusDate+tdelta(days=1): s='3'
+    # elif status[-1]=='3' and today >= statusDate+tdelta(days=4): s='4'
+    # elif status[-1]=='4' and today >= statusDate+tdelta(days=7): s='5'
+    # elif status[-1]=='5' and today >= statusDate+tdelta(days=15): s='x'
     ##### try to connect
-    if s is not None or int(status[-1])<4 :
+    # if s or int(status[-1])<4 :
+    if s:
         con=connectProfile(profileName, email, oth)
         if con==True: return True
     return s
+
+def handle_not_activated(status, statusDate):
+    return connection_reminder_schedule(status, statusDate)
 
 def createNote(collection, note):
 

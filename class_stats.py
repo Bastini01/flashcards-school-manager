@@ -1,6 +1,7 @@
 import pandas as pd
 import anki_db as db
 from mtc_info import unit_to_zh, get_current_term
+import traceback
 
 # import google_apps as g
 # gStudent=g.getStudents()
@@ -18,10 +19,9 @@ def st_cl_te(gStudent, gClass, gs_c, gTeacher, trm = None):
     df=stud.merge(s_c, how='left', on='studentId')
     df=df.merge(c, how='left', on='class_id')
     df1=df.merge(t, how='left', on='teacher_id')
-    # df1=df1[(df1['term']==term)&(df1['state'][1]!='t')]
     df1=df1[df1['term']==term]
     return df1
-# st_cl_te(gStudent, gClass, gs_c, gTeacher).to_excel("st_cl_te.xlsx")
+# sct = st_cl_te(gStudent, gClass, gs_c, gTeacher)#.to_excel("st_cl_te.xlsx")
 
 def class_type(profileName, st_cl_te):
     df=st_cl_te[st_cl_te['profileName']==profileName]
@@ -38,15 +38,9 @@ def start_unit(profileName, st_cl_te):
         startUnit=[int(su.split(",")[0]), int(su.split(",")[1]), 1] if su else None 
         return startUnit
 
-# su=stclte[stclte['profileName']=="00031 Ryan Vellos"].iloc[0].at['startUnit']
-# startUnit=[int(su.split(",")[0]), int(su.split(",")[1]), 1] 
-# print(startUnit)
-
-
 def class_report(st_cl_te, class_id, period='term'):
     df=st_cl_te
     df=df[df['class_id']==class_id]
-    # df.reset_index(drop=True, inplace=True)
     if len(df)==0: return 'classWeekly', {'empty': True, 'styler': None}
     teacherId = df.iloc[0, df.columns.get_loc("teacher_id")]
     teacherName = df.iloc[0, df.columns.get_loc("name")]
@@ -56,23 +50,21 @@ def class_report(st_cl_te, class_id, period='term'):
     timeFrame = per[0].strftime('%Y/%m/%d')+" - "+per[1].strftime('%Y/%m/%d')
 
     def report(x):
-        if period == 'week': return db.weeklyReport(x, db.getReviews(x))
-        else: return db.termReport(x, db.getReviews(x))
+        try:
+            if period == 'week': return db.weeklyReport(x, db.getReviews(x))
+            else: return db.termReport(x, db.getReviews(x))
+        except Exception as e: 
+            tb = traceback.format_exc(limit=50)
+            print("class report student error: ", class_id, x, teacherId, tb, e)
+            return (None, {'chaps-words': [], 'top': []})
 
     df['本期複習的課'] = df.apply(
         lambda x: report(x['profileName'])[1]['chaps-words'], 
         axis=1)
-    # df['複習時間'] = df.apply(
-    #     lambda x: db.termReport(report(x['profileName']))[1]['time'], 
-    #     axis=1)
-    # if period != 'week':
-        # df['最後次複習'] = df.apply(
-        #     lambda x: report(x['profileName'])[1]['lastRev'], 
-        #     axis=1)
     df['最常被忘記的生詞'] = df.apply(
         lambda x: report(x['profileName'])[1]['top'][:6], 
         axis=1)
-    # df= df[df["最常被忘記的生詞"].str.len() != 0]
+
     df= df[df["最常被忘記的生詞"].str.len() != 0]
     df.reset_index(drop=True, inplace=True)
     df['最常被忘記的生詞'] = df['最常被忘記的生詞'].apply(lambda x: [i[0] for i in x])
@@ -99,10 +91,15 @@ def class_report(st_cl_te, class_id, period='term'):
         'styler':stlr,
         'htmlReport':htmlReport
     }
-# # print(class_report('41661'))
-# rep=class_report('41661')
-# # rep['report'].to_excel(rep['class']+rep['teacherName']+'.xlsx')
-# rep['report'].style.to_html(rep['class']+rep['teacherName']+'.html')
+# rep = class_report(sct, '41875', 'week')
+# # rep=class_report('41661')
+# # # rep['report'].to_excel(rep['class']+rep['teacherName']+'.xlsx')
+# # rep[1]['htmlReport'].style.to_html(rep[1]['class']+rep[1]['teacherName']+'.html')
+# logFilePath=rep[1]['class']+rep[1]['teacherName']+'.html'
+# logFile = open(logFilePath,'w', encoding="utf-8")
+# logFile.write(rep[1]['htmlReport'])
+# logFile.close()
+
 
 # gClass.apply(lambda x: print(x['class_id'], x['teacher_id']), axis=1)
 

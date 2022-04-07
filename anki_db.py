@@ -98,7 +98,7 @@ def getReviews(profileName):
         l[10]= unit(l[10])
 
     return reviewsl
-# (getReviews("00048 Nadia 敏 Chang 李"))
+# getReviews("00016 Jose Loo")
 
 def review_mean_duration(reviews):
     # t=textbook_new_word_review(reviews)['reviewDuration'].mean()
@@ -158,7 +158,8 @@ def rev_to_df(reviews):
         'revId',
         'en'])
     return df
-# revnem=rev_to_df(getReviews("00053 Paul H Nemra"))
+# revnem=rev_to_df(getReviews("00017 Ali Watak"))
+# revnem.to_csv('Ali_watak.txt')
 # dafr=revnem[revnem['tags'] != None]
 # dafr=revnem.to_csv('revNemra.txt')
 

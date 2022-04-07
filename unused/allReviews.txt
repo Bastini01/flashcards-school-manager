@@ -1,1 +1,0 @@
-,reviewTime,cardID,usn,buttonPressed,newInterval,previousInterval,newFactor,reviewDuration,reviewType,tradChars,tags,student,revId,en

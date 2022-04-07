@@ -60,7 +60,7 @@ def runCustomBulk():
             # syncResponse = anki_profiles.sync(profileName)
             # if syncResponse == True: google_apps.SendStudentActions(studActions)
 
-            anki_profiles.add_notes(profileName, [3,12,2], 1)
+            anki_profiles.add_notes(profileName, [1,5,2], 1)
             # try: anki_profiles.sync(profileName)
             # except: print('sync error')
             # anki_profiles.deleteDeck(profileName, [1,9])

@@ -139,9 +139,15 @@ def get_student_sup_hours(supHoursLog, studentId):
     return s if s else 0
 # (get_student_sup_hours(get_sup_hours_log(), '190917427'))
 
-def getActionsTemplate():
+def getActionsTemplate(): #not used, documentation only
     columns={"studentIndex":[], "statusUpdate":[], "chapterUpdate":[],"emailTemplate":[]}
     return columns
+
+def tesactions():
+    actions=[{"studentIndex":2, "emailTemplate":"suppHours24"}]
+    actionsJSON=pd.DataFrame(actions).to_json(orient="index")
+    print(actionsJSON)
+# tesactions()
 
 def sendActions(actions):
 

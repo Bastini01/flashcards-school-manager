@@ -1,4 +1,6 @@
 from time import time
+
+from attr import s
 time1=time()
 import sys
 from os.path import expanduser, join
@@ -9,11 +11,11 @@ import anki_profiles
 import pandas as pd
 import anki_db
 import mtc_info
-import class_stats
+import class_stats, main_stats
 
 original_stdout = sys.stdout
 today=dt.datetime.now().date()
-logFilePath=join(r'C:\inetpub\wwwroot\afc\log',"test"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
+logFilePath=join(r'C:\inetpub\wwwroot\afc\log',"log"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
 
 def main(log=True, std=True, cls=True, new=False, idFilter=None):
     if log: 
@@ -30,6 +32,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None):
     if std:
         #####ITERATE STUDENTS
         allReviews = []
+        amountSynced = 0
         for i in range(len(studData)):
             profileName=studData.loc[i, 'profileName']
             studentId=studData.loc[i, 'studentId']
@@ -77,7 +80,15 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None):
                     elif c==True:
                         print(profileName, "new successful connection")
                         actions.append({"studentIndex":i+2,"statusUpdate":'active'})
-                        anki_profiles.first_sync(profileName)
+                        try: anki_profiles.first_sync(profileName)
+                        except Exception as e:
+                            c = False
+                            print(profileName, e)
+                            naResponse = anki_profiles.handle_not_activated(status, statusDate)
+                            if not naResponse: continue
+                            else: actions=[{"studentIndex":i+2,
+                            "emailTemplate": 'notActivated', 
+                            "statusUpdate":'connection failed'+naResponse}]
 
 
                 #########ADD CARDS
@@ -95,16 +106,23 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None):
                 #########SYNC    
                 if status=='active' or status[:-1]=='custom' or c==True:     
                     syncResponse = anki_profiles.sync(profileName, status)
-                    if syncResponse==True and c==True:
+                    if syncResponse == 'ok': amountSynced = amountSynced+1
+                    if syncResponse=='ok' and c==True:
                         actions.append({
                         "studentIndex":i+2,
                         "emailTemplate": 'activatedMail'})
-                    elif not syncResponse: 
+                    elif syncResponse == 'not activated': 
+                        naResponse = anki_profiles.handle_not_activated(status, statusDate)
+                        if not naResponse: continue
+                        else: actions=[{"studentIndex":i+2,
+                        "emailTemplate": 'notActivated', 
+                        "statusUpdate":'connection failed'+naResponse}]
+                    elif syncResponse == 'nok': 
                         actions=[{"studentIndex":i+2, "statusUpdate":'connection failed0'}]
                     elif syncResponse=="fullSync": continue
                             
                 #########NOTIFICATIONS&SUPPHOURS
-                if (status=='active' or status[:-1]=='custom') and syncResponse == True:
+                if (status=='active' or status[:-1]=='custom') and syncResponse == 'ok':
                     rvs=anki_db.getReviews(profileName)
                     #########NO REVIEWS REMINDERS
                     if ((len(rvs)==0 or 
@@ -125,6 +143,8 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None):
                         weekly=anki_db.weeklyReport(profileName, rvs)
                         daily=anki_db.dailyReport(profileName, rvs)
                         month=anki_db.month_report(profileName, rvs)
+                        if daily[1]['reviews'] > 0: 
+                            print(profileName, str(daily[1]['reviews'])+' revs')
                         ########WEEKLY REPORT
                         if (g.checkEmail(emailLog, studentId, weekly[0])==False and
                                 anki_db.weekly_send_conditions(rvs, weekly)):                    
@@ -136,10 +156,10 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None):
                             len(rvs)<500):
                                 actions.append({"studentIndex":i+2,"emailTemplate":daily}) 
                         ########SUPPLEMENTARY HOURS
-                        # sh=g.get_student_sup_hours(supHoursLog, studentId)
-                        # h = month[1]['hours']-sh if sh+month[1]['hours']<=8 else 8-sh
-                        # if h>0: actions.append({"studentIndex":i+2, 
-                        #     "emailTemplate":'suppHours'+str(h)+str(sh)})   
+                        sh=g.get_student_sup_hours(supHoursLog, studentId)
+                        h = month[1]['hours']-sh if sh+month[1]['hours']<=8 else 8-sh
+                        if h>0: actions.append({"studentIndex":i+2, 
+                            "emailTemplate":'suppHours'+str(h)+str(sh)})   
                 #########SEND TO GAPPS
                 if len(actions)>0: g.sendActions(actions)
                 # if len(actions)>0: print(actions)
@@ -149,10 +169,10 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None):
                 tb = traceback.format_exc(limit=10)
                 print(profileName, tb, e)
 
-        df=anki_db.rev_to_df(allReviews)
-        df.to_csv("allReviews.txt")
+        allReviewsDf=anki_db.rev_to_df(allReviews)
+        # df.to_csv("allReviews.txt")
 
-        print("STUDENTS DONE")
+        print("STUDENTS DONE; "+str(amountSynced)+" synced")
     if cls and not new and not idFilter:
     #####ITERATE CLASSES
         def class_actions(classId, teacherId):
@@ -171,6 +191,9 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None):
         df.apply(lambda x: class_actions(x['class_id'], x['teacher_id']), axis=1)
         
         print("CLASSES DONE")
+
+    if today.isoweekday() == 1:
+        main_stats.trendWeekly(allReviewsDf)
 
     time2=time()
     print("runtime: ",int(int(time2-time1)/60)," min")

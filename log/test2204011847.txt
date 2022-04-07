@@ -1,3 +1,0 @@
-00021 Cassandra Paul SYNCED
-STUDENTS DONE
-runtime:  0  min
