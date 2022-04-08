@@ -15,9 +15,10 @@ import class_stats, main_stats
 
 original_stdout = sys.stdout
 today=dt.datetime.now().date()
-logFilePath=join(r'C:\inetpub\wwwroot\afc\log',"log"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
+logFilePath=join(main_stats.logPath,"log"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
 
-def main(log=True, std=True, cls=True, new=False, idFilter=None):
+def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=False):
+    if idFilter: forceConnect=True
     if log: 
         logFile = open(join(logFilePath),'w', encoding="utf-8")
         sys.stdout = logFile
@@ -71,7 +72,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None):
                 #########CONNECT
                 if status[:-1]=='connection failed' or created:
                     # continue
-                    c=anki_profiles.handle_connection(profileName, email, status, statusDate, oth)
+                    c=anki_profiles.handle_connection(profileName, email, status, statusDate, oth, forceConnect)
                     if isinstance(c, str):
                         actions.append({"studentIndex":i+2,
                         "emailTemplate": 'wrongPassword', 
@@ -84,7 +85,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None):
                         except Exception as e:
                             c = False
                             print(profileName, e)
-                            naResponse = anki_profiles.handle_not_activated(status, statusDate)
+                            naResponse = anki_profiles.handle_not_activated(status, statusDate, forceConnect)
                             if not naResponse: continue
                             else: actions=[{"studentIndex":i+2,
                             "emailTemplate": 'notActivated', 
@@ -209,4 +210,4 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None):
         return htmllogdata
 # main(new=True)
 # print(main(idFilter='211010067'))
-# main(log = False)
+main(log = False, cls = False)

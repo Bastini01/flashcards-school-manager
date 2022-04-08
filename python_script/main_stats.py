@@ -1,10 +1,12 @@
-from os.path import join
+from os.path import expanduser, join
 import pandas as pd
 import anki_db as db
 import config_notes, mtc_info, AllReviews
 import datetime as dt
 import class_stats, mtc_info
 import google_apps as g
+
+logPath=expanduser("~")+r'\OneDrive\SRL\TechnicalFiles\Log'
 
 # studData=g.getStudents()
 # emailLog=g.getEmailLog()
@@ -118,7 +120,7 @@ def trendWeekly(allReviews):
     stlr = df.style.set_caption("WEEKLY TREND")
     htmlReport = stlr.to_html()
     # g.sendActions([{"emailTemplate":('statsReport', htmlReport)}])
-    filePath=join(r'C:\inetpub\wwwroot\afc\log',"weekly_trend"+dt.datetime.now().strftime('%y%m%d%H%M')+".xlsx")
+    filePath=join(logPath,"weekly_trend"+dt.datetime.now().strftime('%y%m%d%H%M')+".xlsx")
     df.to_excel(filePath)
     return df
 # trendWeekly(AllReviews.getReviewDataAll()).to_excel('weekly_trend'+dt.datetime.now().strftime('%y%m%d%H%M')+'.xlsx')

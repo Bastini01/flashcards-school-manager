@@ -208,10 +208,11 @@ def get_all_syncStatus():
     for profileName in getProfiles():
         getSyncStatus(profileName)
 
-def connection_reminder_schedule(status, statusDate):
+def connection_reminder_schedule(status, statusDate, forceConnect):
     s=None
     if status[-1]=='x': return None
     if status[:3]=='new' or status=='active': s='0'
+    elif forceConnect: s=status[-1]
     elif status[-1]=='0' and today >= statusDate+tdelta(days=1): s='1'        
     elif status[-1]=='1' and today >= statusDate+tdelta(days=1): s='2'
     elif status[-1]=='2' and today >= statusDate+tdelta(days=1): s='3'
@@ -221,25 +222,15 @@ def connection_reminder_schedule(status, statusDate):
     return s
 
 
-def handle_connection(profileName, email, status, statusDate, oth):
-    s = connection_reminder_schedule(status, statusDate)
-    # if status[-1]=='x': return None
-    # if status[:3]=='new' or status=='active': s='0'
-    # elif status[-1]=='0' and today >= statusDate+tdelta(days=1): s='1'        
-    # elif status[-1]=='1' and today >= statusDate+tdelta(days=1): s='2'
-    # elif status[-1]=='2' and today >= statusDate+tdelta(days=1): s='3'
-    # elif status[-1]=='3' and today >= statusDate+tdelta(days=4): s='4'
-    # elif status[-1]=='4' and today >= statusDate+tdelta(days=7): s='5'
-    # elif status[-1]=='5' and today >= statusDate+tdelta(days=15): s='x'
-    ##### try to connect
-    # if s or int(status[-1])<4 :
+def handle_connection(profileName, email, status, statusDate, oth, forceConnect):
+    s = connection_reminder_schedule(status, statusDate, forceConnect)
     if s:
         con=connectProfile(profileName, email, oth)
         if con==True: return True
     return s
 
-def handle_not_activated(status, statusDate):
-    return connection_reminder_schedule(status, statusDate)
+def handle_not_activated(status, statusDate, forceConnect):
+    return connection_reminder_schedule(status, statusDate, forceConnect)
 
 def createNote(collection, note):
 

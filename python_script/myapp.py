@@ -1,6 +1,6 @@
 from flask import Flask, url_for ,render_template
 # from SRL.scripts import main, listener
-import listener, main
+import main
 app = Flask(__name__)
 app.debug = True
 
@@ -25,7 +25,7 @@ app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix='/run')
 
 @app.route('/all')
 def run_main1():
-    result = main.main()
+    result = main.main(std=True)
     return result
 
 @app.route('/new')
