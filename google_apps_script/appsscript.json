@@ -1,0 +1,22 @@
+{
+  "timeZone": "Asia/Taipei",
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "dependencies": {
+    "libraries": [
+      {
+        "userSymbol": "supp_class_hours",
+        "libraryId": "1y_V5rAFxX98gAN5DuNx03jwcHe1PbX6UkFsxIA0hSNDFORL-_h_UnDgb",
+        "version": "0",
+        "developmentMode": true
+      }
+    ]
+  },
+  "webapp": {
+    "executeAs": "USER_DEPLOYING",
+    "access": "ANYONE_ANONYMOUS"
+  },
+  "executionApi": {
+    "access": "ANYONE"
+  }
+}

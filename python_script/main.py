@@ -210,4 +210,4 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
         return htmllogdata
 # main(new=True)
 # print(main(idFilter='211010067'))
-main(log = False, cls = False)
+# main(log = False, cls = False)
