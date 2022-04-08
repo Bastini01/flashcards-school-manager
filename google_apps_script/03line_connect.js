@@ -1,5 +1,10 @@
 var channelToken = "xyy6eUsoQBfzVV4IGe1BKguVCgJY5N31Kv9Dmc4+OZTkYOLT6/ukK0CpUa8I/S2zhlD1DTcUfHppzLxLYo6ueSUThuHjUBpg6COJVrDzH9CoaNxX2KgWivGx6K4XtfOZoUi51RvjrAccIvDbHpGeJwdB04t89/1O/w1cDnyilFU="
 
+function line_to_si(lineId){
+  var lineIds = sheet.getRange(1, headers().indexOf('lineId'), sheet.getLastRow(), 1).getValues().flat()
+  if (lineIds.indexOf(lineId) != -1){return lineIds.indexOf(lineId)+1}
+}
+
 function customMsg(){
   lineId = ''
   pushMsg(lineId,
@@ -36,6 +41,8 @@ function doPost(e) {
         sheet.getRange(row, 2).setValue(userId)
         var displayName = getUserData(userId)['displayName']
         sheet.getRange(row, 3).setValue(displayName)
+        var si = line_to_si(userId)
+        if(si){sId = getData(si)['sId'].toString()}
         var groupId = event.source.groupId; // 取得群組Id
         var timeStamp = event.timestamp;
         switch (type) {
@@ -45,14 +52,16 @@ function doPost(e) {
             var messageType = event.message.type;
             var messageId = event.message.id;
             var messageText = event.message.text; // 使用者Message字串
-            GmailApp.sendEmail(emailDest, 
-              'LINE Message',
-              'name: '+displayName+
-              '/nuserId: '+userId+
+            var emailContent = 'name: '+displayName+
+              '<br>userId: '+userId+
               '<br>messageType: '+messageType+
-              '<br>messageText: '+messageText)
-              // '<br>http://35.206.234.133/autoflashcards/run/sid/'
-              auto_connect(userId)
+              '<br>messageText: '+messageText
+            if (sId){emailContent = emailContent+
+              '<br>student id: '+sId+
+              '<br>http://35.206.234.133/autoflashcards/run/sid/'+sId
+              run_afc(si)
+            }
+            GmailApp.sendEmail(emailDest, 'LINE Message'," ",{htmlBody: '<p>'+emailContent+'</p>'})
             break;
           case 'join':
             GmailApp.sendEmail(emailDest, 

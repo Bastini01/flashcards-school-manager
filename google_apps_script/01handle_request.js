@@ -21,10 +21,6 @@ function getData(studentIndex){
   return {email, sId, firstName, pw, lineId, state}
 }
 
-function data_from_line(lineId){
-  
-}
-
 function registration_from_line(lineId, displayName){
 
   classTypeChoice = form.getItemById(1337875648).asMultipleChoiceItem().getChoices()[0].getValue()
@@ -74,7 +70,7 @@ function registration_from_line(lineId, displayName){
     }
 }
 
-function testlinereg(){registration_from_line("U02e268a357d377f429911a1fd87c52e4", "abdc")}
+function tester(){return 'test'}
 
 function form_submit(e){
   Logger.log(JSON.stringify(e));
@@ -261,16 +257,9 @@ function handleDesktopRequest(rq){
   
 }
 
-function auto_connect(lineId){
-  lineIds = sheet.getRange(1, headers().indexOf('lineId'), sheet.getLastRow(), 1).getValues().flat()
-  if (lineIds.indexOf(lineId) != -1){
-    si = lineIds.indexOf(lineId)+1
-    sId = getData(si)['sId'].toString(); Logger.log(sId)
-    if (getData(si)['state']=='new'){
-      sheet.getRange(si, headers().indexOf('state')).setValue('newwaiting')
-      try{resp = UrlFetchApp.fetch("http://35.206.234.133/autoflashcards/run/sid/"+sId); Logger.log(resp)}
-      catch(err){Logger.log('autoconnect error; name: '+err.name+'/message: '+err.message)}
-    }
-
-  }
+function run_afc(si){
+  if (getData(si)['state']=='new'){
+    try{resp = UrlFetchApp.fetch("http://35.206.234.133/autoflashcards/run/sid/"+sId); Logger.log(resp)}
+    catch(err){Logger.log('autoconnect error; name: '+err.name+'/message: '+err.message)}
+  } 
 }
