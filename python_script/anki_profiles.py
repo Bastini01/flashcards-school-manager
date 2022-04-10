@@ -150,9 +150,9 @@ def sync(profileName, status='active'):
         m=col.sync_media(SyncAuth)
     except Exception as e:
         if '423' in str(e):
-            print(profileName+" SYNC ERROR: account not activated", e)
+            print(profileName+" SYNC ERROR", e)
             return 'not activated'
-        else: print(profileName+" SYNC ERROR: account not activated", e); return 'nok' 
+        else: print(profileName+" SYNC ERROR", e); return 'nok' 
     #Handle full sync required cases
     if len(c.ListFields())>1: 
         if c.ListFields()[1][1]==3:

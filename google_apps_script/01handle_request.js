@@ -21,6 +21,11 @@ function getData(studentIndex){
   return {email, sId, firstName, pw, lineId, state}
 }
 
+function get_si(type, value){
+  var typeList = sheet.getRange(1, headers().indexOf(type), sheet.getLastRow(), 1).getValues().flat()
+  if (typeList.indexOf(value) != -1){return typeList.indexOf(value)+1}
+}
+
 function registration_from_line(lineId, displayName){
 
   classTypeChoice = form.getItemById(1337875648).asMultipleChoiceItem().getChoices()[0].getValue()
@@ -257,9 +262,18 @@ function handleDesktopRequest(rq){
   
 }
 
-function run_afc(si){
-  if (getData(si)['state']=='new'){
-    try{resp = UrlFetchApp.fetch("http://35.206.234.133/autoflashcards/run/sid/"+sId); Logger.log(resp)}
-    catch(err){Logger.log('autoconnect error; name: '+err.name+'/message: '+err.message)}
-  } 
+function run_afc(sId){
+  try{resp = UrlFetchApp.fetch("http://35.206.234.133/autoflashcards/run/sid/"+sId); Logger.log(resp)}
+  catch(err){Logger.log('autoconnect error; name: '+err.name+'/message: '+err.message)}
+}
+
+function line_response(e){
+  Logger.log(JSON.stringify(e))
+  sId = parseFloat(e.values[1])
+  si = get_si('studentId', sId)
+  if (e.values[2]=='answer LINE'){
+    pushMsg(getData(si)['lineId'], e['values'][3])
+    append_email_log(si, 'custom reply', 'line')
+  }
+  else if (e.values[2]=='run'){run_afc(sId)}
 }

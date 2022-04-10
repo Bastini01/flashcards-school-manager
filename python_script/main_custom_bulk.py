@@ -4,7 +4,7 @@ time1=time()
 import os
 import google_apps as g
 import anki_profiles, config_deck
-import unused.anki_connect as anki_connect
+# import unused.anki_connect as anki_connect
 import pandas as pd
 import anki_db
 import mtc_info
@@ -21,6 +21,7 @@ def runCustomBulk():
         email=studData.iloc[i, 1]
         status=studData.loc[i, 'state']
         statusDate=studData.loc[i, 'statusDate']
+        studentId=studData.loc[i, 'studentId']
         # classType=studData.loc[i, 'classType']
         # startUnit=studData.loc[i, 'startUnit']
         # startDate=studData.loc[i, 'startDate']
@@ -30,7 +31,8 @@ def runCustomBulk():
         # if studData.loc[i, 'state']=="active":
         # if status[0]!="t":
         # if profileName == "00043 Youko Martinez":
-        if profileName == "":
+        # if profileName == "":
+        if studentId == "211020131":
         # if studData.loc[i, 'class']=="907":
         # if profileName[:5] == "00100":
         # if studData.loc[i, 'state']=="active" and unitsToAdd !=[[4, 1, 1], [4, 1, 2], [4, 2, 1]]:
@@ -60,7 +62,7 @@ def runCustomBulk():
             # syncResponse = anki_profiles.sync(profileName)
             # if syncResponse == True: google_apps.SendStudentActions(studActions)
 
-            anki_profiles.add_notes(profileName, [1,5,2], 1)
+            anki_profiles.add_notes(profileName, [1,15,2], 1)
             # try: anki_profiles.sync(profileName)
             # except: print('sync error')
             # anki_profiles.deleteDeck(profileName, [1,9])
