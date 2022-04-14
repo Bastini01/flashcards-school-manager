@@ -1,2 +1,7 @@
-*clasprc.json
+*clasp*
+*cred*
 *token.json
+*_pycache_*
+*.config
+
+

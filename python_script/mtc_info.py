@@ -185,7 +185,9 @@ def currentUnit(date, startUnit, startDate, classType):
     return u
 # print(unitNr(currentUnit(today, [1,6,1], dt.date( 2021, 12, 1 ), 2)))
 
-def getUnitsToAdd(profileName, startUnit, classType):
+def getUnitsToAdd(profileName, startUnit, classType): 
+    #to do: change logic: compare 'to have' units with 'already have' units and add difference
+    # to avoid first units missing due to wrong 'satrt unit' entry 
     date=today
     startDate = termStart
     lastUnit= anki_db.getLastUnit(profileName)

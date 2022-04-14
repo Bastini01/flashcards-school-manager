@@ -149,7 +149,7 @@ def tesactions():
     print(actionsJSON)
 # tesactions()
 
-def sendActions(actions):
+def sendActions(actions, profileName=None):
 
     service = build('script', 'v1', credentials=creds)
 
@@ -188,7 +188,8 @@ def sendActions(actions):
                 if response['done']==True: 
                     r="gAction done "
                     rs=str(response['response']['result'])[:200]
-                    print(r, rs)
+                    if profileName: print(profileName, r, rs)
+                    else: print(r, rs)
                 else: print("gAction FAILED")    
             except: print(response)
 

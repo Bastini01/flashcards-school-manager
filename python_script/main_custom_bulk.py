@@ -32,7 +32,7 @@ def runCustomBulk():
         # if status[0]!="t":
         # if profileName == "00043 Youko Martinez":
         # if profileName == "":
-        if studentId == "211020131":
+        if studentId == "":
         # if studData.loc[i, 'class']=="907":
         # if profileName[:5] == "00100":
         # if studData.loc[i, 'state']=="active" and unitsToAdd !=[[4, 1, 1], [4, 1, 2], [4, 2, 1]]:
@@ -62,7 +62,7 @@ def runCustomBulk():
             # syncResponse = anki_profiles.sync(profileName)
             # if syncResponse == True: google_apps.SendStudentActions(studActions)
 
-            anki_profiles.add_notes(profileName, [1,15,2], 1)
+            anki_profiles.add_notes(profileName, [2,1,2], 1)
             # try: anki_profiles.sync(profileName)
             # except: print('sync error')
             # anki_profiles.deleteDeck(profileName, [1,9])

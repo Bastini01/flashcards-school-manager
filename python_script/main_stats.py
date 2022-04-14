@@ -119,9 +119,9 @@ def trendWeekly(allReviews):
     #####SEND MAIL
     stlr = df.style.set_caption("WEEKLY TREND")
     htmlReport = stlr.to_html()
-    # g.sendActions([{"emailTemplate":('statsReport', htmlReport)}])
-    filePath=join(logPath,"weekly_trend"+dt.datetime.now().strftime('%y%m%d%H%M')+".xlsx")
-    df.to_excel(filePath)
+    g.sendActions([{"emailTemplate":('statsReport', htmlReport)}])
+    filePath=join(logPath,"weekly_trend"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
+    df.to_csv(filePath)
     return df
 # trendWeekly(AllReviews.getReviewDataAll()).to_excel('weekly_trend'+dt.datetime.now().strftime('%y%m%d%H%M')+'.xlsx')
 # trendWeekly(AllReviews.getReviewDataAll())

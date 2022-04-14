@@ -263,11 +263,13 @@ function handleDesktopRequest(rq){
 }
 
 function run_afc(sId){
-  try{resp = UrlFetchApp.fetch("http://35.206.234.133/autoflashcards/run/sid/"+sId); Logger.log(resp)}
+  url="http://35.206.234.133/autoflashcards/run/sid/"+sId
+  Logger.log("autorun, url:"+url)
+  try{resp = UrlFetchApp.fetch(url); Logger.log(resp)}
   catch(err){Logger.log('autoconnect error; name: '+err.name+'/message: '+err.message)}
 }
 
-function line_response(e){
+function line_response(e){ //triggered from 'line response' form
   Logger.log(JSON.stringify(e))
   sId = parseFloat(e.values[1])
   si = get_si('studentId', sId)
