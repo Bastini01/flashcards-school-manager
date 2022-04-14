@@ -1,11 +1,10 @@
-var channelToken = "xyy6eUsoQBfzVV4IGe1BKguVCgJY5N31Kv9Dmc4+OZTkYOLT6/ukK0CpUa8I/S2zhlD1DTcUfHppzLxLYo6ueSUThuHjUBpg6COJVrDzH9CoaNxX2KgWivGx6K4XtfOZoUi51RvjrAccIvDbHpGeJwdB04t89/1O/w1cDnyilFU="
 
 function customMsg(){
-  lineId = 'U7f2a5d091c5f99edac4b359c67d89a3c'
+  lineId = 'U02e268a357d377f429911a1fd87c52e4'
   pushMsg(lineId,
-          "I cannot change it for you.. but you can change it here: https://ankiweb.net/account/settings"
+          "test"
           )
-  // append_email_log(lineId, 'line_custom', 'line')
+  append_email_log(getData(parseFloat(get_si('lineId', lineId))), 'line_custom', 'line')
 }
 
 // "Hi Razz! This is the link to the iphone app: https://apps.apple.com/us/app/ankimobile-flashcards/id373493387 however it's quite expensive.. If you have an iphone I recommend to just use the browser version https://ankiweb.net/decks/ I you want to access more settings you can also get the desktop program https://apps.ankiweb.net/ for free"
