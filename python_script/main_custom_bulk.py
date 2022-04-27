@@ -9,7 +9,7 @@ import pandas as pd
 import anki_db
 import mtc_info
 
-def runCustomBulk():
+def run():
     studData=g.getStudents()
     count=0
     OnePlusReviews=0
@@ -62,7 +62,7 @@ def runCustomBulk():
             # syncResponse = anki_profiles.sync(profileName)
             # if syncResponse == True: google_apps.SendStudentActions(studActions)
 
-            anki_profiles.add_notes(profileName, [2,1,2], 1)
+            anki_profiles.add_notes(profileName, [1,5,2], 1)
             # try: anki_profiles.sync(profileName)
             # except: print('sync error')
             # anki_profiles.deleteDeck(profileName, [1,9])
@@ -87,7 +87,7 @@ def runCustomBulk():
     
     print("Bulk actions done")
 
-runCustomBulk()
+# runCustomBulk()
 
 time2=time()
 print("runtime: ",int(time2-time1)," sec")

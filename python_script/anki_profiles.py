@@ -4,7 +4,7 @@ from shutil import copyfile
 import random
 from pprint import pprint
 from aqt.profiles import ProfileManager
-from anki.db import DB
+from anki.db import DB  ### anki.db EDITED for multithreading --> sqlite.connect(path, timeout=timeout, check_same_thread=False)
 from anki.collection import Collection
 from anki.decks import DeckManager
 from anki.models import ModelManager
@@ -208,7 +208,7 @@ def get_all_syncStatus():
     for profileName in getProfiles():
         getSyncStatus(profileName)
 
-def connection_reminder_schedule(status, statusDate, forceConnect):
+def reminder_schedule(status, statusDate, forceConnect):
     s=None
     if status[-1]=='x': return None
     if status[:3]=='new' or status=='active': s='0'
@@ -222,15 +222,15 @@ def connection_reminder_schedule(status, statusDate, forceConnect):
     return s
 
 
-def handle_connection(profileName, email, status, statusDate, oth, forceConnect):
-    s = connection_reminder_schedule(status, statusDate, forceConnect)
+def handle_connection(profileName, email, status, statusDate, oth, forceConnect=False):
+    s = reminder_schedule(status, statusDate, forceConnect)
     if s:
         con=connectProfile(profileName, email, oth)
         if con==True: return True
     return s
 
-def handle_not_activated(status, statusDate, forceConnect):
-    return connection_reminder_schedule(status, statusDate, forceConnect)
+def handle_not_activated(status, statusDate, forceConnect=False):
+    return reminder_schedule(status, statusDate, forceConnect)
 
 def createNote(collection, note):
 

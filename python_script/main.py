@@ -12,13 +12,13 @@ import pandas as pd
 import anki_db
 import mtc_info
 import class_stats, main_stats
-
 original_stdout = sys.stdout
 today=dt.datetime.now().date()
-logFilePath=join(main_stats.logPath,"log"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
 
 def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=False):
     if log: 
+        logFilePath=join(main_stats.logPath,"log"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
+        if idFilter: logFilePath = logFilePath.replace('.txt', '-'+idFilter+'.txt')
         logFile = open(join(logFilePath),'w', encoding="utf-8")
         sys.stdout = logFile
     try:
@@ -61,6 +61,16 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                 # if profileName != "00114 Leina Lin": continue
                 ###################
                 try:
+                    print(studentId)
+                    #########SEND REGISTRATION REMINDER
+                    if status[:-1] == 'reg':
+                        regResp=anki_profiles.reminder_schedule(status, statusDate, False)
+                        if not regResp: continue
+                        else: 
+                            actions.append({"studentIndex":i+2, "emailTemplate":'regReminder',"statusUpdate":'reg'+regResp})
+                            g.sendActions(actions, profileName)
+                            continue
+                    
                     #########ASK CLASS DATA UPDATE
                     if (status == 'active' and not classType and g.checkEmail(emailLog, studentId, 'termUpdate')==False):
                             actions.append({"studentIndex":i+2, "emailTemplate": 'termUpdate'})
@@ -95,8 +105,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
 
                     #########ADD CARDS
                     if not anki_db.getLastUnit(profileName): anki_profiles.prep_profile(profileName)
-                    if ((status=='active' or c==True) and
-                        classType):            
+                    if ((status=='active' or c==True) and classType):            
                         unitsToAdd=mtc_info.getUnitsToAdd(profileName, startUnit, classType)           
                         for u in unitsToAdd:
                             addResponse=anki_profiles.add_notes(profileName, u)
@@ -199,7 +208,9 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
 
         time2=time()
         print("runtime: ",int(int(time2-time1)/60)," min")
-    except Exception as e: print(e)
+    except Exception as e: 
+        tb = traceback.format_exc()
+        print(tb, e)
     if log:
         logFile.close()
         sys.stdout = original_stdout
@@ -212,4 +223,4 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
     
 # main(new=True)
 # print(main(idFilter='211010067'))
-# main(log = False, cls = False)
+# main(log = False, idFilter='220310041')

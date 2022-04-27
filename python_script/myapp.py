@@ -1,8 +1,25 @@
-from flask import Flask, url_for ,render_template
-# from SRL.scripts import main, listener
-import main
+import time
+import datetime as dt
+import sys
+from os.path import join
+from flask import Flask, request, url_for ,render_template
+from threading import Thread
+import main, main_stats
 app = Flask(__name__)
 app.debug = True
+
+original_stdout = sys.stdout
+logFilePath=join(main_stats.logPath,"flasktest"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
+logFile = open(join(logFilePath),'w', encoding="utf-8")
+today=dt.datetime.now().date()
+
+
+def switchPrint():
+    sys.stdout = logFile
+
+def closelog():
+    logFile.close()
+    sys.stdout = original_stdout
 
 class PrefixMiddleware(object):
 #class for URL sorting 
@@ -23,6 +40,25 @@ class PrefixMiddleware(object):
 
 app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix='/run')
 
+class Compute(Thread):
+    def __init__(self, id):
+        Thread.__init__(self)
+        self.id = id
+
+    def run(self):
+        # time.sleep(120)
+        main.main(idFilter = self.id)
+        # switchPrint()
+        # print("start")
+        # time.sleep(60)
+        # print(self.request)
+        # print('Student run started '+time.strftime('%H:%M:%S'))
+        # print("done")
+        # closelog()
+
+def testfunc(id):
+    print('hello')
+
 @app.route('/all')
 def run_main1():
     result = main.main(std=True)
@@ -35,17 +71,10 @@ def run_main2():
 
 @app.route('/sid/<id>')
 def run_main3(id):
-    # listener.act(id)
-    result = main.main(idFilter=id)
-    # return "The URL for this page is {}".format(url_for('bar'))
-    return result
-
-# def foo_with_slug(adapter, id):
-#     # ask the database for the slug for the old id.  this of
-#     # course has nothing to do with werkzeug.
-#     return f'foo/{Foo.get_slug_for_id(id)}'
-
-# app.add_url_rule('/<id>', view_func=run_main)
+    thread_a = Compute(id)
+    thread_a.start()
+    return 'Student run '+id+' started '+time.strftime('%H:%M:%S'), 200
 	
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port=9010)
+

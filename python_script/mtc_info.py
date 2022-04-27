@@ -16,7 +16,7 @@ def dateList(sdate, edate):
 now=dt.datetime.now()
 today=now.date()
 
-businessDaysPerTerm=49 #actually 57, tweaked to match the actual speed of progress
+businessDaysPerTerm=47 #actually 57, tweaked to match the actual speed of progress
 
 fallDate=[9, 1]
 winterDate=[12, 1]
