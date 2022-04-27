@@ -120,8 +120,9 @@ function form_submit(e){ //triggered from registration form
   var lineId = sheet.getRange(e.range['rowStart'],headers().indexOf("lineId")).getValue()
 
   if (!lineId){
-    sheet.getRange(e.range['rowStart'],headers().indexOf("agreement")).setValue(studentId);
-    sheet.getRange(e.range['rowStart'],headers().indexOf("studentId")).setValue("fromBlankForm");
+    sheet.getRange(e.range['rowStart'],headers().indexOf("agreement")).setValue(studentId)
+    sheet.getRange(e.range['rowStart'],headers().indexOf("studentId")).setValue("fromBlankForm")
+    sheet.getRange(e.range['rowStart'],headers().indexOf("state")).setValue("tblank")
     sendWrongForm(e.range['rowStart'])
     return
     }
