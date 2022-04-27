@@ -46,17 +46,20 @@ function doPost(e) {
             var messageType = event.message.type;
             var messageId = event.message.id;
             var messageText = event.message.text; // 使用者Message字串
-            var emailContent = 'name: '+displayName+
+            var emailOptions = {htmlBody: 'name: '+displayName+
               '<br>userId: '+userId+
               '<br>messageType: '+messageType+
-              '<br>messageText: '+messageText
-            if (sId){emailContent = emailContent+
-              '<br>student id: '+sId+
+              '<br>messageText: '+messageText}
+            if (sId){emailOptions['htmlBody'] += '<br>student id: '+sId+
               '<br>http://35.206.234.133/autoflashcards/run/sid/'+sId+
               '<br>https://forms.gle/QSUE43HjZQ2WUpaw6' //respond to line google form link
               if (getData(si)['state']=='new'){run_afc(sId)}
             }
-            GmailApp.sendEmail(emailDest, 'LINE Message'," ",{htmlBody: '<p>'+emailContent+'</p>'})
+            if (messageType == 'image'){
+              emailOptions['htmlBody'] += "<br>image:<img src='cid:mailImg'>"
+              emailOptions.inlineImages = {mailImg:getMediaContent(messageId)}
+            }
+            GmailApp.sendEmail(emailDest, 'LINE Message'," ",emailOptions)
             break;
           case 'join':
             GmailApp.sendEmail(emailDest, 
@@ -153,8 +156,31 @@ function getUserData(usrId) {
   return JSON.parse(UrlFetchApp.fetch(url, opt))
 }
 
+function getMediaContent(msgId){
+  var url = 'https://api-data.line.me/v2/bot/message/'+msgId+'/content';
+  var opt = {
+    'headers': {
+    'Content-Type': 'application/json; charset=UTF-8',
+    'Authorization': 'Bearer ' + channelToken,
+    }
+  };
+  return UrlFetchApp.fetch(url, opt)
+}
+
 function testgetlinedata(){
-  Logger.log(getUserData('Ua7565725ec9a237b0819817ee1769638'))
+  sId = 'haha'
+  messageType = 'image'
+  var emailOptions = {htmlBody: 'name: '+'hey'+
+    '<br>userId: '+'123'}
+  if (sId){emailOptions['htmlBody'] += '<br>student id: '+'521'+
+    '<br>http://35.206.234.133/autoflashcards/run/sid/'+sId+
+    '<br>https://forms.gle/QSUE43HjZQ2WUpaw6' //respond to line google form link
+  }
+  if (messageType == 'image'){
+    emailOptions['htmlBody'] += "<br>image:<img src='cid:mailImg'>"
+    emailOptions.inlineImages = {mailImg:getMediaContent('15983873967178')}
+  }
+  GmailApp.sendEmail('pierrehenry.bastin@gmail.com', 'LINE Message'," ",emailOptions)
 }
 
 function get_all_user_data(){
