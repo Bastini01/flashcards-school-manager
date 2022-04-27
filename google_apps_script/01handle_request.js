@@ -3,6 +3,7 @@ var today = new Date();
 var ss = SpreadsheetApp.openById('1zM1uvzFo4dEQ4qVSp2SRE6RC8Ll2Dw-a5GftXw2Iy18')
 var sheet = ss.getSheetByName("Form Responses 1")
 var emailLog = ss.getSheetByName("Email log")
+var lineSheet = ss.getSheetByName("LINE")
 var range = sheet.getRange(1, sheet.getLastRow(), 1, sheet.getLastColumn())
 var form = FormApp.openById('1LUX5E3MmT8EbHD1wv0D8tOe3hBEuP0cKUapJKB4eWWw')
 
@@ -58,7 +59,10 @@ function registration_from_line(lineId, displayName){
   Logger.log(lineId+" noted down")
 
   var msgText="Hi!\n"+
-          "Welcome to MTC self-learning\n"+
+          "Welcome to MTC Automated flashcards\n"+
+          "This is an official school program, made to help you use a spaced repetition flashcard app. "+
+          "We will provide you with premade textbook flashcards. "+
+          "By reviewing you can also earn 'large group class' supplementary hours (max. 8 hours per month). "+
           "In order to set up your account, please fill in the form below:\n"+
           resp.getEditResponseUrl()
 
@@ -70,52 +74,58 @@ function registration_from_line(lineId, displayName){
     respIds = sh.getRange(1, 1, sh.getLastRow(), 1).getValues()
     for (var i = 1; i < respIds.length; i++) { 
       if (resp.getId() == respIds[i]) {return}}
-    var r= sh.getRange(sh.getLastRow()+1, 1, 1, 2)
-    r.setValues([[resp.getId(), lineId]])
+    var r= sh.getRange(sh.getLastRow()+1, 1, 1, 3)
+    r.setValues([[resp.getId(), lineId, displayName]])
     }
 }
 
-function tester(){return 'test'}
+function runregfromline(){
+  registration_from_line('', '朱夢迪 Joleen')
+}
 
-function form_submit(e){
-  Logger.log(JSON.stringify(e));
-  if (e.values[4] == defaultStudentId){
-    sheet.getRange(e.range['rowStart'],headers().indexOf("state")).setValue("treg"); return
+function form_submit(e){ //triggered from registration form
+  Logger.log(JSON.stringify(e))
+  var lineId
+  var firstName = sheet.getRange(e.range['rowStart'],headers().indexOf("firstName")).getValue()
+  Logger.log(firstName)
+  var studentId = sheet.getRange(e.range['rowStart'],headers().indexOf("studentId")).getValue()
+  if (studentId == defaultStudentId){
+    sheet.getRange(e.range['rowStart'],headers().indexOf("state")).setValue("reg0")
+    sheet.getRange(e.range['rowStart'],headers().indexOf("lastUpdateDate")).setValue(today)
+    //get lineId from LINE sheet
+    lineAndName = lineSheet.getRange(426, 2, lineSheet.getLastRow(), 2).getValues()
+    lineAndName.reverse()
+    Logger.log(lineAndName)
+    for (const x of lineAndName) { //get lineID
+      if (x[1] == firstName) {
+            Logger.log(x)
+            lineId = x[0]
+            break
+        }   
+      }
+    Logger.log(lineId)
+    sheet.getRange(e.range['rowStart'],headers().indexOf("lineId")).setValue(lineId)
+    return
     }
+
   sh = ss.getSheetByName("student_line")
   respIds = sh.getRange(1, 1, sh.getLastRow(), 1).getValues()
-  item=form.getItemById(1438401958)
-  var respId, lineId
-  var studentId = sheet.getRange(e.range['rowStart'],headers().indexOf("studentId")).getValue()
+  item=form.getItemById(1438401958) //studentID
+  // item=form.getItemById(1080414757) // firstName
+  var respId   
   var classNumber = sheet.getRange(e.range['rowStart'],headers().indexOf("classNumber")).getValue()
   var classType = sheet.getRange(e.range['rowStart'],headers().indexOf("classType")).getValue()
   var textbook = sheet.getRange(e.range['rowStart'],headers().indexOf("texbook")).getValue()
   var startChapter = sheet.getRange(e.range['rowStart'],headers().indexOf("startChapter")).getValue()
+  var lineId = sheet.getRange(e.range['rowStart'],headers().indexOf("lineId")).getValue()
 
-  for (const x of form.getResponses()) { 
-    // Logger.log(x.getResponseForItem(item).getResponse())
-    if (x.getResponseForItem(item).getResponse() == studentId) {
-          respId = x.getId()
-          break
-      }   
-    }
-  Logger.log(respId)
-  // row = respIds.indexOf(respId)+1
-  for (var i = 1; i < respIds.length; i++) { 
-    if (respId == respIds[i]) {
-          lineId = sh.getRange(i+1, 2).getValue()
-          break
-      }
-   
-   }
   if (!lineId){
     sheet.getRange(e.range['rowStart'],headers().indexOf("agreement")).setValue(studentId);
     sheet.getRange(e.range['rowStart'],headers().indexOf("studentId")).setValue("fromBlankForm");
     sendWrongForm(e.range['rowStart'])
     return
     }
-  Logger.log(lineId)
-  sheet.getRange(e.range['rowStart'],headers().indexOf("lineId")).setValue(lineId)
+  
   sheet.getRange(e.range['rowStart'],headers().indexOf("state")).setValue("new")
   Logger.log('status update to new ok')
   sheet.getRange(e.range['rowStart'],headers().indexOf("lastUpdateDate")).setValue(today)
@@ -205,6 +215,9 @@ function handleDesktopRequest(rq){
         sendChapterUpdate(studentIndex, action["chapterUpdate"]);
       }
       if (action["emailTemplate"]){
+        if (action["emailTemplate"]=="regReminder"){
+          sendRegReminder(studentIndex)
+        }
         if (action["emailTemplate"]=="termUpdate"){
           sendTermUpdate(studentIndex)
         }

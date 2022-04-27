@@ -1,10 +1,10 @@
 
 function customMsg(){
-  lineId = 'U02e268a357d377f429911a1fd87c52e4'
+  lineId = ''
   pushMsg(lineId,
-          "test"
+          "Hi, the service was down because of a technical error, the problem is resolved and you can now register! Sorry for the inconvenience."
           )
-  append_email_log(getData(parseFloat(get_si('lineId', lineId))), 'line_custom', 'line')
+  // append_email_log(getData(parseFloat(get_si('lineId', lineId))), 'line_custom', 'line')
 }
 
 // "Hi Razz! This is the link to the iphone app: https://apps.apple.com/us/app/ankimobile-flashcards/id373493387 however it's quite expensive.. If you have an iphone I recommend to just use the browser version https://ankiweb.net/decks/ I you want to access more settings you can also get the desktop program https://apps.ankiweb.net/ for free"
@@ -154,7 +154,7 @@ function getUserData(usrId) {
 }
 
 function testgetlinedata(){
-  Logger.log(getUserData('U02e268a357d377f429911a1fd87c52e4'))
+  Logger.log(getUserData('Ua7565725ec9a237b0819817ee1769638'))
 }
 
 function get_all_user_data(){

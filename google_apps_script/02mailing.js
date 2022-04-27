@@ -6,6 +6,7 @@ function customSender () {
     // sendWrongPasswordMail(target[i])
     // sendChapterUpdateMail(target[i], [1,9,2])
     // sendActivated(target[i])
+    // sendNotActivated(target[i])
     // sendCustom3(target[i])
     // sendReminder0(target[i])
     // sendAnkiInstructions(target[i])
@@ -47,6 +48,22 @@ function append_email_log(studentIndex, templateName, type){
   dataRange.setValues(values);
 }
 
+function sendRegReminder(si){
+  var lineId = getData(si).lineId
+  var msgText="Hi "+getData(si).firstName+"!\n"+
+      "🚩It seems your registration is incomplete.\n"+
+      "If you wish to use MTC Automated flashcards and get supplementary hours please fill in the form through the link in the message above.\n"+
+      "If you have any questions just send a message ;)"
+  if (lineId){pushMsg(lineId, msgText); type='line'}
+  else{
+  var subject = "🚩MTC Automated flashcards registration"
+    // var msgText = msgText.replace('🙏', " :)")
+    GmailApp.sendEmail(getData(si).email,`=?UTF-8?B?${Utilities.base64Encode(Utilities.newBlob(subject).getBytes())}?=`,msgText);
+    type='gmail'
+  }
+  append_email_log(si, "registratione_reminder", type);
+}
+
 function sendOnboarding(si){
   var tn = 'onboarding-template';
   var template = HtmlService.createTemplateFromFile(tn);
@@ -77,13 +94,11 @@ function sendTermUpdate(si){
   var lineId = getData(si).lineId
   var msgText="Hi "+getData(si).firstName+"!\n"+
           "Ready for the new term?\n"+
-          "Please let me know if you continue and what your new class is🙏\n"+
+          "Please let us know if you continue and what your new class is🙏\n"+
           "You might need to ask your teacher for the class number\n"+
           "Thank you!\n"+
           "https://forms.gle/9BhRn2kbZdKMJR1X8"
-  if (lineId){
-  pushMsg(lineId, msgText); type='line'
-    }
+  if (lineId){pushMsg(lineId, msgText); type='line'}
   else{
   var subject = "New term class update!"
     var msgText = msgText.replace('🙏', " :)")
