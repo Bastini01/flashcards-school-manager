@@ -1,8 +1,8 @@
 
 function customMsg(){
-  lineId = ''
+  lineId = 'U2114d70b37eb4220a59976d0dd57bcbe'
   pushMsg(lineId,
-          "Hi, the service was down because of a technical error, the problem is resolved and you can now register! Sorry for the inconvenience."
+          "Hi Chadly, due to a technical problem you didn't get the link, sorry for that.. here is the correct link: https://docs.google.com/forms/d/e/1FAIpQLSe7hcA14t01sITHNUFDN64RnXp3uD0DmLbGUEDUlm0VGqSDFg/viewform?edit2=2_ABaOnuc_hZ1pg9zUBFDoffpQcdoBgP5Ho_u6_on5qv-heWMiNeSrNPMkiC5V__Evffp-Yus"
           )
   // append_email_log(getData(parseFloat(get_si('lineId', lineId))), 'line_custom', 'line')
 }

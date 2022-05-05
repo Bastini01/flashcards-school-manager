@@ -61,7 +61,7 @@ function sendRegReminder(si){
     GmailApp.sendEmail(getData(si).email,`=?UTF-8?B?${Utilities.base64Encode(Utilities.newBlob(subject).getBytes())}?=`,msgText);
     type='gmail'
   }
-  append_email_log(si, "registratione_reminder", type);
+  append_email_log(si, "registration_reminder", type);
 }
 
 function sendOnboarding(si){
@@ -79,9 +79,9 @@ function sendAnkiInstructions(si){
   var password = getData(si).pw
   var msgText="Hi "+getData(si).firstName+"!\n"+
           "Thank you for registering,\n"+
-          "next please create an Ankiweb account using\n"+
-          email+" and\n"+
-          "👉"+password+"👈\n as password!\n"+
+          "next please create an Ankiweb account with\n"+
+          "USERNAME: "+email+"\n"+
+          "PASSWORD: 👉"+password+"👈\n"+
           "Once you have activated the account please let us know by answering this message!\n"+
           "https://ankiweb.net/account/register"
 
@@ -154,9 +154,9 @@ function sendWrongPassword(si) {
   var lineId = getData(si).lineId
   var msgText="Hi "+getData(si).firstName+"!\n"+
           "🚩We couldn't connect to your Ankiweb account\n"+
-          "Please make sure you have one with\n"+
-          getData(si).email+" as email and\n"+
-          getData(si).pw+" as password"
+          "Please change your Ankiweb password to:\n"+
+          getData(si).pw+"\n"+
+          "Your username must be: "+getData(si).email+
           "https://ankiweb.net/account/settings"
 
   if (lineId){

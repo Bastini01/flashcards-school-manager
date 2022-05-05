@@ -182,7 +182,6 @@ def first_sync(profileName):
     # createModel(profileName, "recall")
     # saveDeckConfig(profileName, config_deck.getConfig('Default', 1))
     return
-# first_sync('00001 Outlook PH')
 
 def prep_profile(profileName):
     createModel(profileName, "dict")

@@ -61,7 +61,6 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                 # if profileName != "00114 Leina Lin": continue
                 ###################
                 try:
-                    print(studentId)
                     #########SEND REGISTRATION REMINDER
                     if status[:-1] == 'reg':
                         regResp=anki_profiles.reminder_schedule(status, statusDate, False)
@@ -111,7 +110,6 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                             addResponse=anki_profiles.add_notes(profileName, u)
                             if addResponse==True and status=='active': 
                                 actions.append({"studentIndex":i+2, "chapterUpdate":u})
-                                print(profileName, u, 'cards added')
                             elif addResponse==False: print(profileName, u, 'ADD NOTES PROBLEM')
 
                     #########SYNC    
@@ -203,8 +201,8 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
             
             print("CLASSES DONE")
 
-        if today.isoweekday() == 1:
-            main_stats.trendWeekly(allReviewsDf)
+            if today.isoweekday() == 1:
+                main_stats.trendWeekly(allReviewsDf)
 
         time2=time()
         print("runtime: ",int(int(time2-time1)/60)," min")
@@ -221,6 +219,19 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
         htmllogdata = "<p>" + logdata.replace("\n", "<br>") + "</p>"
         return htmllogdata
     
-# main(new=True)
-# print(main(idFilter='211010067'))
-# main(log = False, idFilter='220310041')
+def full_sync(studentId):
+    logFilePath=join(main_stats.logPath,"log"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
+    if idFilter: logFilePath = logFilePath.replace('.txt', '-'+idFilter+'.txt')
+    logFile = open(join(logFilePath),'w', encoding="utf-8")
+    sys.stdout = logFile
+
+    studData=g.getStudents()
+    emailLog=g.getEmailLog()
+    supHoursLog=g.get_sup_hours_log()
+    gData=g.getData()
+    gClass=gData['class']
+    gs_c=gData['student_class']
+    gTeacher=gData['teacher']
+    st_cl_te = class_stats.st_cl_te(studData, gClass, gs_c, gTeacher)
+
+    return

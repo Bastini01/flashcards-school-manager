@@ -32,14 +32,20 @@ def run():
         # if status[0]!="t":
         # if profileName == "00043 Youko Martinez":
         # if profileName == "":
-        if studentId == "":
+        if studentId == "211110083":
         # if studData.loc[i, 'class']=="907":
         # if profileName[:5] == "00100":
         # if studData.loc[i, 'state']=="active" and unitsToAdd !=[[4, 1, 1], [4, 1, 2], [4, 2, 1]]:
-            # print(profileName)
+            # print(profileName, [i[1] for i in anki_db.getUnits(profileName)])
             # anki_profiles.createModel(profileName, "dict")
             # anki_profiles.createModel(profileName, "recall")
             # anki_profiles.saveDeckConfig(profileName, config_deck.getConfig('Default', 1))
+
+            anki_profiles.add_notes(profileName, [2,15,2], 10)
+            try: anki_profiles.sync(profileName)
+            except: print('sync error')
+
+            # print(profileName)
 
             # userName=studData.iloc[i, 1]           
             # password=userName.split("@")[0]
@@ -47,7 +53,6 @@ def run():
 
             # print(anki_db.getLastUnit(profileName))
 
-            # print(profileName, [i[1] for i in anki_db.getUnits(profileName)])
             # try:
             #     unitsToAdd=mtc_info.getUnitsToAdd(profileName, startUnit, startDate, classType)
             #     if unitsToAdd!=[]: print(profileName, unitsToAdd)
@@ -61,10 +66,6 @@ def run():
             #         studActions=studActions.append({"studentIndex":i+2, "chapterUpdate":u}, ignore_index=True)
             # syncResponse = anki_profiles.sync(profileName)
             # if syncResponse == True: google_apps.SendStudentActions(studActions)
-
-            anki_profiles.add_notes(profileName, [1,5,2], 1)
-            # try: anki_profiles.sync(profileName)
-            # except: print('sync error')
             # anki_profiles.deleteDeck(profileName, [1,9])
             #google_apps.SendStudentActions(studActions)
             #print(profileName+": DONE ",int(time()-timeA)," sec")

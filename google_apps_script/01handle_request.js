@@ -1,5 +1,4 @@
 var today = new Date();
-// var ss = SpreadsheetApp.getActiveSpreadsheet()
 var ss = SpreadsheetApp.openById('1zM1uvzFo4dEQ4qVSp2SRE6RC8Ll2Dw-a5GftXw2Iy18')
 var sheet = ss.getSheetByName("Form Responses 1")
 var emailLog = ss.getSheetByName("Email log")
@@ -58,83 +57,120 @@ function registration_from_line(lineId, displayName){
   r.setValues([[resp.getId(), lineId]])
   Logger.log(lineId+" noted down")
 
-  var msgText="Hi!\n"+
-          "Welcome to MTC Automated flashcards\n"+
-          "This is an official school program, made to help you use a spaced repetition flashcard app. "+
-          "We will provide you with premade textbook flashcards. "+
-          "By reviewing you can also earn 'large group class' supplementary hours (max. 8 hours per month). "+
-          "In order to set up your account, please fill in the form below:\n"+
+  var msgText="This is your personal registration link, please don't share it with other students\n"+
+          "You need your STUDENTNUMBER and CLASSNUMBER: \n"+
           resp.getEditResponseUrl()
 
   pushMsg(lineId, msgText)
 
   //Simultanious line registrations bug fix (one registration will overwrite other one if no time gap)
   for (var i = 1; i < 200; i++){
-    Utilities.sleep(1000)
-    respIds = sh.getRange(1, 1, sh.getLastRow(), 1).getValues()
-    for (var i = 1; i < respIds.length; i++) { 
-      if (resp.getId() == respIds[i]) {return}}
-    var r= sh.getRange(sh.getLastRow()+1, 1, 1, 3)
-    r.setValues([[resp.getId(), lineId, displayName]])
+    Utilities.sleep(2000)
+    Logger.log("registrations bugfix"+lineId+" attempt "+i)
+    lineAndName = lineSheet.getRange(426, 2, lineSheet.getLastRow(), 2).getValues()
+    lineAndName.reverse()
+    // Logger.log(lineAndName)
+    for (const x of lineAndName) {if (x[0] == lineId) {
+      Logger.log("registrations bugfix"+lineId+" attempt "+i+"OK"); return}}
+    var r= lineSheet.getRange(lineSheet.getLastRow()+1, 2, 1, 3)
+    Logger.log("registrations bugfix"+lineId+" attempt "+i+" write on "+lineSheet.getLastRow()+1)
+    r.setValues([[lineId, displayName]])
     }
+
+
+  
+  // for (var i = 1; i < 200; i++){
+  //   Utilities.sleep(2000)
+  //   Logger.log("registrations bugfix"+lineId+" attempt "+i)
+  //   respIds = sh.getRange(1, 1, sh.getLastRow(), 1).getValues()
+  //   for (var i = 1; i < respIds.length; i++) { 
+  //     if (resp.getId() == respIds[i]) {Logger.log("registrations bugfix"+lineId+" attempt "+i+"OK");return}}
+  //   var r= sh.getRange(sh.getLastRow()+1, 1, 1, 3)
+  //   Logger.log("registrations bugfix"+lineId+" attempt "+i+" write on "+sh.getLastRow()+1)
+  //   r.setValues([[resp.getId(), lineId, displayName]])
+  //   }
+
 }
 
-function runregfromline(){
-  registration_from_line('', '朱夢迪 Joleen')
+function resend_resp_url(lineId){ //=> editUrl
+  var respSh = ss.getSheetByName("student_line")
+  lineIds = respSh.getRange(1, 2, respSh.getLastRow(), 1).getValues()
+    for (var i = 1; i < lineIds.length; i++) { 
+      if (lineId == lineIds[i]) {respId = respSh.getRange(i+1, 1, 1, 1).getValue(); break}}
+  return form.getResponse(respId).getEditResponseUrl()
+}
+
+function testresend_resp_url(){
+  // Logger.log(form.getResponse('2_ABaOnuc_hZ1pg9zUBFDoffpQcdoBgP5Ho_u6_on5qv-heWMiNeSrNPMkiC5V__Evffp-Yus').getEditResponseUrl())
+  Logger.log(resend_resp_url('U2114d70b37eb4220a59976d0dd57bcbe'))
 }
 
 function form_submit(e){ //triggered from registration form
   Logger.log(JSON.stringify(e))
   var lineId
   var firstName = sheet.getRange(e.range['rowStart'],headers().indexOf("firstName")).getValue()
-  Logger.log(firstName)
   var studentId = sheet.getRange(e.range['rowStart'],headers().indexOf("studentId")).getValue()
-  if (studentId == defaultStudentId){
+  var state = sheet.getRange(e.range['rowStart'],headers().indexOf("state")).getValue()
+  
+  if (studentId == defaultStudentId){ //automatic for response, link Line id to default form registration
     sheet.getRange(e.range['rowStart'],headers().indexOf("state")).setValue("reg0")
     sheet.getRange(e.range['rowStart'],headers().indexOf("lastUpdateDate")).setValue(today)
     //get lineId from LINE sheet
-    lineAndName = lineSheet.getRange(426, 2, lineSheet.getLastRow(), 2).getValues()
-    lineAndName.reverse()
-    Logger.log(lineAndName)
-    for (const x of lineAndName) { //get lineID
-      if (x[1] == firstName) {
-            Logger.log(x)
-            lineId = x[0]
-            break
-        }   
-      }
-    Logger.log(lineId)
+    loop1:
+      for (var i = 1; i < 200; i++){
+        Logger.log("registrations bugfix"+lineId+" reading attempt "+i)
+        lineAndName = lineSheet.getRange(426, 2, lineSheet.getLastRow(), 2).getValues()
+        lineAndName.reverse()
+        // Logger.log(lineAndName)
+        for (const x of lineAndName) { //get lineID
+          if (x[1] == firstName) {Logger.log("found "+x);  lineId = x[0]; break loop1}
+        Utilities.sleep(2000)
+        }
+      // Logger.log(lineAndName)
+      
+          //wait and try again if no lineID   
+        }
+    Logger.log(lineId+" registration first form submit")
     sheet.getRange(e.range['rowStart'],headers().indexOf("lineId")).setValue(lineId)
     return
     }
 
-  sh = ss.getSheetByName("student_line")
-  respIds = sh.getRange(1, 1, sh.getLastRow(), 1).getValues()
-  item=form.getItemById(1438401958) //studentID
-  // item=form.getItemById(1080414757) // firstName
-  var respId   
-  var classNumber = sheet.getRange(e.range['rowStart'],headers().indexOf("classNumber")).getValue()
-  var classType = sheet.getRange(e.range['rowStart'],headers().indexOf("classType")).getValue()
-  var textbook = sheet.getRange(e.range['rowStart'],headers().indexOf("texbook")).getValue()
-  var startChapter = sheet.getRange(e.range['rowStart'],headers().indexOf("startChapter")).getValue()
-  var lineId = sheet.getRange(e.range['rowStart'],headers().indexOf("lineId")).getValue()
-
-  if (!lineId){
-    sheet.getRange(e.range['rowStart'],headers().indexOf("agreement")).setValue(studentId)
-    sheet.getRange(e.range['rowStart'],headers().indexOf("studentId")).setValue("fromBlankForm")
-    sheet.getRange(e.range['rowStart'],headers().indexOf("state")).setValue("tblank")
-    sendWrongForm(e.range['rowStart'])
-    return
+  else if(state.slice(0,3) == 'reg'){ //1st manual form response
+    sh = ss.getSheetByName("student_line")
+    respIds = sh.getRange(1, 1, sh.getLastRow(), 1).getValues()
+    item=form.getItemById(1438401958) //studentID
+    // item=form.getItemById(1080414757) // firstName
+    var respId   
+    var classNumber = sheet.getRange(e.range['rowStart'],headers().indexOf("classNumber")).getValue()
+    var classType = sheet.getRange(e.range['rowStart'],headers().indexOf("classType")).getValue()
+    var textbook = sheet.getRange(e.range['rowStart'],headers().indexOf("texbook")).getValue()
+    var startChapter = sheet.getRange(e.range['rowStart'],headers().indexOf("startChapter")).getValue()
+    for (var i = 1; i < 200; i++){ //simultaneous registrations bugfix
+      var lineId = sheet.getRange(e.range['rowStart'],headers().indexOf("lineId")).getValue()
+      if (lineId){break}
+      Logger.log("1st manual form submission no line attemt: "+i)
+      Utilities.sleep(2000)
     }
+    
+    sheet.getRange(e.range['rowStart'],headers().indexOf("state")).setValue("new")
+    Logger.log('status update to new ok')
+    sheet.getRange(e.range['rowStart'],headers().indexOf("lastUpdateDate")).setValue(today)
+    //input class data
+    update_class(studentId, classNumber, classType, textbook, startChapter)
+    
+    sendAnkiInstructions(e.range['rowStart'])  
+  }
   
-  sheet.getRange(e.range['rowStart'],headers().indexOf("state")).setValue("new")
-  Logger.log('status update to new ok')
-  sheet.getRange(e.range['rowStart'],headers().indexOf("lastUpdateDate")).setValue(today)
-  //input class data
-  update_class(studentId, classNumber, classType, textbook, startChapter)
-  
-  sendAnkiInstructions(e.range['rowStart'])  
-
+  else{//other manual form response
+    var lineId = sheet.getRange(e.range['rowStart'],headers().indexOf("lineId")).getValue()
+    if(!lineId){
+      sheet.getRange(e.range['rowStart'],headers().indexOf("agreement")).setValue(studentId)
+      sheet.getRange(e.range['rowStart'],headers().indexOf("studentId")).setValue("fromBlankForm")
+      sheet.getRange(e.range['rowStart'],headers().indexOf("state")).setValue("tblank")
+      sendWrongForm(e.range['rowStart'])
+    }
+    GmailApp.sendEmail('self-learning@mtc.ntnu.edu.tw', 'INFO UPDATE: '+firstName, JSON.stringify(e))
+  }
 }
 
 function handle_update_submission(e){ //trigger comes from update form
@@ -153,7 +189,6 @@ function handle_update_submission(e){ //trigger comes from update form
 }
 
 function update_class(studentId, classNumber, classType, textbook, startChapter){
-  var ss = SpreadsheetApp.openById('1zM1uvzFo4dEQ4qVSp2SRE6RC8Ll2Dw-a5GftXw2Iy18')
   var bookNr = textbook.match(/\d+/)[0]
   var chapNr = startChapter.match(/\d+/)[0]
   if (classType[0] == 'R'){type = 2} else {type = 1}
@@ -170,7 +205,6 @@ function update_class(studentId, classNumber, classType, textbook, startChapter)
 }
 
 function update_status(studentId, status){
-  var ss = SpreadsheetApp.openById('1zM1uvzFo4dEQ4qVSp2SRE6RC8Ll2Dw-a5GftXw2Iy18')
   var sheet = ss.getSheetByName("Form Responses 1")
   var studentIds = sheet.getRange(1,headers().indexOf("studentId"), sheet.getLastRow(),1).getValues().flat()
   row = studentIds.indexOf(studentId)+1
@@ -292,4 +326,5 @@ function line_response(e){ //triggered from 'line response' form
     append_email_log(si, 'custom reply', 'line')
   }
   else if (e.values[2]=='run'){run_afc(sId)}
+  else if (e.values[2]=='ask class update'){sendTermUpdateReminder(si)}
 }

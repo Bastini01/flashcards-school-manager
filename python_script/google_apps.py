@@ -147,7 +147,6 @@ def tesactions():
     actions=[{"studentIndex":2, "emailTemplate":"suppHours24"}]
     actionsJSON=pd.DataFrame(actions).to_json(orient="index")
     print(actionsJSON)
-# tesactions()
 
 def sendActions(actions, profileName=None):
 
@@ -188,8 +187,8 @@ def sendActions(actions, profileName=None):
                 if response['done']==True: 
                     r="gAction done "
                     rs=str(response['response']['result'])[:200]
-                    if profileName: print(profileName, r, rs)
-                    else: print(r, rs)
+                    # if profileName: print(profileName, r, rs)
+                    # else: print(r, rs)
                 else: print("gAction FAILED")    
             except: print(response)
 

@@ -41,28 +41,22 @@ class PrefixMiddleware(object):
 app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix='/run')
 
 class Compute(Thread):
-    def __init__(self, id):
+    def __init__(self, setting):
         Thread.__init__(self)
-        self.id = id
+        self.setting = setting
 
     def run(self):
-        # time.sleep(120)
-        main.main(idFilter = self.id)
-        # switchPrint()
-        # print("start")
-        # time.sleep(60)
-        # print(self.request)
-        # print('Student run started '+time.strftime('%H:%M:%S'))
-        # print("done")
-        # closelog()
-
-def testfunc(id):
-    print('hello')
+        if self.setting[:2] == 'st':
+            main.main(idFilter = self.setting[2:])
+        elif self.setting == 'all':
+            main.main(std=True) 
 
 @app.route('/all')
 def run_main1():
-    result = main.main(std=True)
-    return result
+    setting = 'all'
+    thread_a = Compute(setting)
+    thread_a.start()
+    return 'Run all students started '+time.strftime('%H:%M:%S'), 200
 
 @app.route('/new')
 def run_main2():
@@ -71,7 +65,8 @@ def run_main2():
 
 @app.route('/sid/<id>')
 def run_main3(id):
-    thread_a = Compute(id)
+    setting = 'st'+id
+    thread_a = Compute(setting)
     thread_a.start()
     return 'Student run '+id+' started '+time.strftime('%H:%M:%S'), 200
 	
