@@ -240,7 +240,6 @@ def getUnits(profileName):
         unitsl.append(l)
 
     return unitsl
-# (getUnits("00053 Paul H Nemra"))
 
 def getLastUnit(profileName):
     unitsl = getUnits(profileName)

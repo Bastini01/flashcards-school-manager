@@ -185,7 +185,7 @@ def currentUnit(date, startUnit, startDate, classType):
     return u
 # print(unitNr(currentUnit(today, [1,6,1], dt.date( 2021, 12, 1 ), 2)))
 
-def getUnitsToAdd(profileName, startUnit, classType): 
+def getUnitsToAddOld(profileName, startUnit, classType): 
     #to do: change logic: compare 'to have' units with 'already have' units and add difference
     # to avoid first units missing due to wrong 'satrt unit' entry 
     date=today
@@ -198,7 +198,15 @@ def getUnitsToAdd(profileName, startUnit, classType):
         unitsToAdd=listUnits(vocabUnit(lastUnitNr+1), n-1)
     else: unitsToAdd=[]
     return unitsToAdd
-# print(getUnitsToAdd("00017 Ali Watak", [1,6,1], 2))
+
+def getUnitsToAdd(profileName, startUnit, classType): 
+    date=today
+    startDate = termStart
+    presentUnits = [x[1] for x in anki_db.getUnits(profileName)]
+    unitsToGet = [vocabUnit(x) for x in range(unitNr([startUnit[0], 1, 1]), unitNr(currentUnit(date, startUnit, startDate, classType)))]
+    unitsToAdd = [x for x in unitsToGet if x not in presentUnits]
+    return unitsToAdd
+
 
 def acc_report(profileName, rvs, startUnit, classType):
     date=today #dt.date(2022, 2, 15)

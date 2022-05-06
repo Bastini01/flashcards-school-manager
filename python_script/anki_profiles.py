@@ -41,11 +41,9 @@ def getCollection(profileName):
     return col
 
 def createModel(profileName, modelName, css = None, isCloze = False):
-        # https://github.com/dae/anki/blob/b06b70f7214fb1f2ce33ba06d2b095384b81f874/anki/stdmodels.py
         inOrderFields = config_models.getFields()
         cardTemplates = config_models.getTemplates(modelName)
         collection = getCollection(profileName)
-        # mm = collection.models
         mm = ModelManager(collection)
 
         if len(inOrderFields) == 0:
@@ -86,7 +84,6 @@ def createModel(profileName, modelName, css = None, isCloze = False):
         mm.add(m)
         collection.save()
         return m
-# createModel("00001 Outlook PH", "dict")
 
 def createDeck(profileName, deckName):
     collection = getCollection(profileName)
