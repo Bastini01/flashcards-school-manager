@@ -48,6 +48,8 @@ class Compute(Thread):
     def run(self):
         if self.setting[:2] == 'st':
             main.main(idFilter = self.setting[2:])
+        if self.setting[:4] == 'book':
+            main.add_book(sId = self.setting[4:-1], book = self.setting[-1:])
         elif self.setting == 'all':
             main.main(std=True) 
 
@@ -69,6 +71,13 @@ def run_main3(id):
     thread_a = Compute(setting)
     thread_a.start()
     return 'Student run '+id+' started '+time.strftime('%H:%M:%S'), 200
+
+@app.route('/book/<sid>/<book>')
+def run_main4(sid, book):
+    setting = 'book'+sid+book
+    thread_a = Compute(setting)
+    thread_a.start()
+    return 'Add book '+book+' sId: '+sid+' started '+time.strftime('%H:%M:%S'), 200
 	
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port=9010)

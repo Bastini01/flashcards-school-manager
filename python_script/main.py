@@ -105,7 +105,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                     #########ADD CARDS
                     if not anki_db.getLastUnit(profileName): anki_profiles.prep_profile(profileName)
                     if ((status=='active' or c==True) and classType):            
-                        unitsToAdd=mtc_info.getUnitsToAdd(profileName, startUnit, classType)           
+                        unitsToAdd=mtc_info.getUnitsToAdd(profileName, startUnit=startUnit, classType=classType)           
                         for u in unitsToAdd:
                             addResponse=anki_profiles.add_notes(profileName, u)
                             if addResponse==True and status=='active': 
@@ -235,3 +235,34 @@ def full_sync(studentId):
     st_cl_te = class_stats.st_cl_te(studData, gClass, gs_c, gTeacher)
 
     return
+
+def add_book(sId, book):
+
+    logFilePath=join(main_stats.logPath,"log_add_book"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
+    logFile = open(join(logFilePath),'w', encoding="utf-8")
+    sys.stdout = logFile
+    try:
+        studData=g.getStudents()
+        studentIndex = studData.loc[studData['studentId'] == sId].index.values[0]
+        # profileName = studData.loc[studData['studentId'] == sId, 'profileName'].values[0]
+        profileName=studData.loc[studentIndex, 'profileName']
+        unitsToAdd=mtc_info.getUnitsToAdd(profileName, book = book)
+        for u in unitsToAdd:
+            addResponse=anki_profiles.add_notes(profileName, u)
+            if addResponse==False: raise Exception(profileName, u, 'ADD NOTES PROBLEM')
+        syncResponse = anki_profiles.sync(profileName, 'active')
+        if syncResponse != 'ok': raise Exception(profileName, 'SYNC ISSUE')
+        print(profileName+' book '+book+' added and synchronized')
+
+    except Exception as e: tb = traceback.format_exc(); print(e, tb) 
+    logFile.close()
+    sys.stdout = original_stdout
+    with open(logFilePath, 'r', encoding="utf-8") as file:
+        logdata = file.read()
+
+    g.sendActions([{"emailTemplate":('log', logdata)}, {"studentIndex":studentIndex+2, "emailTemplate":'bookAdded'+book}])
+    return
+    
+
+
+

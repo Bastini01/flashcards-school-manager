@@ -98,7 +98,6 @@ def listUnits(vocabUnit, numberOfUnits): #list of units ahead
         if i==0: continue
         l.append(list(nextUnit(vu)))
     return l
-# print(listUnits([1,1,1], 127))
 
 def vocabUnit(unitNr):
     return listUnits([1,1,1], 127)[unitNr]
@@ -199,11 +198,14 @@ def getUnitsToAddOld(profileName, startUnit, classType):
     else: unitsToAdd=[]
     return unitsToAdd
 
-def getUnitsToAdd(profileName, startUnit, classType): 
+def getUnitsToAdd(profileName, startUnit=None, classType=None, book=None): 
     date=today
     startDate = termStart
     presentUnits = [x[1] for x in anki_db.getUnits(profileName)]
-    unitsToGet = [vocabUnit(x) for x in range(unitNr([startUnit[0], 1, 1]), unitNr(currentUnit(date, startUnit, startDate, classType)))]
+    if not book:
+        unitsToGet = [vocabUnit(x) for x in range(unitNr([startUnit[0], 1, 1]), unitNr(currentUnit(date, startUnit, startDate, classType)))]
+    else:
+        unitsToGet = [x for x in listUnits([1,1,1], 127) if x[0] == int(book)]
     unitsToAdd = [x for x in unitsToGet if x not in presentUnits]
     return unitsToAdd
 

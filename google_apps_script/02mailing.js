@@ -156,7 +156,7 @@ function sendWrongPassword(si) {
           "🚩We couldn't connect to your Ankiweb account\n"+
           "Please change your Ankiweb password to:\n"+
           getData(si).pw+"\n"+
-          "Your username must be: "+getData(si).email+
+          "Your username must be: "+getData(si).email+"\n"+
           "https://ankiweb.net/account/settings"
 
   if (lineId){
@@ -260,6 +260,24 @@ function sendAccReport(si, data){
   }
 
   append_email_log(si, data[0], type);
+}
+
+function sendBookAdded(si, bookNr){
+  var lineId = getData(si).lineId
+  var msgText="Hi "+getData(si).firstName+"!\n"+
+          "All of book "+bookNr+" was added to your Ankiweb account.\n"+
+          "https://ankiweb.net/decks/"
+
+  if (lineId){ pushMsg(lineId, msgText); type='line' }
+  
+  else {
+    var subject = "Book "+bookNr+" added"
+    // var msgText = msgText.replace('😉', ";)")
+    GmailApp.sendEmail(getData(si).email,`=?UTF-8?B?${Utilities.base64Encode(Utilities.newBlob(subject).getBytes())}?=`,msgText);
+    type='gmail'
+  }
+
+  append_email_log(si, "book "+bookNr+" added", type);
 }
 
 function sendCustom(si){

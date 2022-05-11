@@ -118,14 +118,14 @@ function form_submit(e){ //triggered from registration form
     //get lineId from LINE sheet
     loop1:
       for (var i = 1; i < 200; i++){
-        Logger.log("registrations bugfix"+lineId+" reading attempt "+i)
+        Logger.log("registrations bugfix"+firstName+" reading attempt "+i)
         lineAndName = lineSheet.getRange(426, 2, lineSheet.getLastRow(), 2).getValues()
         lineAndName.reverse()
         // Logger.log(lineAndName)
         for (const x of lineAndName) { //get lineID
           if (x[1] == firstName) {Logger.log("found "+x);  lineId = x[0]; break loop1}
-        Utilities.sleep(2000)
         }
+        Utilities.sleep(2000)
       // Logger.log(lineAndName)
       
           //wait and try again if no lineID   
@@ -151,14 +151,13 @@ function form_submit(e){ //triggered from registration form
       Logger.log("1st manual form submission no line attemt: "+i)
       Utilities.sleep(2000)
     }
-    
+    sendAnkiInstructions(e.range['rowStart'])  
     sheet.getRange(e.range['rowStart'],headers().indexOf("state")).setValue("new")
     Logger.log('status update to new ok')
     sheet.getRange(e.range['rowStart'],headers().indexOf("lastUpdateDate")).setValue(today)
     //input class data
     update_class(studentId, classNumber, classType, textbook, startChapter)
-    
-    sendAnkiInstructions(e.range['rowStart'])  
+        
   }
   
   else{//other manual form response
@@ -282,6 +281,9 @@ function handleDesktopRequest(rq){
           sh=action["emailTemplate"].slice(10,11)
           add_supp_hours(getData(studentIndex).sId, h)
           sendSuppHours(studentIndex, h, sh)
+        }
+        else if (action["emailTemplate"].slice(0,-1)=="bookAdded"){
+          sendBookAdded(studentIndex, action["emailTemplate"].slice(-1))
         }        
         else if (action["emailTemplate"]=="custom"){
           sendCustom(studentIndex)
@@ -310,11 +312,15 @@ function handleDesktopRequest(rq){
   
 }
 
-function run_afc(sId){
-  url="http://35.206.234.133/autoflashcards/run/sid/"+sId
+function run_afc(sId, bookNr = null){
+  url="http://35.206.234.133/autoflashcards/run/"
+  Logger.log(url)
+  if (bookNr == null) {url=url+"sid/"+sId}
+  else {url+="book/"+sId+"/"+bookNr}
   Logger.log("autorun, url:"+url)
   try{resp = UrlFetchApp.fetch(url); Logger.log(resp)}
   catch(err){Logger.log('autoconnect error; name: '+err.name+'/message: '+err.message)}
+  
 }
 
 function line_response(e){ //triggered from 'line response' form
@@ -326,5 +332,6 @@ function line_response(e){ //triggered from 'line response' form
     append_email_log(si, 'custom reply', 'line')
   }
   else if (e.values[2]=='run'){run_afc(sId)}
+  else if (e.values[2].slice(0,3) == 'Add'){run_afc(sId, bookNr=e.values[2].slice(-1))}
   else if (e.values[2]=='ask class update'){sendTermUpdateReminder(si)}
 }
