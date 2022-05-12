@@ -56,13 +56,9 @@ function registration_from_line(lineId, displayName){
   var r= sh.getRange(sh.getLastRow()+1, 1, 1, 2)
   r.setValues([[resp.getId(), lineId]])
   Logger.log(lineId+" noted down")
-
-  var msgText="This is your personal registration link, please don't share it with other students\n"+
-          "You need your STUDENTNUMBER and CLASSNUMBER: \n"+
-          resp.getEditResponseUrl()
-
-  pushMsg(lineId, msgText)
-
+  
+  sendGformLink(null, lineId=lineId, resp=resp)
+  
   //Simultanious line registrations bug fix (one registration will overwrite other one if no time gap)
   for (var i = 1; i < 200; i++){
     Utilities.sleep(2000)
@@ -92,17 +88,12 @@ function registration_from_line(lineId, displayName){
 
 }
 
-function resend_resp_url(lineId){ //=> editUrl
+function respFromLine(lineId){ //=> resp
   var respSh = ss.getSheetByName("student_line")
   lineIds = respSh.getRange(1, 2, respSh.getLastRow(), 1).getValues()
     for (var i = 1; i < lineIds.length; i++) { 
       if (lineId == lineIds[i]) {respId = respSh.getRange(i+1, 1, 1, 1).getValue(); break}}
-  return form.getResponse(respId).getEditResponseUrl()
-}
-
-function testresend_resp_url(){
-  // Logger.log(form.getResponse('2_ABaOnuc_hZ1pg9zUBFDoffpQcdoBgP5Ho_u6_on5qv-heWMiNeSrNPMkiC5V__Evffp-Yus').getEditResponseUrl())
-  Logger.log(resend_resp_url('U2114d70b37eb4220a59976d0dd57bcbe'))
+  return form.getResponse(respId)//.getEditResponseUrl()
 }
 
 function form_submit(e){ //triggered from registration form

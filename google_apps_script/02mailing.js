@@ -73,6 +73,23 @@ function sendOnboarding(si){
   append_email_log(si, tn);
 }
 
+function sendGformLink(si, lineId = '', resp = null){
+  if(si !== null){
+    lineId = getData(si).lineId
+    resp = respFromLine(lineId)
+  }
+  var msgText="This is your personal registration link, please don't share it with other students\n"+
+          "You need your STUDENTNUMBER and CLASSNUMBER: \n"+
+          resp.getEditResponseUrl()
+
+  pushMsg(lineId, msgText)
+ 
+}
+
+function testsendGformLink(){
+  sendGformLink(null, lineId = 'U25e50ba6fec7098f06c558d7b4ded397', resp = respFromLine('U25e50ba6fec7098f06c558d7b4ded397'))
+}
+
 function sendAnkiInstructions(si){
   var lineId = getData(si).lineId
   var email = getData(si).email
