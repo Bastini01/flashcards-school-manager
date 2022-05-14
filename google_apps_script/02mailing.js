@@ -1,5 +1,5 @@
 function customSender () {
-  target= []
+  target= [2]
   // target = autoArray()
   for (var i = 0; i < target.length; i++){
     Logger.log(target[i]+", "+ getData(target[i]).email+", "+ getData(target[i]).firstName)
@@ -12,6 +12,7 @@ function customSender () {
     // sendAnkiInstructions(target[i])
     // sendTermUpdate(target[i])
     // sendTermUpdateReminder(target[i])
+    sendGformLink(target[i])
   }
   
 }
@@ -83,7 +84,7 @@ function sendGformLink(si, lineId = '', resp = null){
           resp.getEditResponseUrl()
 
   pushMsg(lineId, msgText)
- 
+  append_email_log(get_si('lineId', lineId), "gformLink", 'line')
 }
 
 function testsendGformLink(){

@@ -316,8 +316,11 @@ function run_afc(sId, bookNr = null){
 
 function line_response(e){ //triggered from 'line response' form
   Logger.log(JSON.stringify(e))
-  sId = parseFloat(e.values[1])
-  si = get_si('studentId', sId)
+  input = e.values[1]
+  if (input.length <= 10) {si = get_si('studentId', parseFloat(input)); Logger.log(si)} 
+  else {si = get_si('lineId', input); Logger.log(si)}
+
+  if (si){
   if (e.values[2]=='answer LINE'){
     pushMsg(getData(si)['lineId'], e['values'][3])
     append_email_log(si, 'custom reply', 'line')
@@ -325,4 +328,8 @@ function line_response(e){ //triggered from 'line response' form
   else if (e.values[2]=='run'){run_afc(sId)}
   else if (e.values[2].slice(0,3) == 'Add'){run_afc(sId, bookNr=e.values[2].slice(-1))}
   else if (e.values[2]=='ask class update'){sendTermUpdateReminder(si)}
+  }
+  else {
+    pushMsg(input, e['values'][3])
+  }
 }
