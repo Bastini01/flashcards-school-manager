@@ -1,25 +1,9 @@
 import time
-import datetime as dt
-import sys
-from os.path import join
-from flask import Flask, request, url_for ,render_template
+from flask import Flask
 from threading import Thread
-import main, main_stats
+import main
 app = Flask(__name__)
 app.debug = True
-
-original_stdout = sys.stdout
-logFilePath=join(main_stats.logPath,"flasktest"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
-logFile = open(join(logFilePath),'w', encoding="utf-8")
-today=dt.datetime.now().date()
-
-
-def switchPrint():
-    sys.stdout = logFile
-
-def closelog():
-    logFile.close()
-    sys.stdout = original_stdout
 
 class PrefixMiddleware(object):
 #class for URL sorting 

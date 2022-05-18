@@ -1,6 +1,6 @@
-import pandas as pd
 import anki_db as db
 from mtc_info import unit_to_zh, get_current_term
+import google_apps as g
 import traceback
 
 # import google_apps as g
@@ -10,49 +10,21 @@ import traceback
 # gs_c=gData['student_class']
 # gTeacher=gData['teacher']
 
-def st_cl_te(gStudent, gClass, gs_c, gTeacher, trm = None):
-    term=get_current_term()['term'] if not trm else trm
-    stud=gStudent
-    c=gClass
-    s_c=gs_c
-    t=gTeacher
-    df=stud.merge(s_c, how='left', on='studentId')
-    df=df.merge(c, how='left', on='class_id')
-    df1=df.merge(t, how='left', on='teacher_id')
-    df1=df1[df1['term']==term]
-    return df1
-# sct = st_cl_te(gStudent, gClass, gs_c, gTeacher)#.to_excel("st_cl_te.xlsx")
-
-def class_type(profileName, st_cl_te):
-    df=st_cl_te[st_cl_te['profileName']==profileName]
-    if len(df) == 0: return None
-    classType = df.iloc[0].at['type']
-    if not classType: return None
-    else: return int(classType)
-
-def start_unit(profileName, st_cl_te):
-    df=st_cl_te[st_cl_te['profileName']==profileName]
-    if len(df) == 0: return None
-    else:
-        su=df.iloc[0].at['startUnit']
-        startUnit=[int(su.split(",")[0]), int(su.split(",")[1]), 1] if su else None 
-        return startUnit
-
-def class_report(st_cl_te, class_id, period='term'):
-    df=st_cl_te
+def class_report(class_id, period='term', st_cl_te = None):
+    df=st_cl_te if st_cl_te else g.st_cl_te(get_current_term()['term'])
     df=df[df['class_id']==class_id]
     if len(df)==0: return 'classWeekly', {'empty': True, 'styler': None}
     teacherId = df.iloc[0, df.columns.get_loc("teacher_id")]
     teacherName = df.iloc[0, df.columns.get_loc("name")]
     teacherEmail = df.iloc[0, df.columns.get_loc("email")]
     df = df[['studentId','profileName']]
-    per = db.week_dates() if period == 'week' else db.term_dates()
+    per = db.week_dates() if period == 'week' else (get_current_term()['termStart'], get_current_term()['termEnd'])
     timeFrame = per[0].strftime('%Y/%m/%d')+" - "+per[1].strftime('%Y/%m/%d')
 
     def report(x):
         try:
             if period == 'week': return db.weeklyReport(x, db.getReviews(x))
-            else: return db.termReport(x, db.getReviews(x))
+            else: return db.termReport(per[0], x, db.getReviews(x))
         except Exception as e: 
             tb = traceback.format_exc(limit=50)
             print("class report student error: ", class_id, x, teacherId, tb, e)
@@ -91,15 +63,4 @@ def class_report(st_cl_te, class_id, period='term'):
         'styler':stlr,
         'htmlReport':htmlReport
     }
-# rep = class_report(sct, '41875', 'week')
-# # rep=class_report('41661')
-# # # rep['report'].to_excel(rep['class']+rep['teacherName']+'.xlsx')
-# # rep[1]['htmlReport'].style.to_html(rep[1]['class']+rep[1]['teacherName']+'.html')
-# logFilePath=rep[1]['class']+rep[1]['teacherName']+'.html'
-# logFile = open(logFilePath,'w', encoding="utf-8")
-# logFile.write(rep[1]['htmlReport'])
-# logFile.close()
-
-
-# gClass.apply(lambda x: print(x['class_id'], x['teacher_id']), axis=1)
 

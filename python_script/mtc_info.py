@@ -34,20 +34,25 @@ bdc=np.busdaycalendar(holidays=[*nyJan, *cny, *springBreak, midAtumn, doubleTen,
 def get_current_term():
     if today.month==12:
         termStart= dt.date( today.year, winterDate[0], winterDate[1])
+        termEnd= dt.date( today.year+1, springDate[0], springDate[1])
         term=str(termStart.year)[2:]+"winter"
     elif today.month< 3 or today.month==3 and today.day< springDate[1]:
         termStart= dt.date( today.year-1, winterDate[0], winterDate[1])
+        termEnd= dt.date( today.year, springDate[0], springDate[1])
         term=str(termStart.year)[2:]+"winter"
     elif today < dt.date( today.year, summerDate[0],summerDate[1]):
         termStart= dt.date( today.year, springDate[0], springDate[1])
+        termEnd= dt.date( today.year, summerDate[0],summerDate[1])
         term=str(termStart.year)[2:]+"spring"
     elif today < dt.date( today.year, fallDate[0],fallDate[1]):
         termStart= dt.date( today.year, summerDate[0], summerDate[1])
+        termEnd= dt.date( today.year, fallDate[0],fallDate[1])
         term=str(termStart.year)[2:]+"summer"
     else: 
         termStart= dt.date( today.year, fallDate[0], fallDate[1])
+        termEnd= dt.date( winterDate[0], winterDate[1])
         term=str(termStart.year)[2:]+"fall"
-    return {'term': term, 'termStart': termStart}
+    return {'term': term, 'termStart': termStart, 'termEnd': termEnd}
 
 termStart = get_current_term()['termStart']
 

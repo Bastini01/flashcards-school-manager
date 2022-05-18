@@ -3,10 +3,8 @@ import pandas as pd
 import anki_db as db
 import config_notes, mtc_info, AllReviews
 import datetime as dt
-import class_stats, mtc_info
+import class_stats, mtc_info, main
 import google_apps as g
-
-logPath=expanduser("~")+r'\OneDrive\SRL\TechnicalFiles\Log'
 
 # studData=g.getStudents()
 # emailLog=g.getEmailLog()
@@ -41,22 +39,8 @@ def classOverview():
         df3.loc[(n[0], n[1], '%')]= df3.iloc[i]/df3[:3].sum(axis=0)*100
     df3.sort_index(inplace=True, ascending=[True, False, True])
     df3=df3.astype('int32')
-    # roll_up tentative for sidplaying student name/number
-    # df3=pd.DataFrame(columns=df2.columns, index=df2.index)
-    # for i in range(len(df2)):
-    #     for j in range(len(df2.columns)):
-    #         e1=df2.iloc[i, j]
-    #         if pd.isna(e1) == False: 
-    #             for k in range(len(df3)):
-    #                 e2=df3.iat[k,j]
-    #                 if pd.isna(e2) == True: 
-    #                     df3.iat[k,j]=e1
-    #                     break
-    #             else: df3.loc[k+1,df3.columns[j]]=e1 
     
     return df3
-# print(classOverview())
-# classOverview().to_excel('class_list.xlsx')
 
 def print_class_reports(term = None):
     trm = mtc_info.get_current_term()['term'] if not term else term
@@ -72,7 +56,8 @@ def print_class_reports(term = None):
             '.html')
 # print_class_reports('21winter') 
 
-def vocAnalysis(reviews, chapter=None):
+def vocAnalysis(chapter=None):
+    reviews = AllReviews.getReviewDataAll()
     if chapter == None: voc = config_notes.getVocSource()
     else:
         voc1 = config_notes.getVu([chapter[0], chapter[1], 1])[0]
@@ -95,8 +80,9 @@ def vocAnalysis(reviews, chapter=None):
         'student']
         ).buttonPressed.agg('mean')
     df=df.groupby(['TextbookChapter','Traditional Characters']).agg(['count', 'mean'])
-    df['mean']=round((df['mean']-1)*3.33, 1)
-    return df
+    df['mean']=round(10-(df['mean']-1)*(10/3), 1)
+    df.to_csv(join(main.technicalFilesPath,'vocAnalysis.txt'))
+    return
 
 def trendWeekly(allReviews):
     # allReviews = AllReviews.getReviewDataAll()
@@ -120,8 +106,7 @@ def trendWeekly(allReviews):
     stlr = df.style.set_caption("WEEKLY TREND")
     htmlReport = stlr.to_html()
     g.sendActions([{"emailTemplate":('statsReport', htmlReport)}])
-    filePath=join(logPath,"weekly_trend"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
+    filePath=join(main.logPath,"weekly_trend"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
     df.to_csv(filePath)
     return df
 # trendWeekly(AllReviews.getReviewDataAll()).to_excel('weekly_trend'+dt.datetime.now().strftime('%y%m%d%H%M')+'.xlsx')
-# trendWeekly(AllReviews.getReviewDataAll())

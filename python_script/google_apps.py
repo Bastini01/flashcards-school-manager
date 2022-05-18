@@ -115,13 +115,38 @@ def getData():
         c = get_gsheet("'class'")
         s_c = get_gsheet("'student_class'")
         l=[t ,c , s_c]
-        for i in range(3):
+        for i in range(len(l)):
             columnNames = l[i].pop(0)
             l[i] = pd.DataFrame(l[i], columns=columnNames)
         # return i
         result= {'teacher': l[0], 'class': l[1], 'student_class': l[2]}
         return result
 # (getData()['student_class'])
+
+def st_cl_te(term, studData = None, gData = None):
+    #term=get_current_term()['term'] if not trm else trm
+    s = studData if studData else getStudents()
+    d= gData if gData else getData()
+    df=s.merge(d['student_class'], how='left', on='studentId')
+    df=df.merge(d['class'], how='left', on='class_id')
+    df1=df.merge(d['teacher'], how='left', on='teacher_id')
+    df1=df1[df1['term']==term]
+    return df1
+
+def start_unit(profileName, st_cl_te):
+    df=st_cl_te[st_cl_te['profileName']==profileName]
+    if len(df) == 0: return None
+    else:
+        su=df.iloc[0].at['startUnit']
+        startUnit=[int(su.split(",")[0]), int(su.split(",")[1]), 1] if su else None 
+        return startUnit
+
+def class_type(profileName, st_cl_te):
+    df=st_cl_te[st_cl_te['profileName']==profileName]
+    if len(df) == 0: return None
+    classType = df.iloc[0].at['type']
+    if not classType: return None
+    else: return int(classType)
 
 def get_sup_hours_log():
     data = get_gsheet("'sup_hours_log'", '1GZGz8N4a-r125qxtlcRUvlNn29OxS_0VJGvV9d8I0SE')

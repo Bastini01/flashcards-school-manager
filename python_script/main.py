@@ -12,12 +12,16 @@ import pandas as pd
 import anki_db
 import mtc_info
 import class_stats, main_stats
+
+technicalFilesPath = expanduser("~")+r'\OneDrive\SRL\TechnicalFiles'
+logPath = technicalFilesPath+r'\Log'
 original_stdout = sys.stdout
 today=dt.datetime.now().date()
 
+
 def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=False):
     if log: 
-        logFilePath=join(main_stats.logPath,"log"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
+        logFilePath=join(logPath,"log"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
         if idFilter: logFilePath = logFilePath.replace('.txt', '-'+idFilter+'.txt')
         logFile = open(join(logFilePath),'w', encoding="utf-8")
         sys.stdout = logFile
@@ -28,9 +32,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
         supHoursLog=g.get_sup_hours_log()
         gData=g.getData()
         gClass=gData['class']
-        gs_c=gData['student_class']
-        gTeacher=gData['teacher']
-        st_cl_te = class_stats.st_cl_te(studData, gClass, gs_c, gTeacher)
+        st_cl_te = g.st_cl_te(mtc_info.get_current_term()['term'], studData, gData)
         if std:
             #####ITERATE STUDENTS
             allReviews = []
@@ -42,8 +44,8 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                 oth=studData.loc[i, 'other']
                 status=studData.loc[i, 'state']
                 statusDate=studData.loc[i, 'statusDate']
-                classType=class_stats.class_type(profileName, st_cl_te)
-                startUnit=class_stats.start_unit(profileName, st_cl_te)
+                classType=g.class_type(profileName, st_cl_te)
+                startUnit=g.start_unit(profileName, st_cl_te)
                 actions=[]
                 c = False
                 
@@ -186,7 +188,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
         #####ITERATE CLASSES
             def class_actions(classId, teacherId):
                 try:
-                    wc=class_stats.class_report(st_cl_te, classId, 'week')
+                    wc=class_stats.class_report(classId, 'week', st_cl_te)
                     del wc[1]['styler']
                     if (not wc[1]['empty'] and wc[1]['teacherEmail'] != "-" and
                     g.checkEmail(emailLog, teacherId, "cw"+wc[1]['class']+wc[1]['timeFrame'])==False):
@@ -219,26 +221,9 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
         htmllogdata = "<p>" + logdata.replace("\n", "<br>") + "</p>"
         return htmllogdata
     
-def full_sync(studentId):
-    logFilePath=join(main_stats.logPath,"log"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
-    if idFilter: logFilePath = logFilePath.replace('.txt', '-'+idFilter+'.txt')
-    logFile = open(join(logFilePath),'w', encoding="utf-8")
-    sys.stdout = logFile
-
-    studData=g.getStudents()
-    emailLog=g.getEmailLog()
-    supHoursLog=g.get_sup_hours_log()
-    gData=g.getData()
-    gClass=gData['class']
-    gs_c=gData['student_class']
-    gTeacher=gData['teacher']
-    st_cl_te = class_stats.st_cl_te(studData, gClass, gs_c, gTeacher)
-
-    return
-
 def add_book(sId, book):
 
-    logFilePath=join(main_stats.logPath,"log_add_book"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
+    logFilePath=join(logPath,"log_add_book"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
     logFile = open(join(logFilePath),'w', encoding="utf-8")
     sys.stdout = logFile
     try:

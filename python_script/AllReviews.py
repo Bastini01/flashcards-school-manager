@@ -1,6 +1,5 @@
 import time
 time1=time.time()
-import pandas as pd
 import anki_db, anki_profiles
 import google_apps
 
