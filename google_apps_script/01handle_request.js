@@ -325,8 +325,8 @@ function line_response(e){ //triggered from 'line response' form
     pushMsg(getData(si)['lineId'], e['values'][3])
     append_email_log(si, 'custom reply', 'line')
   }
-  else if (e.values[2]=='run'){run_afc(sId)}
-  else if (e.values[2].slice(0,3) == 'Add'){run_afc(sId, bookNr=e.values[2].slice(-1))}
+  else if (e.values[2]=='run'){run_afc(getData(si)['sId'])}
+  else if (e.values[2].slice(0,3) == 'Add'){run_afc(getData(si)['sId'], bookNr=e.values[2].slice(-1))}
   else if (e.values[2]=='ask class update'){sendTermUpdateReminder(si)}
   }
   else {

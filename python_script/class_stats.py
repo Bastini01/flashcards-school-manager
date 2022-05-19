@@ -11,7 +11,7 @@ import traceback
 # gTeacher=gData['teacher']
 
 def class_report(class_id, period='term', st_cl_te = None):
-    df=st_cl_te if st_cl_te else g.st_cl_te(get_current_term()['term'])
+    df=st_cl_te if st_cl_te is not None else g.st_cl_te(get_current_term()['term'])
     df=df[df['class_id']==class_id]
     if len(df)==0: return 'classWeekly', {'empty': True, 'styler': None}
     teacherId = df.iloc[0, df.columns.get_loc("teacher_id")]
