@@ -164,7 +164,8 @@ def rev_to_df(reviews):
 # dafr=revnem.to_csv('revNemra.txt')
 
 def isSerious(threshhold, profileName, start=None, end=None):
-    rev=getReviews(profileName)
+    try: rev=getReviews(profileName)
+    except: return False
     if rev==[]: return False
     if start==None: start=rev[0][0]
     if end==None: end=rev[len(rev)-1][0]
@@ -227,7 +228,7 @@ def getUnits(profileName):
     query = "SELECT MAX(notes.id), SUBSTRING(tags, INSTR(tags, 'Book'), 20), COUNT(notes.id) FROM "\
             "(notes INNER JOIN cards ON notes.id=cards.nid) "\
             "INNER JOIN decks ON cards.did=decks.id "\
-            "WHERE tags LIKE '%Book%Chapter%' AND decks.name LIKE '%當代%'"\
+            "WHERE tags LIKE '%Book%Chapter%'"\
             "GROUP BY 2"
                          
     units = queryDb(profileName, query)
