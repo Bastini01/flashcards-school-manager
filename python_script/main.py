@@ -116,7 +116,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
 
                     #########SYNC    
                     if status=='active' or status[:-1]=='custom' or c==True:     
-                        syncResponse = anki_profiles.sync(profileName, status)
+                        syncResponse = anki_profiles.sync(profileName)
                         if syncResponse == 'ok': amountSynced = amountSynced+1
                         if syncResponse=='ok' and c==True:
                             actions.append({

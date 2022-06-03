@@ -123,14 +123,14 @@ def getData():
         return result
 # (getData()['student_class'])
 
-def st_cl_te(term, studData = None, gData = None):
+def st_cl_te(term = None, studData = None, gData = None):
     #term=get_current_term()['term'] if not trm else trm
     s = studData if studData is not None else getStudents()
     d= gData if gData is not None else getData()
     df=s.merge(d['student_class'], how='left', on='studentId')
     df=df.merge(d['class'], how='left', on='class_id')
     df1=df.merge(d['teacher'], how='left', on='teacher_id')
-    df1=df1[df1['term']==term]
+    if term is not None: df1=df1[df1['term']==term]
     return df1
 
 def start_unit(profileName, st_cl_te):

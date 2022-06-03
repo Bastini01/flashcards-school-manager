@@ -6,20 +6,9 @@ import datetime as dt
 import class_stats, mtc_info, main
 import google_apps as g
 
-# studData=g.getStudents()
-# emailLog=g.getEmailLog()
-# gData=g.getData()
-# gClass=gData['class']
-# gs_c=gData['student_class']
-# gTeacher=gData['teacher']
-
-# st_cl_te = class_stats.st_cl_te(studData, gClass, gs_c, gTeacher, '22spring')
-
-# st_cl_te.to_excel('st_cl_te.xlsx')
-
 def classOverview():
 
-    df1=st_cl_te
+    df1=g.st_cl_te(mtc_info.get_current_term()['term'])
     df1['serious']=df1.apply(lambda x: db.isSerious(150, x['profileName']), axis=1)
     df1['state']=df1['state'].apply(lambda x: x[:-1] if x[:3]=="con" else x)
     # df1['state']=df1.apply(lambda x: 'active' if x['serious']=="active" else x['state'])
@@ -38,8 +27,8 @@ def classOverview():
         n=df3.iloc[i].name
         df3.loc[(n[0], n[1], '%')]= df3.iloc[i]/df3[:3].sum(axis=0)*100
     df3.sort_index(inplace=True, ascending=[True, False, True])
-    df3=df3.astype('int32')
-    
+    # df3=df3.astype('int32')
+    df3.to_html(join(main.technicalFilesPath,'classOverview.html'))
     return df3
 
 def print_class_reports(term = None):
@@ -84,7 +73,8 @@ def vocAnalysis(chapter=None):
     df.to_csv(join(main.technicalFilesPath,'vocAnalysis.txt'))
     return
 
-def trendWeekly(allReviews):
+def trendWeekly(allReviews = None):
+    allReviews = allReviews if allReviews is not None else AllReviews.getReviewDataAll()
     # allReviews = AllReviews.getReviewDataAll()
     filterdf=allReviews[allReviews['reviewTime'] < dt.datetime(2021, 12, 1)]
     allReviews.drop(index=filterdf.index, inplace=True)
@@ -109,4 +99,18 @@ def trendWeekly(allReviews):
     filePath=join(main.logPath,"weekly_trend"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
     df.to_csv(filePath)
     return df
-# trendWeekly(AllReviews.getReviewDataAll()).to_excel('weekly_trend'+dt.datetime.now().strftime('%y%m%d%H%M')+'.xlsx')
+
+def active_users_historical_total(totalReviews = 30):
+    df=g.getStudents()[['profileName']]
+    df['serious']=df.apply(lambda x: db.isSerious(totalReviews, x['profileName']), axis=1)
+    df=df[df['serious'] == True]
+    df['revs']=df.apply(lambda x: len(db.getReviews(x['profileName'])), axis=1)
+    #df.to_csv(join(main.technicalFilesPath,'all_active_users.txt'))
+    print(len(df))
+    return len(df)
+
+def active_users_anaysis():
+    for i in [50, 100, 500, 1000]:
+        print(i,active_users_historical_total(i))
+
+    

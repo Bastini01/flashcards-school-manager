@@ -136,14 +136,13 @@ def SetAutoSyncAll(choice=False): #sets the 'autosync on open' setting for all p
         pm.save()
         print(profileName+" auto sync: ", choice)
 
-def sync(profileName, status='active'):
+def sync(profileName):
     col = getCollection(profileName)
     pm.openProfile(profileName)
     SyncAuth=pm.sync_auth()
     col.db.commit()
     try:
         c=col.sync_collection(SyncAuth)
-        #print(c.ListFields()[1][1])
         m=col.sync_media(SyncAuth)
     except Exception as e:
         if '423' in str(e):
@@ -152,19 +151,18 @@ def sync(profileName, status='active'):
         else: print(profileName+" SYNC ERROR", e); return 'nok' 
     #Handle full sync required cases
     if len(c.ListFields())>1: 
-        if c.ListFields()[1][1]==3:
-            # c=col.full_download(SyncAuth)
-            print(profileName+" FULL DOWNLOAD\n", c, m)
-            return "fullSync"
+        if c.ListFields()[1][1]==2 or c.ListFields()[1][1]==3:
+            c=col.full_download(SyncAuth)
+            print(profileName+" FULL DOWNLOAD\n")
+            # return "fullSync"
         else: 
-            print(profileName+" FULL SYNC REQUIRED\n", c, m)
+            print(profileName+" FULL SYNC REQUIRED\n", c)
             return "fullSync"
     ##################""
     # print(profileName+" SYNCED")
     col.save()
     col.close()
     return 'ok'    
-# sync("00134 華倫 許")
 
 def first_sync(profileName):
     col = getCollection(profileName)
@@ -299,16 +297,7 @@ def createNote(collection, note):
 
 def addNote(collection, note):
         ankiNote = createNote(collection, note)
-        # self.addMediaFromNote(ankiNote, note)
-
-        # collection = getCollection(profileName)
-        # self.startEditing()
         collection.add_note(ankiNote, ankiNote.note_type()["did"])
-        # nCardsAdded = collection.add_note(ankiNote, ankiNote.note_type()["did"])
-        # if nCardsAdded < 1:
-        #     raise Exception('The field values you have provided would make an empty question on all cards.')
-        # self.stopEditing()
-
         return ankiNote.id
 
 def addNotes(profileName, notes):
@@ -385,7 +374,6 @@ def addMedia(profileName, mediaFiles):
     d=u+"\\AppData\\Roaming\\Anki2\\"+profileName+"\\collection.media\\"
     for m in mediaFiles:
         for file in m['sound']:       
-            # folderSpec=file[:-9]+file[9]
             vocabUnit=[int(file[1]),int(file[4:6]),int(file[-9:-7])]
             sf=config_notes.getSoundFileDir(vocabUnit)+file
             df=d+file
