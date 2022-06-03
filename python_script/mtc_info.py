@@ -5,9 +5,6 @@ import anki_db
 import os
 import config_notes
 
-# vocabUnit=[1,6,1]
-# classType=1
-# unitAddDate=dt.date( 2021, 12, 1 )
 termStartUnits=[[1,1,1],[1,6,1],[2,1,1],[2,6,1],[2,11,1],[3,9,1],[4,1,1]]
 
 def dateList(sdate, edate):
@@ -18,10 +15,12 @@ today=now.date()
 
 businessDaysPerTerm=47 #actually 57, tweaked to match the actual speed of progress
 
+ ####x days sooner to accomodate early registrations
 fallDate=[9, 1]
 winterDate=[12, 1]
-springDate=[3, 5]   ####2 days sooner to accomodate early registrations
-summerDate=[6, 7]
+springDate=[3, 5] #2 
+summerDate=[6, 6] #1
+########
 nyDec = dt.date( today.year, 12, 31 )
 nyJan = [dt.date( today.year, 1, 1 ), dt.date( today.year, 1, 2 )]
 cny = dateList(dt.date( today.year, 1, 29 ), dt.date( today.year, 2, 7))

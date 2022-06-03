@@ -9,7 +9,7 @@ var form = FormApp.openById('1LUX5E3MmT8EbHD1wv0D8tOe3hBEuP0cKUapJKB4eWWw')
 defaultStudentId = '?'
 
 function headers(){
-  return ['','timestamp', 'email', 'firstName', 'lastName', 'studentId', 'classNumber', 'classType', 'texbook', 'phoneOperatingSystem', 'startChapter','agreement', 'state', 'lastUpdateDate', 'lineId'] } 
+  return ['','timestamp', 'email', 'firstName', 'lastName', 'studentId', 'teacherName', 'classNumber', 'classType', 'texbook', 'phoneOperatingSystem', 'startChapter','agreement', 'state', 'lastUpdateDate', 'lineId'] } 
 
 function getData(studentIndex){
   var email = sheet.getRange(studentIndex,headers().indexOf('email')).getValue() 
@@ -136,6 +136,7 @@ function form_submit(e){ //triggered from registration form
     var classType = sheet.getRange(e.range['rowStart'],headers().indexOf("classType")).getValue()
     var textbook = sheet.getRange(e.range['rowStart'],headers().indexOf("texbook")).getValue()
     var startChapter = sheet.getRange(e.range['rowStart'],headers().indexOf("startChapter")).getValue()
+    var teacherName = sheet.getRange(e.range['rowStart'],headers().indexOf("teacherName")).getValue()
     for (var i = 1; i < 200; i++){ //simultaneous registrations bugfix
       var lineId = sheet.getRange(e.range['rowStart'],headers().indexOf("lineId")).getValue()
       if (lineId){break}
@@ -147,7 +148,7 @@ function form_submit(e){ //triggered from registration form
     Logger.log('status update to new ok')
     sheet.getRange(e.range['rowStart'],headers().indexOf("lastUpdateDate")).setValue(today)
     //input class data
-    update_class(studentId, classNumber, classType, textbook, startChapter)
+    update_class(studentId, classNumber, classType, textbook, startChapter, teacherName)
         
   }
   
@@ -171,14 +172,15 @@ function handle_update_submission(e){ //trigger comes from update form
     classType = e['values'][5]
     textbook = e['values'][6]
     startChapter = e['values'][7]
-  update_class(studentId, classNumber, classType, textbook, startChapter)
+    teacherName = e['values'][8]
+  update_class(studentId, classNumber, classType, textbook, startChapter, teacherName)
   }
   else{
     sId = parseFloat(studentId)
     update_status(sId, 'tOut')}
 }
 
-function update_class(studentId, classNumber, classType, textbook, startChapter){
+function update_class(studentId, classNumber, classType, textbook, startChapter, teacherName){
   var bookNr = textbook.match(/\d+/)[0]
   var chapNr = startChapter.match(/\d+/)[0]
   if (classType[0] == 'R'){type = 2} else {type = 1}
@@ -189,7 +191,7 @@ function update_class(studentId, classNumber, classType, textbook, startChapter)
   classIds = classSheet.getRange(1, 1, classSheet.getLastRow(), 1).getValues().flat()
   if (!classIds.includes(classNumber)) {
         r = classSheet.getRange(classSheet.getLastRow()+1, 1, 1, 5)
-        r.setValues([[classNumber,"999",'22spring',type,bookNr+','+chapNr]])
+        r.setValues([[classNumber,getTeacherNumber(teacherName), current_term(), type,bookNr+','+chapNr]])
         Logger.log('class: '+classNumber+' created')
     }
 }
@@ -209,15 +211,6 @@ function test_request(){
 
   rq = '{"0":{"studentIndex":2,"emailTemplate":"suppHours24"}}'
   handleDesktopRequest(rq)
-  // var obj = JSON.parse(rq)
-  // Logger.log(obj)
-  // var actions = Object.keys(obj).map(key => ( obj[key] ))
-  // Logger.log(actions)
-  // for (var i = 0; i < actions.length; ++i) {
-  //   var time1 = new Date()
-  //   var action=actions[i]
-  //   Logger.log(action)
-  // }
 }
 
 function handleDesktopRequest(rq){

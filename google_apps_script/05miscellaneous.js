@@ -4,12 +4,18 @@ var clSheet = ss.getSheetByName("class")
 var teSheet = ss.getSheetByName("teacher")
 
 
+
 function seeRowsData(){
-  // var ss = SpreadsheetApp.openById('1zM1uvzFo4dEQ4qVSp2SRE6RC8Ll2Dw-a5GftXw2Iy18');
-  // // var ss = SpreadsheetApp.getActiveSpreadsheet();
-  // var dataSheet = ss.getSheetByName("Form Responses 1");
   var dataRange = dataSheet.getRange(2, 1, dataSheet.getLastRow() - 1, dataSheet.getLastColumn());
   Logger.log(getRowsData(dataSheet,dataRange));
+}
+
+function current_term(){
+  year = today.getFullYear().toString().slice(2,4)
+  if (today.getMonth() <=1 || today.getMonth()+1 == 11) {return year+"winter"}
+  else if (today.getMonth() <=4) {return year+"spring"}
+  else if (today.getMonth() <=7) {return year+"summer"}
+  else {return year+"fall"}
 }
 
 function testhandleDesktopRequest(){
@@ -37,20 +43,11 @@ function test220331(){
 }
 
 function fill_class_data_class(){
-  // var ss = SpreadsheetApp.getActiveSpreadsheet();
-  // var dataSheet = ss.getSheetByName("Form Responses 1");
-  // var clSheet = ss.getSheetByName("class");
-  // var teSheet = ss.getSheetByName("teacher");
   var classes = []
   for (var i = 2; i < dataSheet.getLastRow(); ++i){
     cl=dataSheet.getRange(i, 6).getValue()
     if(typeof cl != 'string'){cl=cl.toString()}
-    // Logger.log(classes)
-    // if (!(cl in classes)){classes.push(cl)}
-    if (!classes.includes(cl)){classes.push(cl)}
-
-    // Logger.log(!(cl in classes))
-    
+    if (!classes.includes(cl)){classes.push(cl)}   
   }
   clss=classes.map(x => [x])
   Logger.log(clss)
@@ -59,31 +56,35 @@ function fill_class_data_class(){
 }
 
 function fill_class_data_teacher(){
-  // var ss = SpreadsheetApp.getActiveSpreadsheet();
-  // var dataSheet = ss.getSheetByName("Form Responses 1");
-  // var clSheet = ss.getSheetByName("class");
-  // var teSheet = ss.getSheetByName("teacher");
   var teachersClass = teSheet.getRange(1, 5, teSheet.getLastRow()).getValues()
   tc=teachersClass.map(x => x[0].toString())
   Logger.log(tc)
-  // var classes = clSheet.getRange(2, 1, clSheet.getLastRow()).getValues()
   for (var i = 2; i < clSheet.getLastRow(); ++i){
     cl=clSheet.getRange(i, 1).getValue().toString()
     Logger.log(cl)
-    // if(typeof cl != 'string'){cl=cl.toString()}
-    // Logger.log(classes)
-    // if (!(cl in classes)){classes.push(cl)}
     if (tc.includes(cl)){
       indx=tc.indexOf(cl)      
       clSheet.getRange(i, 2).setValue(
         teSheet.getRange(indx+1, 1).getValues()
       )
     }
-
-    // Logger.log(!(cl in classes))
-    
   }
 
 }
 
-//Logger.log('logging?');
+function getTeacherNumber(teacherName){
+  var nameList = teSheet.getRange(1, 4, teSheet.getLastRow(), 1).getValues().flat()
+  return teSheet.getRange(nameList.indexOf(teacherName)+1 , 1).getValue()
+}
+
+function updateTeacherList(){ //triggered once a month or manually
+  var teacherList = teSheet.getRange(2, 2, teSheet.getLastRow(), 3).getValues()
+  teacherList = teacherList.filter(item => item[0].includes('@'))
+  teacherList = teacherList.map(item => item[2]).sort()
+  teacherList.push("Other - 其他")
+  Logger.log(teacherList)
+  var updateForm = FormApp.openById('1XsN8z4uueZH0HZlu69sviR70yJrxwo9LBPvN47sHXF0')
+  updateForm.getItemById(130655611).asListItem().setChoiceValues(teacherList)
+  form.getItemById(919431551).asListItem().setChoiceValues(teacherList)
+}
+

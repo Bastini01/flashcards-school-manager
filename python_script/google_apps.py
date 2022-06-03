@@ -72,13 +72,9 @@ def getStudents():
     data.columns.name=None
     data.drop(index=0, inplace=True)
     data.reset_index(drop=True, inplace=True)
-    # data.insert(len(data.columns),'OriginalStartUnit',None, allow_duplicates=True)
     for i in range(len(data)):
-        # data.loc[i,'startDate'] = unit_date(data, i)['date']
         data.loc[i,'profileName'] = getProfileName(data, i)
         data.loc[i,'statusDate'] = status_date(data, i)
-        # data.loc[i,'classType'] = int(data.iloc[i, 6])
-        # data.at[i,'OriginalStartUnit'] = unit_date(data, i)['unit']
     c=[data.columns[i] for i in [2,3,6,7,9]]
     c.append('Last update date')
     data.drop(columns=c, inplace=True)
@@ -87,7 +83,6 @@ def getStudents():
         data.columns[3]: "class"}, 
         inplace=True)
     return(data)
-# getStudents()
 
 def getEmailLog():
     data = get_gsheet("'Email log'")
