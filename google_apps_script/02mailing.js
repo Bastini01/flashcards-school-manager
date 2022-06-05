@@ -71,7 +71,7 @@ function sendOnboarding(si){
   var emailText = fillTemplateA(template);
   var subject = "MTC automated flashcards instructions - MTC自動化字卡說明";
   GmailApp.sendEmail(getData(si).email, subject," ", {htmlBody: emailText});
-  append_email_log(si, tn);
+  append_email_log(si, tn, 'gmail');
 }
 
 function sendGformLink(si, lineId = '', resp = null){

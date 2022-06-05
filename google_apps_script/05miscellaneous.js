@@ -10,12 +10,20 @@ function seeRowsData(){
   Logger.log(getRowsData(dataSheet,dataRange));
 }
 
-function current_term(){
+function current_term(l='en'){
   year = today.getFullYear().toString().slice(2,4)
-  if (today.getMonth() <=1 || today.getMonth()+1 == 11) {return year+"winter"}
-  else if (today.getMonth() <=4) {return year+"spring"}
-  else if (today.getMonth() <=7) {return year+"summer"}
-  else {return year+"fall"}
+  if (today.getMonth() <=1 || today.getMonth()+1 == 11) {result = year+"winter"}
+  else if (today.getMonth() <=4) {result = year+"spring"}
+  else if (today.getMonth() <=7) {result = year+"summer"}
+  else {result = year+"fall"}
+  if(l='en'){return result}
+  else{
+    result.replace('winter','冬')
+    result.replace('spring','春') 
+    result.replace('summer','夏') 
+    result.replace('fall','秋')
+    return result 
+  }
 }
 
 function testhandleDesktopRequest(){
@@ -77,14 +85,31 @@ function getTeacherNumber(teacherName){
   return teSheet.getRange(nameList.indexOf(teacherName)+1 , 1).getValue()
 }
 
-function updateTeacherList(){ //triggered once a month or manually
+function get_teacherList(){
   var teacherList = teSheet.getRange(2, 2, teSheet.getLastRow(), 3).getValues()
-  teacherList = teacherList.filter(item => item[0].includes('@'))
-  teacherList = teacherList.map(item => item[2]).sort()
+  return teacherList.filter(item => item[0].includes('@'))
+}
+
+function updateTeacherList(){ //triggered once a month or manually
+  teacherList = get_teacherList().map(item => item[2]).sort()
   teacherList.push("Other - 其他")
   Logger.log(teacherList)
   var updateForm = FormApp.openById('1XsN8z4uueZH0HZlu69sviR70yJrxwo9LBPvN47sHXF0')
   updateForm.getItemById(130655611).asListItem().setChoiceValues(teacherList)
   form.getItemById(919431551).asListItem().setChoiceValues(teacherList)
+}
+
+function teacher_promotion(){ //triggered once per term or manually 
+  teacherList = get_teacherList()
+  term=current_term('zh')
+  for (t in teacherList){
+  var tn = 'teacher_reminder';
+  var template = HtmlService.createTemplateFromFile(tn);
+  template.teacherLN=t[3].charAt(0);
+  var emailText = template.evaluate().getContent();
+  var subject = "「MTC自動化字卡」"+term.slice(0,2)+"年"+term.charAt(2)+"季推動計畫";
+  GmailApp.sendEmail(t[1], subject," ", {htmlBody: emailText});
+  append_email_log('teacher'+t[0], tn, 'gmail');
+  }
 }
 
