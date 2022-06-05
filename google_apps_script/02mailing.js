@@ -12,7 +12,7 @@ function customSender () {
     // sendAnkiInstructions(target[i])
     // sendTermUpdate(target[i])
     // sendTermUpdateReminder(target[i])
-    sendGformLink(target[i])
+    // sendGformLink(target[i])
   }
   
 }
@@ -42,10 +42,13 @@ function fillTemplateA(si, template) {
   return template.evaluate().getContent();
 }
 
-function append_email_log(studentIndex, templateName, type){
+function append_email_log(recipient, templateName, type){
   if (type==null){type='gmail'}
-  var dataRange = emailLog.getRange(emailLog.getLastRow()+1, 1, 1, 5);
-  var values = [[today, getData(studentIndex).sId, getData(studentIndex).firstName, templateName, type]];
+  var dataRange = emailLog.getRange(emailLog.getLastRow()+1, 1, 1, 5)
+  // if (recipient.includes('@')){r = recipient; n = recipient}
+  if (!Number.isInteger(recipient)){r = recipient; n = recipient} 
+  else {r = getData(recipient).sId; n = getData(recipient).firstName}
+  var values = [[today, r, n, templateName, type]];
   dataRange.setValues(values);
 }
 
@@ -112,14 +115,18 @@ function sendTermUpdate(si){
   var lineId = getData(si).lineId
   var msgText="Hi "+getData(si).firstName+"!\n"+
           "Ready for the new term?\n"+
-          "Please let us know if you continue and what your new class is🙏\n"+
-          "You might need to ask your teacher for the class number\n"+
-          "Thank you!\n"+
-          "https://forms.gle/9BhRn2kbZdKMJR1X8"
+          "Please fill in this form 🙏\n"+
+          "https://forms.gle/9BhRn2kbZdKMJR1X8\n"+
+          "You might need to ask your teacher for the new class number..\n"+
+          "To invite new classmates share the link below👇"+
+          "https://lin.ee/UjsSBA0G\n"
+          "Thank you!\n"          
+          
   if (lineId){pushMsg(lineId, msgText); type='line'}
   else{
   var subject = "New term class update!"
     var msgText = msgText.replace('🙏', " :)")
+    var msgText = msgText.replace('👇', "")
     GmailApp.sendEmail(getData(si).email,`=?UTF-8?B?${Utilities.base64Encode(Utilities.newBlob(subject).getBytes())}?=`,msgText);
     type='gmail'
   }

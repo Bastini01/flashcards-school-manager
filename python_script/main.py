@@ -55,12 +55,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                     if status[:3]!="new": continue
                 elif idFilter:
                     if studentId!=idFilter: continue
-                # if i+1==43: continue
-                # if i+1!=40: continue        
-                # if i+1 not in [65, 69, 89]: continue
                 if i < 14: continue
-                # if i > 20: continue
-                # if profileName != "00114 Leina Lin": continue
                 ###################
                 try:
                     #########SEND REGISTRATION REMINDER

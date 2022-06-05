@@ -16,12 +16,12 @@ function current_term(l='en'){
   else if (today.getMonth() <=4) {result = year+"spring"}
   else if (today.getMonth() <=7) {result = year+"summer"}
   else {result = year+"fall"}
-  if(l='en'){return result}
+  if(l=='en'){return result}
   else{
-    result.replace('winter','冬')
-    result.replace('spring','春') 
-    result.replace('summer','夏') 
-    result.replace('fall','秋')
+    result = result.replace('winter','冬')
+    result = result.replace('spring','春') 
+    result = result.replace('summer','夏') 
+    result = result.replace('fall','秋')
     return result 
   }
 }
@@ -33,7 +33,12 @@ function testhandleDesktopRequest(){
 }
 
 function tstingFunction() {
-  var list=['d','f','g']; list = list.slice(-5); Logger.log(list)
+  result = '22summer'
+  result = result.replace('winter','冬')
+  result = result.replace('spring','春') 
+  result = result.replace('summer','夏') 
+  result = result.replace('fall','秋')
+  Logger.log(result)
 }
 
 function test220331(){
@@ -102,14 +107,17 @@ function updateTeacherList(){ //triggered once a month or manually
 function teacher_promotion(){ //triggered once per term or manually 
   teacherList = get_teacherList()
   term=current_term('zh')
+  qrcode = DriveApp.getFileById('1UCzhSXItnBw9M01gNmZbQUVKilqlXTbZ1PMrHYcGnUQ').getBlob()
   for (t in teacherList){
-  var tn = 'teacher_reminder';
-  var template = HtmlService.createTemplateFromFile(tn);
-  template.teacherLN=t[3].charAt(0);
+  // t = teacherList[0]
+  var templateName = 'teacher_reminder';
+  var template = HtmlService.createTemplateFromFile(templateName);
+  template.teacherLN=t[2].charAt(0);
   var emailText = template.evaluate().getContent();
-  var subject = "「MTC自動化字卡」"+term.slice(0,2)+"年"+term.charAt(2)+"季推動計畫";
-  GmailApp.sendEmail(t[1], subject," ", {htmlBody: emailText});
-  append_email_log('teacher'+t[0], tn, 'gmail');
+  var subject = "「MTC自動化字卡」20"+term.slice(0,2)+"年"+term.charAt(2)+"季推動計畫"
+  // GmailApp.sendEmail(t[0], subject," ", {htmlBody: emailText, cc: 'shuhuafang@mtc.ntnu.edu.tw', attachments: [qrcode]})
+  GmailApp.sendEmail('pierrehenry.bastin@gmail.com', subject," ", {htmlBody: emailText, attachments: [qrcode]})
+  append_email_log('teacher'+t[0], templateName);
   }
 }
 
