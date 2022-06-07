@@ -32,18 +32,22 @@ def classOverview():
     return df3
 
 def print_class_reports(term = None):
+    path = main.technicalFilesPath+r'\class_reports'
     trm = mtc_info.get_current_term()['term'] if not term else term
-    c=gClass
+    c=g.getData()['class']
     df=c[c['term']==trm]
+    st_cl_te = g.st_cl_te(trm)
     for row in df.iterrows():
         print(row[1][0])
-        rep=class_stats.class_report(st_cl_te, row[1][0])[1]
+        
+        rep=class_stats.class_report(row[1][0], False, st_cl_te)[1]
+        if not rep['styler']: continue
         rep['styler'].to_html(
+            join(path,
             rep['class']+
             rep['teacherName']+
-            # rep['timeFrame']+
-            '.html')
-# print_class_reports('21winter') 
+            '.html'))
+# print_class_reports('22spring') 
 
 def vocAnalysis(chapter=None):
     reviews = AllReviews.getReviewDataAll()
@@ -100,17 +104,22 @@ def trendWeekly(allReviews = None):
     df.to_csv(filePath)
     return df
 
-def active_users_historical_total(totalReviews = 30):
+def active_users_count(totalReviews = 30, term = None):
+    dates = (None, None)
+    if term: 
+        dts = mtc_info.get_term_dates(term)
+        dates = (dts['termStart'], dts['termEnd'])
     df=g.getStudents()[['profileName']]
-    df['serious']=df.apply(lambda x: db.isSerious(totalReviews, x['profileName']), axis=1)
+    df['serious']=df.apply(lambda x: db.isSerious(totalReviews, x['profileName'], dates[0], dates[1]), axis=1)
     df=df[df['serious'] == True]
-    df['revs']=df.apply(lambda x: len(db.getReviews(x['profileName'])), axis=1)
+    df['revs']=df.apply(lambda x: len(db.reviews_by_period(x['profileName'], dates[0], dates[1])), axis=1)
     #df.to_csv(join(main.technicalFilesPath,'all_active_users.txt'))
     print(len(df))
     return len(df)
+active_users_count(30, "22spring")
 
-def active_users_anaysis():
+def active_users_analysis():
     for i in [50, 100, 500, 1000]:
-        print(i,active_users_historical_total(i))
+        print(i,active_users_count(i))
 
     

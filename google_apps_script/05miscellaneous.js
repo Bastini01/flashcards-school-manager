@@ -104,19 +104,21 @@ function updateTeacherList(){ //triggered once a month or manually
   form.getItemById(919431551).asListItem().setChoiceValues(teacherList)
 }
 
-function teacher_promotion(){ //triggered once per term or manually 
+function send_teacher_promotion(){ //triggered (once per term or) manually 
   teacherList = get_teacherList()
   term=current_term('zh')
   qrcode = DriveApp.getFileById('1UCzhSXItnBw9M01gNmZbQUVKilqlXTbZ1PMrHYcGnUQ').getBlob()
-  for (t in teacherList){
-  // t = teacherList[0]
+  // Logger.log(teacherList)
+  for (i in teacherList){
+  t = teacherList[i]
+  // Logger.log(t)
   var templateName = 'teacher_reminder';
   var template = HtmlService.createTemplateFromFile(templateName);
   template.teacherLN=t[2].charAt(0);
   var emailText = template.evaluate().getContent();
   var subject = "「MTC自動化字卡」20"+term.slice(0,2)+"年"+term.charAt(2)+"季推動計畫"
   // GmailApp.sendEmail(t[0], subject," ", {htmlBody: emailText, cc: 'shuhuafang@mtc.ntnu.edu.tw', attachments: [qrcode]})
-  GmailApp.sendEmail('pierrehenry.bastin@gmail.com', subject," ", {htmlBody: emailText, attachments: [qrcode]})
+  // GmailApp.sendEmail('pierrehenry.bastin@gmail.com', subject," ", {htmlBody: emailText, attachments: [qrcode]})
   append_email_log('teacher'+t[0], templateName);
   }
 }

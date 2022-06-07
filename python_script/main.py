@@ -4,6 +4,8 @@ from attr import s
 time1=time()
 import sys
 from os.path import expanduser, join
+technicalFilesPath = expanduser("~")+r'\OneDrive\SRL\TechnicalFiles'
+
 import datetime as dt
 import traceback
 import google_apps as g
@@ -13,7 +15,6 @@ import anki_db
 import mtc_info
 import class_stats, main_stats
 
-technicalFilesPath = expanduser("~")+r'\OneDrive\SRL\TechnicalFiles'
 logPath = technicalFilesPath+r'\Log'
 original_stdout = sys.stdout
 today=dt.datetime.now().date()
@@ -183,7 +184,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
         #####ITERATE CLASSES
             def class_actions(classId, teacherId):
                 try:
-                    wc=class_stats.class_report(classId, 'week', st_cl_te)
+                    wc=class_stats.class_report(classId, True, st_cl_te)
                     del wc[1]['styler']
                     if (not wc[1]['empty'] and wc[1]['teacherEmail'] != "-" and
                     g.checkEmail(emailLog, teacherId, "cw"+wc[1]['class']+wc[1]['timeFrame'])==False):

@@ -163,16 +163,19 @@ def rev_to_df(reviews):
 # dafr=revnem[revnem['tags'] != None]
 # dafr=revnem.to_csv('revNemra.txt')
 
-def isSerious(threshhold, profileName, start=None, end=None):
+def reviews_by_period(profileName, start=None, end=None):
     try: rev=getReviews(profileName)
+    except: return None
+    if rev==[]: return []
+    if start==None: start=dt.datetime(2021, 1, 1)
+    else: start = dt.datetime(start.year, start.month, start.day)
+    if end==None: end=dt.datetime(today.year, today.month, today.day)
+    else: end = dt.datetime(end.year, end.month, end.day)
+    return [i for i in rev if i[0] >= start and i[0] <= end]
+
+def isSerious(threshhold, profileName, start=None, end=None):
+    try: cnt=len(reviews_by_period(profileName, start, end))
     except: return False
-    if rev==[]: return False
-    if start==None: start=rev[0][0]
-    if end==None: end=rev[len(rev)-1][0]
-    cnt=0
-    for i in rev:
-        if i[0] >= start and i[0] <= end:
-            cnt=cnt+1
     if cnt >= threshhold: return True
     else: return False
 # (isSerious(200, "00053 Paul H Nemra"))

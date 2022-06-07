@@ -1,5 +1,5 @@
 import anki_db as db
-from mtc_info import unit_to_zh, get_current_term
+from mtc_info import unit_to_zh, get_current_term, get_term_dates
 import google_apps as g
 import traceback
 
@@ -10,20 +10,21 @@ import traceback
 # gs_c=gData['student_class']
 # gTeacher=gData['teacher']
 
-def class_report(class_id, period='term', st_cl_te = None):
-    df=st_cl_te if st_cl_te is not None else g.st_cl_te(get_current_term()['term'])
+def class_report(class_id, week=False, st_cl_te = None):
+    df=st_cl_te if st_cl_te is not None else g.st_cl_te()
     df=df[df['class_id']==class_id]
     if len(df)==0: return 'classWeekly', {'empty': True, 'styler': None}
     teacherId = df.iloc[0, df.columns.get_loc("teacher_id")]
     teacherName = df.iloc[0, df.columns.get_loc("name")]
     teacherEmail = df.iloc[0, df.columns.get_loc("email")]
+    term = df.iloc[0, df.columns.get_loc("term")]
     df = df[['studentId','profileName']]
-    per = db.week_dates() if period == 'week' else (get_current_term()['termStart'], get_current_term()['termEnd'])
+    per = db.week_dates() if week else (get_term_dates(term)['termStart'], get_term_dates(term)['termEnd'])
     timeFrame = per[0].strftime('%Y/%m/%d')+" - "+per[1].strftime('%Y/%m/%d')
 
     def report(x):
         try:
-            if period == 'week': return db.weeklyReport(x, db.getReviews(x))
+            if week: return db.weeklyReport(x, db.getReviews(x))
             else: return db.termReport(per[0], x, db.getReviews(x))
         except Exception as e: 
             tb = traceback.format_exc(limit=50)
@@ -64,3 +65,4 @@ def class_report(class_id, period='term', st_cl_te = None):
         'htmlReport':htmlReport
     }
 
+# print(class_report('41883', False))

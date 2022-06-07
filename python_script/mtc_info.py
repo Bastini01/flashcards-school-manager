@@ -55,6 +55,18 @@ def get_current_term():
 
 termStart = get_current_term()['termStart']
 
+def get_term_dates(term):
+    year = int("20"+term[:2])
+    season = term[2:]
+    if season == "winter": d1 = winterDate ; d2 = springDate
+    elif season == "spring": d1 = springDate ; d2 = summerDate
+    elif season == "summer": d1 = summerDate ; d2 = fallDate
+    else: d1 = fallDate; d2 = winterDate
+    result = {'termStart': dt.date(year, d1[0], d1[1]), 
+              'termEnd': dt.date(year, d2[0], d2[1])}
+    if season == "winter": result['termEnd'] = dt.date(year+1, d2[0], d2[1])
+    return result
+
 def unit_to_zh(vocabUnit):
     txt="當代"+str(vocabUnit[0])
     if len(vocabUnit)>1: txt=txt+"-"+str(vocabUnit[1])
