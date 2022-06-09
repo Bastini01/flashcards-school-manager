@@ -18,7 +18,7 @@ import class_stats, main_stats
 logPath = technicalFilesPath+r'\Log'
 original_stdout = sys.stdout
 today=dt.datetime.now().date()
-
+term = mtc_info.get_current_term()['term']
 
 def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=False):
     if log: 
@@ -33,7 +33,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
         supHoursLog=g.get_sup_hours_log()
         gData=g.getData()
         gClass=gData['class']
-        st_cl_te = g.st_cl_te(mtc_info.get_current_term()['term'], studData, gData)
+        st_cl_te = g.st_cl_te(term, studData, gData)
         if std:
             #####ITERATE STUDENTS
             allReviews = []
@@ -69,8 +69,8 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                             continue
                     
                     #########ASK CLASS DATA UPDATE
-                    if (status == 'active' and not classType and g.checkEmail(emailLog, studentId, 'termUpdate')==False):
-                            actions.append({"studentIndex":i+2, "emailTemplate": 'termUpdate'})
+                    if (status == 'active' and not classType and g.checkEmail(emailLog, studentId, 'termUpdate'+term)==False):
+                            actions.append({"studentIndex":i+2, "emailTemplate": 'termUpdate'+term})
                     
                     #########CREATE PROFILE
                     if status[:3]=='new' or profileName not in anki_profiles.getProfiles():

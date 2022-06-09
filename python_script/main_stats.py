@@ -116,7 +116,7 @@ def active_users_count(totalReviews = 30, term = None):
     #df.to_csv(join(main.technicalFilesPath,'all_active_users.txt'))
     print(len(df))
     return len(df)
-active_users_count(30, "22spring")
+# active_users_count(30, "22spring")
 
 def active_users_analysis():
     for i in [50, 100, 500, 1000]:

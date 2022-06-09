@@ -236,8 +236,8 @@ function handleDesktopRequest(rq){
         if (action["emailTemplate"]=="regReminder"){
           sendRegReminder(studentIndex)
         }
-        if (action["emailTemplate"]=="termUpdate"){
-          sendTermUpdate(studentIndex)
+        if (action["emailTemplate"].slice(0,10)=="termUpdate"){
+          sendTermUpdate(studentIndex, action["emailTemplate"])
         }
         if (action["emailTemplate"]=="wrongPassword"){
           sendWrongPassword(studentIndex)

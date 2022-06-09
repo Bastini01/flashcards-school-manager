@@ -111,7 +111,7 @@ function sendAnkiInstructions(si){
   append_email_log(si, "AnkiInstructions", type);
 }
 
-function sendTermUpdate(si){
+function sendTermUpdate(si, term){
   var lineId = getData(si).lineId
   var msgText="Hi "+getData(si).firstName+"!\n"+
           "Ready for the new term?\n"+
@@ -130,7 +130,7 @@ function sendTermUpdate(si){
     GmailApp.sendEmail(getData(si).email,`=?UTF-8?B?${Utilities.base64Encode(Utilities.newBlob(subject).getBytes())}?=`,msgText);
     type='gmail'
   }
-  append_email_log(si, "termUpdate", type);
+  append_email_log(si, term, type);
 }
 
 function sendTermUpdateReminder(si){
