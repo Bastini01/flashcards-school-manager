@@ -226,7 +226,7 @@ function handleDesktopRequest(rq){
     if (action["studentIndex"]) {
         var studentIndex=action["studentIndex"]
       if (action["statusUpdate"]) {
-        sheet.getRange(studentIndex, 12).setValue(action["statusUpdate"]);
+        sheet.getRange(studentIndex, headers().indexOf("state")).setValue(action["statusUpdate"]);
         sheet.getRange(studentIndex, headers().indexOf("lastUpdateDate")).setValue(today);
       }
       if (action["chapterUpdate"]) {
