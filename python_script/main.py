@@ -231,9 +231,10 @@ def add_book(sId, book):
         for u in unitsToAdd:
             addResponse=anki_profiles.add_notes(profileName, u)
             if addResponse==False: raise Exception(profileName, u, 'ADD NOTES PROBLEM')
-        syncResponse = anki_profiles.sync(profileName, 'active')
+        syncResponse = anki_profiles.sync(profileName)
         if syncResponse != 'ok': raise Exception(profileName, 'SYNC ISSUE')
         print(profileName+' book '+book+' added and synchronized')
+        g.sendActions([{"studentIndex":studentIndex+2, "emailTemplate":'bookAdded'+book}])
 
     except Exception as e: tb = traceback.format_exc(); print(e, tb) 
     logFile.close()
@@ -241,7 +242,7 @@ def add_book(sId, book):
     with open(logFilePath, 'r', encoding="utf-8") as file:
         logdata = file.read()
 
-    g.sendActions([{"emailTemplate":('log', logdata)}, {"studentIndex":studentIndex+2, "emailTemplate":'bookAdded'+book}])
+    g.sendActions([{"emailTemplate":('log', logdata)}])
     return
     
 

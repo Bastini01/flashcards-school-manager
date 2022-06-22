@@ -1,5 +1,4 @@
 var today = new Date();
-var ss = SpreadsheetApp.openById('1zM1uvzFo4dEQ4qVSp2SRE6RC8Ll2Dw-a5GftXw2Iy18')
 var sheet = ss.getSheetByName("Form Responses 1")
 var emailLog = ss.getSheetByName("Email log")
 var lineSheet = ss.getSheetByName("LINE")

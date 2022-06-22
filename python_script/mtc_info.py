@@ -13,13 +13,13 @@ def dateList(sdate, edate):
 now=dt.datetime.now()
 today=now.date()
 
-businessDaysPerTerm=47 #actually 57, tweaked to match the actual speed of progress
+businessDaysPerTerm=45 #actually 57, tweaked to match the actual speed of progress
 
- ####x days sooner to accomodate early registrations
+ ####x days sooner to accomodate early registrations and adding rithm
 fallDate=[9, 1]
 winterDate=[12, 1]
 springDate=[3, 5] #2 
-summerDate=[6, 7]
+summerDate=[6, 6] #1
 ########
 nyDec = dt.date( today.year, 12, 31 )
 nyJan = [dt.date( today.year, 1, 1 ), dt.date( today.year, 1, 2 )]
