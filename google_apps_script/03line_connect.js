@@ -22,7 +22,7 @@ function doPost(e) {
   emailDest = 'self-learning@mtc.ntnu.edu.tw'
   Logger.log('info:' + e.postData.contents);
   // Logger.log('I got here!');
-  try {
+  // try {
     var events = value.events;
     if (events != null) {
       for (var i in events) {
@@ -31,11 +31,12 @@ function doPost(e) {
         var replyToken = event.replyToken; // 要回復訊息 reToken
         var sourceType = event.source.type;
         // var sourceId = LineHelpers.getSourceId(event.source);
-        var userId = event.source.userId; // 取得個人userId
+        var userId = event.source.userId // 取得個人userId
         sheet.getRange(row, 2).setValue(userId)
         var displayName = getUserData(userId)['displayName']
         sheet.getRange(row, 3).setValue(displayName)
         var si = get_si('lineId', userId)
+        var sId = ""
         if(si){sId = getData(si)['sId'].toString()}
         var groupId = event.source.groupId; // 取得群組Id
         var timeStamp = event.timestamp;
@@ -98,11 +99,8 @@ function doPost(e) {
         
       }
     }
-  } catch(ex) {
-    Logger.log(ex);
-  }
-  // try{
-
+  // } catch(ex) {
+  //   Logger.log(ex);
   // }
 }
 

@@ -9,7 +9,7 @@ var form = FormApp.openById('1LUX5E3MmT8EbHD1wv0D8tOe3hBEuP0cKUapJKB4eWWw')
 defaultStudentId = '?'
 
 function headers(){
-  return ['','timestamp', 'email', 'firstName', 'lastName', 'studentId', 'teacherName', 'classNumber', 'classType', 'texbook', 'phoneOperatingSystem', 'startChapter','agreement', 'state', 'lastUpdateDate', 'lineId'] } 
+  return ['','timestamp', 'email', 'firstName', 'lastName', 'studentId', 'teacherName', 'classNumber', 'classType', 'texbook', 'phoneOperatingSystem', 'startChapter','agreement', 'state', 'lastUpdateDate', 'lineId', 'optOutEmail'] } 
 
 function getData(studentIndex){
   var email = sheet.getRange(studentIndex,headers().indexOf('email')).getValue() 
@@ -18,7 +18,8 @@ function getData(studentIndex){
   var pw = email.substring(0, email.indexOf("@"))
   var lineId = sheet.getRange(studentIndex,headers().indexOf('lineId')).getValue()
   var state = sheet.getRange(studentIndex,headers().indexOf('state')).getValue()
-  return {email, sId, firstName, pw, lineId, state}
+  var optOutEmail = sheet.getRange(studentIndex,headers().indexOf('optOutEmail')).getValue()
+  return {email, sId, firstName, pw, lineId, state, optOutEmail}
 }
 
 function get_si(type, value){
@@ -230,6 +231,7 @@ function handleDesktopRequest(rq){
         sheet.getRange(studentIndex, headers().indexOf("lastUpdateDate")).setValue(today);
       }
       if (action["chapterUpdate"]) {
+        if (getData(studentIndex).optOutEmail){return}
         sendChapterUpdate(studentIndex, action["chapterUpdate"]);
       }
       if (action["emailTemplate"]){
