@@ -12,16 +12,14 @@ function customMsg(){
 // "Hi, I need to connect to your Ankiweb account to keep track of statistics and upload new vocabulary. You can give access by changing your password to 'leinat09'. I you do not wish to give access to your Ankiweb account I will indicate you opted out and you will get no more notifications./nCheers, 宏熹"
 
 function doPost(e) {
-  var sheet = ss.getSheetByName("LINE")
-  var row = sheet.getLastRow()+1
+  var row = lineSheet.getLastRow()+1
   var value = JSON.parse(e.postData.contents);
   if(typeof e !== 'undefined'){
     Logger.log(e.parameter)
-    sheet.getRange(row, 1).setValue(JSON.stringify(e))
+    lineSheet.getRange(row, 1).setValue(JSON.stringify(e))
   }
   emailDest = 'self-learning@mtc.ntnu.edu.tw'
   Logger.log('info:' + e.postData.contents);
-  // Logger.log('I got here!');
   // try {
     var events = value.events;
     if (events != null) {
@@ -32,9 +30,9 @@ function doPost(e) {
         var sourceType = event.source.type;
         // var sourceId = LineHelpers.getSourceId(event.source);
         var userId = event.source.userId // 取得個人userId
-        sheet.getRange(row, 2).setValue(userId)
+        lineSheet.getRange(row, 2).setValue(userId)
         var displayName = getUserData(userId)['displayName']
-        sheet.getRange(row, 3).setValue(displayName)
+        lineSheet.getRange(row, 3).setValue(displayName)
         var si = get_si('lineId', userId)
         var sId = ""
         if(si){sId = getData(si)['sId'].toString()}
@@ -125,8 +123,6 @@ function testreplyMsg(){
 }
 
 function pushMsg(usrId, message) {
-  // var sheet = ss.getSheetByName("LINE")
-  // var row = sheet.getLastRow()+1
   var url = 'https://api.line.me/v2/bot/message/push';
   var opt = {
     'headers': {
@@ -140,7 +136,6 @@ function pushMsg(usrId, message) {
   })
  }
 JSON.parse(UrlFetchApp.fetch(url, opt))
-//  sheet.getRange(row, 1).setValue(JSON.stringify(response))
 }
 
 function getUserData(usrId) {
@@ -182,18 +177,12 @@ function testgetlinedata(){
 }
 
 function get_all_user_data(){
-  var sheet = ss.getSheetByName("LINE");
-  for (let i = 1; i <= sheet.getLastRow(); i++){
+  for (let i = 1; i <= lineSheet.getLastRow(); i++){
     try{
-    // Logger.log(i)
-    // usrId = sheet.getRange(i,1).getValue().split("userId")[1].slice(5, 38)
-    // displayName = getUserData(usrId)["displayName"]
-    // sheet.getRange(i,3).setValue(displayName+": "+usrId)
-    // Logger.log(displayName+": "+usrId)
-    displayName = sheet.getRange(i,3).getValue().split(": ")[0]
-    usrId = sheet.getRange(i,3).getValue().split(": ")[1]
-    sheet.getRange(i,2).setValue(displayName)
-    sheet.getRange(i,3).setValue(usrId)
+    displayName = lineSheet.getRange(i,3).getValue().split(": ")[0]
+    usrId = lineSheet.getRange(i,3).getValue().split(": ")[1]
+    lineSheet.getRange(i,2).setValue(displayName)
+    lineSheet.getRange(i,3).setValue(usrId)
 
     }
     catch{}

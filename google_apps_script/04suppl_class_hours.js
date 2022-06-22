@@ -1,5 +1,5 @@
-var shss = SpreadsheetApp.openById('1GZGz8N4a-r125qxtlcRUvlNn29OxS_0VJGvV9d8I0SE');
-var shSheet = shss.getSheetByName("sup_hours_log");
+var shss = SpreadsheetApp.openById('1GZGz8N4a-r125qxtlcRUvlNn29OxS_0VJGvV9d8I0SE')
+var shSheet = shss.getSheetByName("sup_hours_log")
 
 function last_submission(studentId, row){
   var sId = parseFloat(studentId)

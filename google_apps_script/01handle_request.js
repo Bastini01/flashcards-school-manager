@@ -1,7 +1,11 @@
-var today = new Date();
+var today = new Date()
+var ss = SpreadsheetApp.openById('1zM1uvzFo4dEQ4qVSp2SRE6RC8Ll2Dw-a5GftXw2Iy18')
 var sheet = ss.getSheetByName("Form Responses 1")
 var emailLog = ss.getSheetByName("Email log")
 var lineSheet = ss.getSheetByName("LINE")
+var studentLineSheet = ss.getSheetByName("student_line")
+var teSheet = ss.getSheetByName("teacher")
+var classSheet = ss.getSheetByName("class")
 var range = sheet.getRange(1, sheet.getLastRow(), 1, sheet.getLastColumn())
 var form = FormApp.openById('1LUX5E3MmT8EbHD1wv0D8tOe3hBEuP0cKUapJKB4eWWw')
 
@@ -52,8 +56,7 @@ function registration_from_line(lineId, displayName){
   )
   resp = resp.submit()
 
-  var sh = ss.getSheetByName("student_line")
-  var r= sh.getRange(sh.getLastRow()+1, 1, 1, 2)
+  var r= studentLineSheet.getRange(studentLineSheet.getLastRow()+1, 1, 1, 2)
   r.setValues([[resp.getId(), lineId]])
   Logger.log(lineId+" noted down")
   
@@ -72,27 +75,12 @@ function registration_from_line(lineId, displayName){
     Logger.log("registrations bugfix"+lineId+" attempt "+i+" write on "+lineSheet.getLastRow()+1)
     r.setValues([[lineId, displayName]])
     }
-
-
-  
-  // for (var i = 1; i < 200; i++){
-  //   Utilities.sleep(2000)
-  //   Logger.log("registrations bugfix"+lineId+" attempt "+i)
-  //   respIds = sh.getRange(1, 1, sh.getLastRow(), 1).getValues()
-  //   for (var i = 1; i < respIds.length; i++) { 
-  //     if (resp.getId() == respIds[i]) {Logger.log("registrations bugfix"+lineId+" attempt "+i+"OK");return}}
-  //   var r= sh.getRange(sh.getLastRow()+1, 1, 1, 3)
-  //   Logger.log("registrations bugfix"+lineId+" attempt "+i+" write on "+sh.getLastRow()+1)
-  //   r.setValues([[resp.getId(), lineId, displayName]])
-  //   }
-
 }
 
 function respFromLine(lineId){ //=> resp
-  var respSh = ss.getSheetByName("student_line")
-  lineIds = respSh.getRange(1, 2, respSh.getLastRow(), 1).getValues()
+  lineIds = studentLineSheet.getRange(1, 2, studentLineSheet.getLastRow(), 1).getValues()
     for (var i = 1; i < lineIds.length; i++) { 
-      if (lineId == lineIds[i]) {respId = respSh.getRange(i+1, 1, 1, 1).getValue(); break}}
+      if (lineId == lineIds[i]) {respId = studentLineSheet.getRange(i+1, 1, 1, 1).getValue(); break}}
   return form.getResponse(respId)//.getEditResponseUrl()
 }
 
@@ -127,11 +115,9 @@ function form_submit(e){ //triggered from registration form
     }
 
   else if(state.slice(0,3) == 'reg'){ //1st manual form response
-    sh = ss.getSheetByName("student_line")
-    respIds = sh.getRange(1, 1, sh.getLastRow(), 1).getValues()
+    respIds =studentLineSheet.getRange(1, 1,studentLineSheet.getLastRow(), 1).getValues()
     item=form.getItemById(1438401958) //studentID
     // item=form.getItemById(1080414757) // firstName
-    var respId   
     var classNumber = sheet.getRange(e.range['rowStart'],headers().indexOf("classNumber")).getValue()
     var classType = sheet.getRange(e.range['rowStart'],headers().indexOf("classType")).getValue()
     var textbook = sheet.getRange(e.range['rowStart'],headers().indexOf("texbook")).getValue()
@@ -181,13 +167,12 @@ function handle_update_submission(e){ //trigger comes from update form
 }
 
 function update_class(studentId, classNumber, classType, textbook, startChapter, teacherName){
+  studentClassSheet = ss.getSheetByName("student_class")
   var bookNr = textbook.match(/\d+/)[0]
   var chapNr = startChapter.match(/\d+/)[0]
   if (classType[0] == 'R'){type = 2} else {type = 1}
-  sc = ss.getSheetByName("student_class")
-  var r= sc.getRange(sc.getLastRow()+1, 1, 1, 2);
+  var r= studentClassSheet.getRange(studentClassSheet.getLastRow()+1, 1, 1, 2);
   r.setValues([[classNumber, studentId]])
-  classSheet = ss.getSheetByName("class")
   classIds = classSheet.getRange(1, 1, classSheet.getLastRow(), 1).getValues().flat()
   if (!classIds.includes(classNumber)) {
         r = classSheet.getRange(classSheet.getLastRow()+1, 1, 1, 5)
