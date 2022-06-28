@@ -1,5 +1,5 @@
 function customSender () {
-  target= [2]
+  target= [186]
   // target = autoArray()
   for (var i = 0; i < target.length; i++){
     Logger.log(target[i]+", "+ getData(target[i]).email+", "+ getData(target[i]).firstName)
@@ -11,7 +11,7 @@ function customSender () {
     // sendReminder0(target[i])
     // sendAnkiInstructions(target[i])
     // sendTermUpdate(target[i])
-    // sendTermUpdateReminder(target[i])
+    sendTermUpdateReminder(target[i])
     // sendGformLink(target[i])
   }
   

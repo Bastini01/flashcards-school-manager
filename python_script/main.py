@@ -39,6 +39,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
             allReviews = []
             amountSynced = 0
             for i in range(len(studData)):
+                stdTime0 = time()
                 profileName=studData.loc[i, 'profileName']
                 studentId=studData.loc[i, 'studentId']
                 email=studData.iloc[i, 1]
@@ -175,6 +176,8 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                 except Exception as e: 
                     tb = traceback.format_exc()
                     print(profileName, tb, e)
+                sdtTimeEnd = time()
+                print(profileName, "runtime: ",int(int(sdtTimeEnd-stdTime0))," sec")
 
             allReviewsDf=anki_db.rev_to_df(allReviews)
             # df.to_csv("allReviews.txt")

@@ -4,7 +4,7 @@ function getTeacherNumber(teacherName){
   }
   
 function get_teacherList(){
-  var teacherList = teSheet.getRange(1, 2, teSheet.getLastRow(), 4).getValues()
+  var teacherList = teSheet.getRange(2, 1, teSheet.getLastRow(), 4).getValues()
   return teacherList.filter(item => item[1].includes('@'))
 }
 
@@ -35,14 +35,36 @@ function send_teacher_promotion(){ //triggered (once per term or) manually
 }
 
 function prepare_teacher_invites() {
-  var teacherInviteSs = SpreadsheetApp.openById('1MHz-K8-NxgwrfMw3DvNrbuKcXSeewJyRjsA5W6GkhT8')
+  var tiss = SpreadsheetApp.openById('1MHz-K8-NxgwrfMw3DvNrbuKcXSeewJyRjsA5W6GkhT8').getSheets()
   levelFilter = ["當代中文課程（一）", "當代中文課程（二）", "當代中文課程（三）"]
-  previewSheet = teacherInviteSs.getSheets()[1]
-  latestListSheet = teacherInviteSs.getSheets()[-1]
-  latestList = latestListSheet.getRange(2, 1, latestListSheet.getLastRow(), latestListSheet.getLastColumn()).getValues()
-  previewSheet.getRange(1, 1, previewSheet.getLastRow(), 2).clear()
+  previewSheet = tiss[1]
+  lls = tiss[tiss.length-2]
+  tms = tiss[tiss.length-1] //teacher email sheet
+
+  ll = lls.getRange(2, 1, lls.getLastRow(), lls.getLastColumn()).getValues()
   registeredTeachers = get_teacherList().map(item => item[0])
-  ll = latestList.filter(item => item[8] in levelFilter)
-  ll = ll.filter(item => item[0] in registeredTeachers)
-  previewSheet.getRange(1, 2, ll.leng)
+
+  ll = ll.filter(item => levelFilter.includes(item[8]))
+  ll = ll.filter(item => !(item[8] == levelFilter[2] && item[9]>6)) //remove classes above book3 unit 6
+  ll = ll.filter(item => !registeredTeachers.includes(item[0]))
+
+  ll.sort((a,b) => (a[1] > b[1]) ? 1 : ((b[1] > a[1]) ? -1 : 0))
+  ll = ll.map(item => [item[0], item[1]])
+  
+  ll = [...new Set(ll.flat())]
+  ll1 = []; while (ll.length > 0) ll1.push(ll.splice(0, 2))
+  
+  teacherEmails = tms.getRange(2, 1, tms.getLastRow(), 4).getValues()
+  idx = teacherEmails.map(item => item[0]).flat()
+  ll1.forEach(function(e){
+    if (idx.indexOf[e[0]] == -1){e[2] = "-"}
+    else {e[2] = teacherEmails[idx.indexOf(e[0])][3]}
+  })
+
+  ll1 = ll1.map(item => [item[0], item[2], item[1]])
+
+  // Logger.log(ll1)
+  // previewSheet.getRange(1, 1, previewSheet.getLastRow(), 3).clear()
+  previewSheet.getRange(1, 1, ll1.length, 3).setValues(ll1)
 }
+

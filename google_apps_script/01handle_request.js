@@ -84,6 +84,17 @@ function respFromLine(lineId){ //=> resp
   return form.getResponse(respId)//.getEditResponseUrl()
 }
 
+function respUrlFromLine(lineId){ //=> respUrl
+  lineIds = studentLineSheet.getRange(1, 2, studentLineSheet.getLastRow(), 1).getValues()
+    for (var i = 1; i < lineIds.length; i++) { 
+      if (lineId == lineIds[i]) {respId = studentLineSheet.getRange(i+1, 1, 1, 1).getValue(); break}}
+  return form.getResponse(respId).getEditResponseUrl()
+}
+
+function printRespUrl(){
+  Logger.log(respUrlFromLine('U4e2b3aee8d581c248910f2be6b8a3b2a'))
+}
+
 function form_submit(e){ //triggered from registration form
   Logger.log(JSON.stringify(e))
   var lineId

@@ -109,7 +109,9 @@ def active_users_count(totalReviews = 30, term = None):
     if term: 
         dts = mtc_info.get_term_dates(term)
         dates = (dts['termStart'], dts['termEnd'])
-    df=g.getStudents()[['profileName']]
+    df=g.getStudents()
+    print(df.columns)
+    df = df[['profileName']]
     df['serious']=df.apply(lambda x: db.isSerious(totalReviews, x['profileName'], dates[0], dates[1]), axis=1)
     df=df[df['serious'] == True]
     df['revs']=df.apply(lambda x: len(db.reviews_by_period(x['profileName'], dates[0], dates[1])), axis=1)
