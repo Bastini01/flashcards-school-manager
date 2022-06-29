@@ -249,9 +249,8 @@ def getLastUnit(profileName):
     unitsl = getUnits(profileName)
     if len(unitsl)==0: return None
     else: return unitsl[-1]
-#(getLastUnit("00053 Paul H Nemra"))
 
-def chapter_completion(profileName, revs, chapter = None):
+def chapter_completion(profileName, revs):
     units = getUnits(profileName)
     chapters = {(tuple(x[1][:-1]),0,0) for x in units}
     result = []
@@ -262,32 +261,23 @@ def chapter_completion(profileName, revs, chapter = None):
         if i[0][0]<3: x[1]=int(x[1]/2)
         x[2] = len(chapter_1st_review(list(i[0]), revs))
         result.append(x); result.sort()
-    if chapter == None: return result
-    else:
-        r=[x[0] for x in result]
-        return result[r.index(chapter)][1], result[r.index(chapter)][2]
-#(chapter_completion("00128 Alexander Socop",getReviews("00128 Alexander Socop")))
+    return result
 
 def first_review_completion_report(profileName, revs):
-    # chapters={(x[10][0], x[10][1]) for x in revs if x[10] != None}
-    chapters = {tuple(x[1][:-1]) for x in getUnits(profileName)}
-    chaps=[list(x) for x in chapters]
-    chaps.sort()
+    chapCompl = chapter_completion(profileName, revs)
     complete=[]
     incomplete=[]
-    for c in chaps:
-        compl=chapter_completion(profileName, revs, tuple(c))
-        if compl[0]==0 or compl[0]>150: continue
-        if compl[1]/compl[0]>0.8: complete.append(c)
+    for c in chapCompl:  
+        if c[1]==0 or c[1]>200: continue
+        if c[2]/c[1]>0.8: complete.append(list(c[0]))
         else: 
             incomplete.append([
-                c,
-                compl[0]-compl[1],
-                round((compl[0]-compl[1])*review_mean_duration(revs)/60),
-                round((1-compl[1]/compl[0])*100)
+                list(c[0]),
+                c[1]-c[2],
+                round((c[1]-c[2])*review_mean_duration(revs)/60),
+                round((1-c[2]/c[1])*100)
             ])
     return complete, incomplete
-#(first_review_completion_report("00128 Alexander Socop", getReviews("00128 Alexander Socop")))
 
 def periodReport(profileName, reviews, start, end):
     endstr1= end.strftime('%y%m%d')

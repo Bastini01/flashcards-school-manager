@@ -147,7 +147,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                                 actions.append({"studentIndex":i+2,
                                     "emailTemplate":accReport})
                         #########REVIEW REPORTS
-                        elif len(rvs)>0 and today<anki_db.last_review_date(rvs)+dt.timedelta(weeks=5): 
+                        elif len(rvs)>0 and today<anki_db.last_review_date(rvs)+dt.timedelta(weeks=5):
                             weekly=anki_db.weeklyReport(profileName, rvs)
                             daily=anki_db.dailyReport(profileName, rvs)
                             month=anki_db.month_report(profileName, rvs)
@@ -167,20 +167,22 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                             sh=g.get_student_sup_hours(supHoursLog, studentId)
                             h = month[1]['hours']-sh if sh+month[1]['hours']<=8 else 8-sh
                             if h>0: actions.append({"studentIndex":i+2, 
-                                "emailTemplate":'suppHours'+str(h)+str(sh)})   
+                                "emailTemplate":'suppHours'+str(h)+str(sh)}) 
                     #########SEND TO GAPPS
                     if len(actions)>0: g.sendActions(actions, profileName)
-                    # if len(actions)>0: print(actions)
                     #########APPEND REVIEWS
-                    allReviews = allReviews+anki_db.getReviews(profileName)
+                    if today.isoweekday() == 1:
+                        allReviews = allReviews+anki_db.getReviews(profileName)
                 except Exception as e: 
                     tb = traceback.format_exc()
                     print(profileName, tb, e)
-                sdtTimeEnd = time()
-                print(profileName, "runtime: ",int(int(sdtTimeEnd-stdTime0))," sec")
+                if (time()-stdTime0 > 2):
+                    print(profileName, "runtime: ",int(time()-stdTime0)," sec")
 
-            allReviewsDf=anki_db.rev_to_df(allReviews)
-            # df.to_csv("allReviews.txt")
+            if len(allReviews) > 0:
+                allReviewsDf=anki_db.rev_to_df(allReviews)
+                main_stats.trendWeekly(allReviewsDf)
+                # df.to_csv("allReviews.txt")
 
             print("STUDENTS DONE; "+str(amountSynced)+" synced")
         if cls and not new and not idFilter:
@@ -201,9 +203,6 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
             df.apply(lambda x: class_actions(x['class_id'], x['teacher_id']), axis=1)
             
             print("CLASSES DONE")
-
-            if today.isoweekday() == 1:
-                main_stats.trendWeekly(allReviewsDf)
 
         time2=time()
         print("runtime: ",int(int(time2-time1)/60)," min")
