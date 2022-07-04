@@ -1,17 +1,37 @@
 import sqlite3
 from os.path import expanduser
+from os import listdir, mkdir
 import pandas as pd
 import numpy as np
-# import matplotlib.pyplot as plt
-# from matplotlib.backends.backend_pdf import PdfPages
 from io import StringIO
 from html.parser import HTMLParser
 import datetime as dt
 import math
 import config_notes
 import re
+from shutil import copyfile
 
 today=dt.date.today()
+Anki2Dir = expanduser("~")+"\\AppData\\Roaming\\Anki2\\"
+technicalFilesPath = expanduser("~")+r'\OneDrive\SRL\TechnicalFiles'
+
+def copyAnki2():
+    dirList = listdir(Anki2Dir)[:-3]
+    c = "\collection.anki2"
+    t= technicalFilesPath
+    for i in dirList:
+        # print(Anki2Dir+i+c)
+        # print(t+"\\Anki2copy\\"+i.split("\\")[-1]+c)
+        dst = t+"\\Anki2copy\\"+i.split("\\")[-1]
+        try: mkdir(dst) 
+        except: pass
+        try: copyfile(Anki2Dir+i+c, dst+c)
+        except: continue
+
+copyAnki2()
+
+def dbPath(profileName):
+    return Anki2Dir+profileName+"\\collection.anki2"
 
 class MLStripper(HTMLParser):
     def __init__(self):
@@ -62,7 +82,7 @@ def timeText(time):
 # (timeText())
 
 def queryDb(profileName, query):
-    con = sqlite3.connect(expanduser("~")+"\\AppData\\Roaming\\Anki2\\"+profileName+"\\collection.anki2")
+    con = sqlite3.connect(dbPath(profileName))
     cursor = con.cursor()
     query = query
     cursor.execute(query)

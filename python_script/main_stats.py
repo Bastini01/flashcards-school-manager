@@ -28,11 +28,11 @@ def classOverview():
         df3.loc[(n[0], n[1], '%')]= df3.iloc[i]/df3[:3].sum(axis=0)*100
     df3.sort_index(inplace=True, ascending=[True, False, True])
     # df3=df3.astype('int32')
-    df3.to_html(join(main.technicalFilesPath,'classOverview.html'))
+    df3.to_html(join(db.technicalFilesPath,'classOverview.html'))
     return df3
 
 def print_class_reports(term = None):
-    path = main.technicalFilesPath+r'\class_reports'
+    path = db.technicalFilesPath+r'\class_reports'
     trm = mtc_info.get_current_term()['term'] if not term else term
     c=g.getData()['class']
     df=c[c['term']==trm]
@@ -74,7 +74,7 @@ def vocAnalysis(chapter=None):
         ).buttonPressed.agg('mean')
     df=df.groupby(['TextbookChapter','Traditional Characters']).agg(['count', 'mean'])
     df['mean']=round(10-(df['mean']-1)*(10/3), 1)
-    df.to_csv(join(main.technicalFilesPath,'vocAnalysis.txt'))
+    df.to_csv(join(db.technicalFilesPath,'vocAnalysis.txt'))
     return
 
 def trendWeekly(allReviews = None):
@@ -115,10 +115,9 @@ def active_users_count(totalReviews = 30, term = None):
     df['serious']=df.apply(lambda x: db.isSerious(totalReviews, x['profileName'], dates[0], dates[1]), axis=1)
     df=df[df['serious'] == True]
     df['revs']=df.apply(lambda x: len(db.reviews_by_period(x['profileName'], dates[0], dates[1])), axis=1)
-    #df.to_csv(join(main.technicalFilesPath,'all_active_users.txt'))
+    #df.to_csv(join(db.technicalFilesPath,'all_active_users.txt'))
     print(len(df))
     return len(df)
-# active_users_count(30, "22spring")
 
 def active_users_analysis():
     for i in [50, 100, 500, 1000]:

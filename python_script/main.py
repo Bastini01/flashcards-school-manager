@@ -4,8 +4,6 @@ from attr import s
 time1=time()
 import sys
 from os.path import expanduser, join
-technicalFilesPath = expanduser("~")+r'\OneDrive\SRL\TechnicalFiles'
-
 import datetime as dt
 import traceback
 import google_apps as g
@@ -15,7 +13,7 @@ import anki_db
 import mtc_info
 import class_stats, main_stats
 
-logPath = technicalFilesPath+r'\Log'
+logPath = anki_db.technicalFilesPath+r'\Log'
 original_stdout = sys.stdout
 today=dt.datetime.now().date()
 term = mtc_info.get_current_term()['term']
@@ -176,8 +174,8 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                 except Exception as e: 
                     tb = traceback.format_exc()
                     print(profileName, tb, e)
-                if (time()-stdTime0 > 2):
-                    print(profileName, "runtime: ",int(time()-stdTime0)," sec")
+                # if (time()-stdTime0 > 2):
+                #     print(profileName, "runtime: ",int(time()-stdTime0)," sec")
 
             if len(allReviews) > 0:
                 allReviewsDf=anki_db.rev_to_df(allReviews)

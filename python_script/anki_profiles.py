@@ -439,7 +439,6 @@ def add_notes(profileName, vocabUnit, startChapter=None):
     if nrAdded == len(nts): 
         return True
     return False
-# print(add_notes("00001 Outlook PH",[3,10,2], 9))
 
 def deleteDeck(profileName, vocabUnit):
     col = getCollection(profileName)
