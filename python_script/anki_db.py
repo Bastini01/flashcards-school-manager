@@ -90,13 +90,23 @@ def queryDb(profileName, query):
     con.close()
     return result
 
-def getReviews(profileName):
+def date_to_stamp(date):
+    return str(int(dt.datetime(date.year, date.month, date.day).timestamp()*1000))
+
+def getReviews(profileName, start = None, end = None):
+    if start: start=date_to_stamp(start)
+    else: start = date_to_stamp(dt.date(2021, 1, 1))
+
+    if end: end=date_to_stamp(end)
+    else: end = str(int(dt.datetime.now().timestamp()*1000))
 
     query = "SELECT revlog.*, notes.flds, notes.tags FROM "\
             "(revlog INNER JOIN cards ON revlog.cid=cards.id)"\
-            "INNER JOIN notes ON cards.nid = notes.id"\
+            "INNER JOIN notes ON cards.nid = notes.id "\
+            "WHERE revlog.id BETWEEN "+start+" AND "+end
 
-    reviewst = queryDb(profileName, query)
+    try: reviewst = queryDb(profileName, query)
+    except: return []
     #process TradChars date and unit
     reviewsl=[]
     for i in reviewst:
@@ -111,9 +121,8 @@ def getReviews(profileName):
         except: pass           
         l[0]=dt.datetime.fromtimestamp(round(l[0]/1000.0))
         l[10]= unit(l[10])
-
     return reviewsl
-# getReviews("00016 Jose Loo")
+# getReviews("00026 Emmanuel Trenado",dt.date(2022, 5, 1) ,dt.date(2022, 6, 2))
 
 def review_mean_duration(reviews):
     # t=textbook_new_word_review(reviews)['reviewDuration'].mean()
@@ -178,18 +187,8 @@ def rev_to_df(reviews):
 # dafr=revnem[revnem['tags'] != None]
 # dafr=revnem.to_csv('revNemra.txt')
 
-def reviews_by_period(profileName, start=None, end=None):
-    try: rev=getReviews(profileName)
-    except: return []
-    if rev==[]: return []
-    if start==None: start=dt.datetime(2021, 1, 1)
-    else: start = dt.datetime(start.year, start.month, start.day)
-    if end==None: end=dt.datetime(today.year, today.month, today.day)
-    else: end = dt.datetime(end.year, end.month, end.day)
-    return [i for i in rev if i[0] >= start and i[0] <= end]
-
 def isSerious(threshhold, profileName, start=None, end=None):
-    try: cnt=len(reviews_by_period(profileName, start, end))
+    try: cnt=len(getReviews(profileName, start, end))
     except: return False
     if cnt >= threshhold: return True
     else: return False

@@ -110,7 +110,7 @@ def active_users(totalReviews = 30, term = None):
         dates = (dts['termStart'], dts['termEnd'])
     df=g.getStudents()
     df = df[['profileName', 'os']]
-    df['revs']=df.apply(lambda x: len(db.reviews_by_period(x['profileName'], dates[0], dates[1])), axis=1)
+    df['revs']=df.apply(lambda x: len(db.getReviews(x['profileName'], dates[0], dates[1])), axis=1)
     df['serious']=df.apply(lambda x: True if x['revs']>=totalReviews else False, axis=1)
     df=df[df['serious'] == True]
     #df.to_csv(join(db.technicalFilesPath,'all_active_users.txt'))
@@ -122,7 +122,7 @@ def active_user_os():
     df = df[['os', 'revs']]
     df = df.groupby(['os']).agg(['count', 'mean'])
     print(df)
-# active_user_os()
+active_user_os()
 
 def active_users_analysis():
     for i in [50, 100, 500, 1000]:
