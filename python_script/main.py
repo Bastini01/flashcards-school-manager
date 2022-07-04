@@ -1,5 +1,4 @@
 from time import time
-
 from attr import s
 time1=time()
 import sys
@@ -13,14 +12,13 @@ import anki_db
 import mtc_info
 import class_stats, main_stats
 
-logPath = anki_db.technicalFilesPath+r'\Log'
 original_stdout = sys.stdout
 today=dt.datetime.now().date()
 term = mtc_info.get_current_term()['term']
 
 def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=False):
     if log: 
-        logFilePath=join(logPath,"log"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
+        logFilePath=join(anki_db.logPath,"log"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
         if idFilter: logFilePath = logFilePath.replace('.txt', '-'+idFilter+'.txt')
         logFile = open(join(logFilePath),'w', encoding="utf-8")
         sys.stdout = logFile
@@ -40,7 +38,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                 stdTime0 = time()
                 profileName=studData.loc[i, 'profileName']
                 studentId=studData.loc[i, 'studentId']
-                email=studData.iloc[i, 1]
+                email=studData.loc[i, 'Email']
                 oth=studData.loc[i, 'other']
                 status=studData.loc[i, 'state']
                 statusDate=studData.loc[i, 'statusDate']
@@ -219,13 +217,12 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
     
 def add_book(sId, book):
 
-    logFilePath=join(logPath,"log_add_book"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
+    logFilePath=join(anki_db.logPath,"log_add_book"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
     logFile = open(join(logFilePath),'w', encoding="utf-8")
     sys.stdout = logFile
     try:
         studData=g.getStudents()
         studentIndex = studData.loc[studData['studentId'] == sId].index.values[0]
-        # profileName = studData.loc[studData['studentId'] == sId, 'profileName'].values[0]
         profileName=studData.loc[studentIndex, 'profileName']
         unitsToAdd=mtc_info.getUnitsToAdd(profileName, book = book)
         for u in unitsToAdd:

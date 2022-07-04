@@ -4,7 +4,6 @@ import anki_db, anki_profiles
 import google_apps
 
 def getReviewDataAll():
-    # studData=google_apps.getStudents()
     profiles = anki_profiles.getProfiles()
     allReviews = []
     # for i in range(len(studData)):

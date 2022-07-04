@@ -18,7 +18,7 @@ def run():
     for i in range(len(studData)):
         timeA=time()
         profileName=studData.loc[i, 'profileName']
-        email=studData.iloc[i, 1]
+        email=studData.loc[i, 'Email']
         status=studData.loc[i, 'state']
         statusDate=studData.loc[i, 'statusDate']
         studentId=studData.loc[i, 'studentId']

@@ -8,6 +8,7 @@ from googleapiclient import errors
 from httplib2 import Http
 from oauth2client import file as oauth_file, client, tools
 import pandas as pd
+import anki_db
 
 today=dt.now().date()
 
@@ -75,14 +76,15 @@ def getStudents():
     for i in range(len(data)):
         data.loc[i,'profileName'] = getProfileName(data, i)
         data.loc[i,'statusDate'] = status_date(data, i)
-    c=[data.columns[i] for i in [2,3,6,7,9]]
+    c=[data.columns[i] for i in [2,3,5,6,7,8,10,11,16,17]]
     c.append('Last update date')
     data.drop(columns=c, inplace=True)
     data.rename(columns={
         data.columns[2]: "studentId", 
-        data.columns[3]: "class"}, 
+        data.columns[3]: "os"}, 
         inplace=True)
     return(data)
+# getStudents().to_csv(anki_db.technicalFilesPath+'studentsDF.csv')
 
 def getEmailLog():
     data = get_gsheet("'Email log'")

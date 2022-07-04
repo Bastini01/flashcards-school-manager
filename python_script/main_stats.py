@@ -3,7 +3,7 @@ import pandas as pd
 import anki_db as db
 import config_notes, mtc_info, AllReviews
 import datetime as dt
-import class_stats, mtc_info, main
+import class_stats, mtc_info
 import google_apps as g
 
 def classOverview():
@@ -32,7 +32,7 @@ def classOverview():
     return df3
 
 def print_class_reports(term = None):
-    path = db.technicalFilesPath+r'\class_reports'
+    path = db.technicalFilesPath+r'class_reports'
     trm = mtc_info.get_current_term()['term'] if not term else term
     c=g.getData()['class']
     df=c[c['term']==trm]
@@ -47,7 +47,6 @@ def print_class_reports(term = None):
             rep['class']+
             rep['teacherName']+
             '.html'))
-# print_class_reports('22spring') 
 
 def vocAnalysis(chapter=None):
     reviews = AllReviews.getReviewDataAll()
@@ -100,27 +99,33 @@ def trendWeekly(allReviews = None):
     stlr = df.style.set_caption("WEEKLY TREND")
     htmlReport = stlr.to_html()
     g.sendActions([{"emailTemplate":('statsReport', htmlReport)}])
-    filePath=join(main.logPath,"weekly_trend"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
+    filePath=join(db.logPath,"weekly_trend"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
     df.to_csv(filePath)
     return df
 
-def active_users_count(totalReviews = 30, term = None):
+def active_users(totalReviews = 30, term = None):
     dates = (None, None)
     if term: 
         dts = mtc_info.get_term_dates(term)
         dates = (dts['termStart'], dts['termEnd'])
     df=g.getStudents()
-    print(df.columns)
-    df = df[['profileName']]
-    df['serious']=df.apply(lambda x: db.isSerious(totalReviews, x['profileName'], dates[0], dates[1]), axis=1)
-    df=df[df['serious'] == True]
+    df = df[['profileName', 'os']]
     df['revs']=df.apply(lambda x: len(db.reviews_by_period(x['profileName'], dates[0], dates[1])), axis=1)
+    df['serious']=df.apply(lambda x: True if x['revs']>=totalReviews else False, axis=1)
+    df=df[df['serious'] == True]
     #df.to_csv(join(db.technicalFilesPath,'all_active_users.txt'))
-    print(len(df))
-    return len(df)
+    return df
+# print(active_users(totalReviews = 30, term = "22summer"))
+
+def active_user_os():
+    df=active_users(term = mtc_info.get_current_term()['term'])
+    df = df[['os', 'revs']]
+    df = df.groupby(['os']).agg(['count', 'mean'])
+    print(df)
+# active_user_os()
 
 def active_users_analysis():
     for i in [50, 100, 500, 1000]:
-        print(i,active_users_count(i))
+        print(i,len(active_users(i)))
 
     

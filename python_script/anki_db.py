@@ -13,7 +13,8 @@ from shutil import copyfile
 
 today=dt.date.today()
 Anki2Dir = expanduser("~")+"\\AppData\\Roaming\\Anki2\\"
-technicalFilesPath = expanduser("~")+r'\OneDrive\SRL\TechnicalFiles'
+technicalFilesPath = expanduser("~")+'\\OneDrive\\SRL\\TechnicalFiles\\'
+logPath = technicalFilesPath+r'Log'
 
 def copyAnki2():
     dirList = listdir(Anki2Dir)[:-3]
@@ -22,7 +23,7 @@ def copyAnki2():
     for i in dirList:
         # print(Anki2Dir+i+c)
         # print(t+"\\Anki2copy\\"+i.split("\\")[-1]+c)
-        dst = t+"\\Anki2copy\\"+i.split("\\")[-1]
+        dst = t+"Anki2copy\\"+i.split("\\")[-1]
         try: mkdir(dst) 
         except: pass
         try: copyfile(Anki2Dir+i+c, dst+c)
@@ -79,7 +80,6 @@ def timeText(time):
     elif dec>0.75: result = str(round(mins/60)) +" hours"
 
     return result
-# (timeText())
 
 def queryDb(profileName, query):
     con = sqlite3.connect(dbPath(profileName))
@@ -99,10 +99,6 @@ def getReviews(profileName):
     reviewst = queryDb(profileName, query)
     #process TradChars date and unit
     reviewsl=[]
-    def extract_fld(src, fldNr):
-        r=strip_tags(src.split("\x1f")[fldNr]).strip('"')
-        r=HTMLParser().unescape(r)
-        return r
     for i in reviewst:
         l=list(i)
         reviewsl.append(l)
@@ -112,7 +108,6 @@ def getReviews(profileName):
             l.append(strip_tags(l[9].split("\x1f")[0]).strip('"'))
             l[9]=strip_tags(l[9].split("\x1f")[3]).strip('"')
             l[9]=HTMLParser().unescape(l[9])      
-            # l.append(strip_tags(l[9].split("\x1f")[0]).strip('"'))
         except: pass           
         l[0]=dt.datetime.fromtimestamp(round(l[0]/1000.0))
         l[10]= unit(l[10])
@@ -185,7 +180,7 @@ def rev_to_df(reviews):
 
 def reviews_by_period(profileName, start=None, end=None):
     try: rev=getReviews(profileName)
-    except: return None
+    except: return []
     if rev==[]: return []
     if start==None: start=dt.datetime(2021, 1, 1)
     else: start = dt.datetime(start.year, start.month, start.day)
@@ -198,7 +193,6 @@ def isSerious(threshhold, profileName, start=None, end=None):
     except: return False
     if cnt >= threshhold: return True
     else: return False
-# (isSerious(200, "00053 Paul H Nemra"))
 
 def topXdifficult(reviews, x=100):
     result=[]

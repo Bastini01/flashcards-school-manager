@@ -3,5 +3,6 @@
 *token*
 *_pycache_*
 *.config
+*test*
 
 

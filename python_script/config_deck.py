@@ -23,7 +23,7 @@ def getConfig(deckName, configId):
                     "perDay": 1000,
                     "delays": [5],
                     "separate": True,
-                    "ints": [5, 10, 7]
+                    "ints": [3, 10, 7]
                 },
                 "name": deckName,
                 "rev": {
