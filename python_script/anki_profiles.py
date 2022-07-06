@@ -90,7 +90,6 @@ def createDeck(profileName, deckName):
     collection.decks.id(deckName)
     collection.save()
     return
-# createDeck("00001 Outlook PH", "當代-1::第01課:: ting")
 
 def saveDeckConfig(profileName, config):
         collection = getCollection(profileName)
@@ -107,7 +106,6 @@ def saveDeckConfig(profileName, config):
             return False
         collection.save()
         return True
-# saveDeckConfig("00001 Outlook PH", config_deck.getConfig('Default', 1))
 
 def connectProfile(profileName, email, oth):
     userName=email
@@ -172,10 +170,6 @@ def first_sync(profileName):
     col.full_download(SyncAuth)
     col.save()
     col.close()
-
-    # createModel(profileName, "dict")
-    # createModel(profileName, "recall")
-    # saveDeckConfig(profileName, config_deck.getConfig('Default', 1))
     return
 
 def prep_profile(profileName):

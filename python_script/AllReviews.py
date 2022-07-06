@@ -1,33 +1,30 @@
+from os import listdir
+from os.path import getmtime
 import time
+import datetime as dt
 time1=time.time()
-import anki_db, anki_profiles
-import google_apps
+import anki_db as db
+import pandas as pd
 
 def getReviewDataAll():
-    profiles = anki_profiles.getProfiles()
+    revspath = db.technicalFilesPath+'allReviews.pkl'
+    if getmtime(revspath) > dt.datetime.now().replace(second=0, hour=0, minute=0).timestamp():       
+        return pd.read_pickle(revspath)
+
+    profiles = [x for x in listdir(db.Anki2Dir) if x[0] == "0"]
     allReviews = []
-    # for i in range(len(studData)):
     for i in profiles:
         profNum=int(i[2:5])
-        # state=studData.loc[i, 'state']
-        # if state=="active": #or state[:-1]=="custom":
-        # if state[0] != 't':
         if profNum > 3 and profNum not in [13, 14, 15, 18]:
-            # profileName=studData.loc[i, 'profileName']
             profileName = i
-            try:allReviews = allReviews+anki_db.getReviews(profileName)
+            try:allReviews = allReviews+db.getReviews(profileName, dt.date(2021,11,1))
             except Exception as e:
                 if "no such table: revlo" in str(e): continue
                 print(profileName+" EXCEPTION: extraction issue!", e)
                 continue
 
-    df= anki_db.rev_to_df(allReviews)   
-    # df = df[df.student != '']
+    df= db.rev_to_df(allReviews)
+    df.to_pickle(revspath)   
     return df
 
-# rev=getReviewDataAll()
-# rev.to_csv("allReviews.txt")
-# rev.to_pickle("allReviews.pkl")
-# time2=time.time()
-# print("runtime: ",int(time2-time1)," sec")
-# print("end")
+# print(len(getReviewDataAll()))
