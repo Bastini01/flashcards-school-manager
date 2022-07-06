@@ -6,13 +6,13 @@ import datetime as dt
 import class_stats, mtc_info
 import google_apps as g
 import matplotlib.pyplot as plt
+from matplotlib.ticker import PercentFormatter
 
 def classOverview():
 
     df1=g.st_cl_te(mtc_info.get_current_term()['term'])
     df1['serious']=df1.apply(lambda x: db.isSerious(150, x['profileName']), axis=1)
     df1['state']=df1['state'].apply(lambda x: x[:-1] if x[:3]=="con" else x)
-    # df1['state']=df1.apply(lambda x: 'active' if x['serious']=="active" else x['state'])
     df1.loc[df1.serious==True, 'state']='active'
     df1=df1.set_index(['state', 'serious', 'type', 'name', 'class_id'], append=True)
     df2=df1['profileName']
@@ -76,46 +76,76 @@ def vocAnalysis(chapter=None):
     df.to_csv(join(db.technicalFilesPath,'vocAnalysis.txt'))
     return
 
-def periodical_users(param=None):
+# print(AllReviews.getReviewDataAll())
+
+def hookoffs():
     df = AllReviews.getReviewDataAll()
-    if param=='w': 
-        df['reviewTime'] = df['reviewTime'].apply(lambda x: x + dt.timedelta(days=7 - x.weekday()))
-    elif param=='m': 
+    df = df.groupby([df['reviewTime'].dt.date, 'student']).agg({'cardID':'count'}).reset_index()
+    def mm30days(x):
+        dft = df[df['student']==x['student']]
+        dft = dft[dft['reviewTime']>=x['reviewTime']-dt.timedelta(days=15)]
+        dft = dft[dft['reviewTime']<=x['reviewTime']+dt.timedelta(days=15)]
+        return dft.cardID.sum()/30
+    df['MM30days'] = df.apply(lambda x: mm30days(x), 1)
+    wasActive = df[df['MM30days']>5]['student'].unique()
+    last3Months = df[df['reviewTime']>dt.datetime.now().date()-dt.timedelta(days=90)]['student'].unique()
+    hookoffs = [x for x in wasActive if x not in last3Months]
+    # print(len(hookoffs))
+# hookoffs()
+
+def mean_reviews_distribution():
+    df = AllReviews.getReviewDataAll()
+    df = df.groupby('student').agg({'reviewTime':['count','min']}).droplevel(0, 1)
+    df = df[df['count']>0]
+    df['mean'] = df.apply(lambda x: x['count']/(dt.datetime.now()-x['min']).days, 1)
+    plt.hist(df['mean'], bins=1000, cumulative=True, density=True, histtype='step', orientation='horizontal')
+    plt.ylim([0, 40])
+    plt.gca().xaxis.set_major_formatter(PercentFormatter(1))
+    plt.gca().set_xlabel('cumulative percentange of active users')
+    plt.gca().set_ylabel('average reviews/day')
+    plt.gca().set_title('MTC Automated flashcards\naverage reviews/day - since project start')
+    plt.show()
+    return
+# reviews_mean()
+
+def periodical_users(period=None, cutoff=None, allReviews = None):
+    df = allReviews if allReviews else AllReviews.getReviewDataAll()
+    if period=='w': 
+        df['reviewTime'] = df['reviewTime'].apply(lambda x: x + dt.timedelta(days=6 - x.weekday()))
+    elif period=='m': 
         df['reviewTime'] = df['reviewTime'].apply(lambda x: x.replace(day=15))
-    df = df.groupby([df['reviewTime'].dt.date])['student'].nunique()[:-1]
+    df = df.groupby([df['reviewTime'].dt.date, 'student']).agg(
+        {'cardID':'count', 
+        'reviewDuration':lambda x: sum(x)/60000}
+        ).reset_index()
+    if period: df['mn rev/day'] = df['cardID'].apply(lambda x: x/7 if period=='w' else x/30, 1)
+    if cutoff: df = df[df['mn rev/day']>cutoff]
+    df = df.groupby([df['reviewTime']]).agg(
+        totalRevCount=('cardID','sum'), 
+        activeUserCount=('student','nunique'),
+        revsMn=('cardID','mean'),
+        studytimeMn=('reviewDuration', 'mean')
+        )[:-1].astype('int32')
     return df
-# (periodical_users('w'))
 
 def trendWeekly(allReviews = None):
-    revspath = db.technicalFilesPath+'allReviews.pkl'
-    if allReviews: allReviews = allReviews
-    elif getmtime(revspath) > dt.datetime.now().replace(second=0, hour=0, minute=0).timestamp():       
-        allReviews = pd.read_pickle(revspath)
-    else: allReviews = AllReviews.getReviewDataAll()
-    # filterdf=allReviews[allReviews['reviewTime'] < dt.datetime(2021, 11, 1)]
-    # allReviews.drop(index=filterdf.index, inplace=True)
-    allReviews['年'] = allReviews.apply(lambda x: x['reviewTime'].isocalendar().year, axis=1)  
-    allReviews['week'] = allReviews.apply(lambda x: x['reviewTime'].week, axis=1)
-    df=allReviews.groupby(['年', 'week', 'student']).agg(revs=('cardID', 'count'), studTime=('reviewDuration', 'sum'))
-    df.reset_index(level=2, inplace=True)
-    df['serious']=df.apply(lambda x: db.isSerious(30, x['student']), axis=1)
-    df=df[df['serious'] == True]
-    df['studTime']=df.studTime/60000
-    
-    df=df.groupby(['年', 'week']).agg(
-        總共複習次數=('revs','sum'), 
-        使用者人數=('student','count'),
-        平均複習次數=('revs','mean'),
-        平均複習時間=('studTime', 'mean'))
-    df=df.astype('int32')
+    df = periodical_users('w', 5, allReviews).rename(columns={
+        'totalRevCount':'總共複習次數',
+        'activeUserCount':'使用者人數',
+        'revsMn':'平均複習次數',
+        'studytimeMn':'平均複習時間'
+    }).rename_axis('禮拜')
+    df = df.set_axis(
+        [dt.datetime.combine(x, dt.datetime.min.time()
+        ).strftime('%y%m%d') for x in df.axes[0].values]
+    )
     #####SEND MAIL
     stlr = df.style.set_caption("WEEKLY TREND")
     htmlReport = stlr.to_html()
     g.sendActions([{"emailTemplate":('statsReport', htmlReport)}])
-    filePath=join(db.logPath,"weekly_trend"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
-    df.to_csv(filePath)
-    return df
-# trendWeekly()
+    # filePath=join(db.logPath,"weekly_trend"+dt.datetime.now().strftime('%y%m%d%H%M')+".txt")
+    # df.to_csv(filePath)
+    print(df)
 
 def active_users(totalReviews = 30, term = None):
     dates = (None, None)
@@ -146,10 +176,10 @@ def save_g_data():
 # save_g_data()
 
 def activation():
-    # df1 = g.getStudents()
-    # df2 = g.getEmailLog()
-    df1 = pd.read_pickle(db.technicalFilesPath+'studentsDF.pkl')
-    df2 = pd.read_pickle(db.technicalFilesPath+'emailsLogDF.pkl')
+    df1 = g.getStudents()
+    df2 = g.getEmailLog()
+    # df1 = pd.read_pickle(db.technicalFilesPath+'studentsDF.pkl')
+    # df2 = pd.read_pickle(db.technicalFilesPath+'emailsLogDF.pkl')
     df2 = df2[df2['emailTemplate'] == 'activated_template']
     df2 = df2.groupby('recipientId', as_index=False).agg({'date':'min'})
     df2 = df2.rename(columns={'recipientId':'studentId'})
@@ -170,7 +200,7 @@ def line_stats():
     df = df.rename(columns={'contacts':'registrations'})
     return df
 
-def registration_activation_compare(param=None):
+def plot_user_trend(period=None, cutoff=None):
     dr = line_stats()
     da = activation()
     ax = plt.subplots()[1]
@@ -179,11 +209,11 @@ def registration_activation_compare(param=None):
     ax.set_xlabel('time')
     ax.set_ylabel('cumulative')
     ax.set_title('MTC Automated flashcards user trend')
-    dfu = periodical_users(param)
+    dfu = periodical_users(period, cutoff).activeUserCount
     ax2 = ax.twinx()
     
-    if param:
-        labelr = 'weekly unique users' if param == "w" else 'monthly unique users'
+    if period:
+        labelr = 'weekly unique users' if period == "w" else 'monthly unique users'
     else:       
         x = 7; dfu = dfu.rolling(window=x).mean()
         labelr = "daily unique users ("+str(x)+" day MM)"
@@ -193,4 +223,4 @@ def registration_activation_compare(param=None):
     ax.legend()
     plt.show()
 
-# registration_activation_compare('m')
+# plot_user_trend('w', 5)
