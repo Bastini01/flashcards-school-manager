@@ -79,6 +79,7 @@ def vocAnalysis(chapter=None):
 # print(AllReviews.getReviewDataAll())
 
 def hookoffs():
+    cutoff = 5
     df = AllReviews.getReviewDataAll()
     df = df.groupby([df['reviewTime'].dt.date, 'student']).agg({'cardID':'count'}).reset_index()
     def mm30days(x):
@@ -87,12 +88,11 @@ def hookoffs():
         dft = dft[dft['reviewTime']<=x['reviewTime']+dt.timedelta(days=15)]
         return dft.cardID.sum()/30
     df['MM30days'] = df.apply(mm30days, 1)
-    wasActive = df[df['MM30days']>5]['student'].unique()
+    wasActive = df[df['MM30days']>cutoff]['student'].unique()
     last3Months = df[df['reviewTime']>dt.datetime.now().date()-dt.timedelta(days=90)]['student'].unique()
     hookoffs = [x for x in wasActive if x not in last3Months]
-    print(len(hookoffs))
-# hookoffs()
-# user_distribution1()
+    print(str(len(wasActive))+" users have reached an average of "+str(cutoff)+" reviews on a period of 30 days"/
+        "at least once. "+str(len(hookoffs))+" of these users have not reviewed in the last 3 months.")
 
 def user_distribution(param = None):
     df = AllReviews.getReviewDataAll()
@@ -111,7 +111,7 @@ def user_distribution(param = None):
     plt.gca().set_xlabel(lbl)
     plt.gca().set_title('MTC Automated flashcards\nactive user analysis')
     plt.gca().invert_yaxis()
-    plt.show()
+    plt.show(block=False)
     return
 # user_distribution('f')
 
@@ -223,8 +223,21 @@ def plot_user_trend(period=None, cutoff=None):
         labelr = "daily unique users ("+str(x)+" day MM)"
         
     ax2.plot(dfu.index, dfu.values, 'g', linestyle='dotted')       
-    ax2.set_ylabel(labelr, color='g') 
+    ax2.set_ylabel(labelr+" (less than "+str(cutoff)+" reviews/day on average not counted)", color='g') 
     ax.legend()
-    plt.show()
+    plt.show(block=False)
 
-# plot_user_trend('w', 5)
+def runAllStats():
+    
+    cutoff = 5
+    plot_user_trend(None, cutoff)
+    plot_user_trend('w', cutoff)
+    plot_user_trend('m', cutoff)
+    user_distribution()
+    user_distribution('f')
+    hookoffs()
+runAllStats()  
+
+
+
+

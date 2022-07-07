@@ -8,8 +8,10 @@ import pandas as pd
 
 def getReviewDataAll():
     revspath = db.technicalFilesPath+'allReviews.pkl'
-    if getmtime(revspath) > dt.datetime.now().replace(second=0, hour=0, minute=0).timestamp():       
-        return pd.read_pickle(revspath)
+    try: 
+        if getmtime(revspath) > dt.datetime.now().replace(second=0, hour=0, minute=0).timestamp():       
+            return pd.read_pickle(revspath)
+    except: pass
 
     profiles = [x for x in listdir(db.Anki2Dir) if x[0] == "0"]
     allReviews = []
