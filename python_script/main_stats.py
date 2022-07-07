@@ -28,7 +28,6 @@ def classOverview():
         n=df3.iloc[i].name
         df3.loc[(n[0], n[1], '%')]= df3.iloc[i]/df3[:3].sum(axis=0)*100
     df3.sort_index(inplace=True, ascending=[True, False, True])
-    # df3=df3.astype('int32')
     df3.to_html(join(db.technicalFilesPath,'classOverview.html'))
     return df3
 
@@ -78,21 +77,45 @@ def vocAnalysis(chapter=None):
 
 # print(AllReviews.getReviewDataAll())
 
-def hookoffs():
-    cutoff = 5
+def hookoffs(cutoff=None, recent=None):
+    cutoff = cutoff if cutoff else 0
+    recent = recent if recent else 90
+    today = dt.datetime.now().date()
     df = AllReviews.getReviewDataAll()
     df = df.groupby([df['reviewTime'].dt.date, 'student']).agg({'cardID':'count'}).reset_index()
     def mm30days(x):
         dft = df[df['student']==x['student']]
-        dft = dft[dft['reviewTime']>=x['reviewTime']-dt.timedelta(days=15)]
-        dft = dft[dft['reviewTime']<=x['reviewTime']+dt.timedelta(days=15)]
+        dft = dft[(dft['reviewTime']>=x['reviewTime']-dt.timedelta(days=30)) &
+            (dft['reviewTime']<=x['reviewTime'])]
         return dft.cardID.sum()/30
     df['MM30days'] = df.apply(mm30days, 1)
-    wasActive = df[df['MM30days']>cutoff]['student'].unique()
-    last3Months = df[df['reviewTime']>dt.datetime.now().date()-dt.timedelta(days=90)]['student'].unique()
-    hookoffs = [x for x in wasActive if x not in last3Months]
-    print(str(len(wasActive))+" users have reached an average of "+str(cutoff)+" reviews on a period of 30 days"\
-        "at least once. "+str(len(hookoffs))+" of these users have not reviewed in the last 3 months.")
+    before = df[(df['MM30days']>cutoff) & (df['reviewTime']<today-dt.timedelta(days=recent))]['student'].unique()
+    recently = df[df['reviewTime']>today-dt.timedelta(days=recent)]['student'].unique()
+    hookoffs = [x for x in before if x not in recently]
+    # print(str(len(before))+" users have reached at least "+str(cutoff)+" "\
+    #     "reviews per day on average on a period of 30 days, at some point more than "+str(recent)+" days ago. "\
+    #     +str(len(hookoffs))+" of these users have not reviewed in the last "+str(recent)+" days.")
+    return {'before': len(before), 'hookoffs': len(hookoffs)}
+
+def hookoffs_detail():
+    # df = pd.DataFrame(['historically active', 'not active recently'],{'cutoff': [0, 1, 5, 10, 20], 'recent': [30, 60, 90]})
+    cols = pd.MultiIndex.from_product([[30, 60, 90], ['were active', 'quit']])
+    df = pd.DataFrame(columns=cols , index=[0, 1, 5, 10, 20]
+            ).rename_axis(index='average reviews/day min. threshold', columns=['look back window', 'user cnt'])
+
+    def appfunc(x):
+        r = []
+        for i in x.index.values:
+            if x.name[1]==df.columns.levels[1][1]: n = 'before'
+            else: n = 'hookoffs'
+            r.append(hookoffs(i, int(x.name[0]))[n])
+            # r.append(str(i)+str(x.name)+n)
+        return r
+
+    df = df.apply(appfunc, result_type='broadcast')
+    df.style.to_html(db.technicalFilesPath+'Quit anaysis.html')
+    print(df)
+# hookoffs_detail()
 
 def user_distribution(param = None):
     df = AllReviews.getReviewDataAll()
@@ -111,9 +134,8 @@ def user_distribution(param = None):
     plt.gca().set_xlabel(lbl)
     plt.gca().set_title('MTC Automated flashcards\nactive user analysis')
     plt.gca().invert_yaxis()
-    plt.show()
-    return
-# user_distribution('f')
+    #plt.show()
+    return plt
 
 def periodical_users(period=None, cutoff=None, allReviews = None):
     df = allReviews if allReviews else AllReviews.getReviewDataAll()
@@ -227,18 +249,27 @@ def plot_user_trend(period=None, cutoff=None):
     ax2.plot(dfu.index, dfu.values, 'g', linestyle='dotted')       
     ax2.set_ylabel(labelr+"\n(less than "+str(cutoff)+" reviews/day on average not counted)", color='g') 
     ax.legend()
-    plt.show()
+    #plt.show()
+    return plt
 
 def runAllStats():
     
-    cutoff = 5
-    plot_user_trend(None, cutoff)
-    plot_user_trend('w', cutoff)
-    plot_user_trend('m', cutoff)
-    user_distribution()
-    user_distribution('f')
-    hookoffs()
-runAllStats()  
+    cutoff = 0
+    recent = 90
+    # plot_user_trend(None, cutoff).savefig(db.technicalFilesPath+"user trend day.png", bbox_inches='tight')
+    # print("user trend day ok"); plt.gcf().clear()
+    plot_user_trend('w', cutoff).savefig(db.technicalFilesPath+"user trend week.png", bbox_inches='tight')
+    print("user trend week ok"); plt.gcf().clear()
+    # plot_user_trend('m', cutoff).savefig(db.technicalFilesPath+"user trend month.png", bbox_inches='tight')
+    # print("user trend month ok"); plt.gcf().clear()
+    # user_distribution().savefig(db.technicalFilesPath+"user analysis mean.png", bbox_inches='tight')
+    # print("user mean rev ok"); plt.gcf().clear()
+    # user_distribution('f').savefig(db.technicalFilesPath+"user analysis frequency.png", bbox_inches='tight')
+    # print("user freq ok"); plt.gcf().clear()
+    # hookoffs(cutoff, recent)
+# runAllStats()
+
+
 
 
 
