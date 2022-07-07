@@ -86,27 +86,34 @@ def hookoffs():
         dft = dft[dft['reviewTime']>=x['reviewTime']-dt.timedelta(days=15)]
         dft = dft[dft['reviewTime']<=x['reviewTime']+dt.timedelta(days=15)]
         return dft.cardID.sum()/30
-    df['MM30days'] = df.apply(lambda x: mm30days(x), 1)
+    df['MM30days'] = df.apply(mm30days, 1)
     wasActive = df[df['MM30days']>5]['student'].unique()
     last3Months = df[df['reviewTime']>dt.datetime.now().date()-dt.timedelta(days=90)]['student'].unique()
     hookoffs = [x for x in wasActive if x not in last3Months]
-    # print(len(hookoffs))
+    print(len(hookoffs))
 # hookoffs()
+# user_distribution1()
 
-def mean_reviews_distribution():
+def user_distribution(param = None):
     df = AllReviews.getReviewDataAll()
-    df = df.groupby('student').agg({'reviewTime':['count','min']}).droplevel(0, 1)
-    df = df[df['count']>0]
-    df['mean'] = df.apply(lambda x: x['count']/(dt.datetime.now()-x['min']).days, 1)
-    plt.hist(df['mean'], bins=1000, cumulative=True, density=True, histtype='step', orientation='horizontal')
-    plt.ylim([0, 40])
-    plt.gca().xaxis.set_major_formatter(PercentFormatter(1))
-    plt.gca().set_xlabel('cumulative percentange of active users')
-    plt.gca().set_ylabel('average reviews/day')
-    plt.gca().set_title('MTC Automated flashcards\naverage reviews/day - since project start')
+    if not param:
+        func = lambda x: x.count()/(dt.datetime.now()-x.min()).days
+        lbl = 'reviews/day - all time mean'; lim = [0,40]
+    else:
+        func = lambda x: x.dt.date.nunique()/(dt.datetime.now()-x.min()).days
+        lbl = 'study frequency (days studied/total days active)'; lim = [0,0.95]
+    df = df.groupby('student').agg(param = ('reviewTime', func)).reset_index()
+    plt.hist(df['param'], bins=1000, cumulative=True, density=True, histtype='step', orientation='vertical')
+    plt.xlim(lim)
+    plt.ylim([0,1])
+    plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
+    plt.gca().set_ylabel('cumulative percentange of active users')
+    plt.gca().set_xlabel(lbl)
+    plt.gca().set_title('MTC Automated flashcards\nactive user analysis')
+    plt.gca().invert_yaxis()
     plt.show()
     return
-# reviews_mean()
+# user_distribution('f')
 
 def periodical_users(period=None, cutoff=None, allReviews = None):
     df = allReviews if allReviews else AllReviews.getReviewDataAll()
@@ -158,7 +165,6 @@ def active_users(totalReviews = 30, term = None):
     df['serious']=df.apply(lambda x: True if x['revs']>=totalReviews else False, axis=1)
     df=df[df['serious'] == True]
     return df
-# (active_users(totalReviews = 30, term = "22summer"))
 
 def active_user_os():
     df=active_users(term = mtc_info.get_current_term()['term'])
@@ -173,7 +179,6 @@ def active_users_analysis():
 def save_g_data():
     g.getStudents().to_pickle(db.technicalFilesPath+'studentsDF.pkl')
     g.getEmailLog().to_pickle(db.technicalFilesPath+'emailsLogDF.pkl')
-# save_g_data()
 
 def activation():
     df1 = g.getStudents()
@@ -191,7 +196,6 @@ def activation():
     df = df.rename(columns={'studentId' :'activations'})
     df['activations'] = df['activations'].cumsum()
     return df
-# activation()    
 
 def line_stats():
     df = pd.read_csv(db.technicalFilesPath+'line_stats.csv')
