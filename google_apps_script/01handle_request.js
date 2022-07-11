@@ -92,7 +92,7 @@ function respUrlFromLine(lineId){ //=> respUrl
 }
 
 function printRespUrl(){
-  Logger.log(respUrlFromLine('U4e2b3aee8d581c248910f2be6b8a3b2a'))
+  Logger.log(respUrlFromLine('U541ecc7f01fd55a898e4ac15c89e82a9'))
 }
 
 function form_submit(e){ //triggered from registration form
@@ -197,16 +197,6 @@ function update_status(studentId, status){
   var studentIds = sheet.getRange(1,headers().indexOf("studentId"), sheet.getLastRow(),1).getValues().flat()
   row = studentIds.indexOf(studentId)+1
   sheet.getRange(row, headers().indexOf('state')).setValue(status)
-}
-
-function test_request(){
-  // action = {studentIndex=113.0, emailTemplate=[weekly220321, {time=1 minute, otbWords=0.0, completion=[null, null], chaps-words=[], learning=0.0, top=[], reviews=0.0, pending=24.0, tbWords=0.0, chaps=0.0, hours=0.0, lastRev=1.647216E12, pendingLearning=[[[2.0, 4.0], 24.0, 0.0, 6 minutes]]}]}
-  // var actions = Array((studentIndex=2.0, emailTemplate="suppHours23"))
-  // var actions = JSON.stringify(actions)
-  // Logger.log(actions)
-
-  rq = '{"0":{"studentIndex":2,"emailTemplate":"suppHours24"}}'
-  handleDesktopRequest(rq)
 }
 
 function handleDesktopRequest(rq){

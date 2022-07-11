@@ -11,7 +11,7 @@ function customSender () {
     // sendReminder0(target[i])
     // sendAnkiInstructions(target[i])
     // sendTermUpdate(target[i])
-    sendTermUpdateReminder(target[i])
+    // sendTermUpdateReminder(target[i])
     // sendGformLink(target[i])
   }
   
@@ -182,7 +182,7 @@ function sendWrongPassword(si) {
           "Please change your Ankiweb password to:\n"+
           getData(si).pw+"\n"+
           "Your username must be: "+getData(si).email+"\n"+
-          "https://ankiweb.net/account/settings"
+          "https://ankiweb.net/account/resetpw"
 
   if (lineId){
   pushMsg(lineId, msgText); type='line'
