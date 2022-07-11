@@ -48,7 +48,7 @@ def run_main1():
 def run_main2():
     result = main.main(new=True)
     return result
-
+    
 @app.route('/sid/<id>')
 def run_main3(id):
     setting = 'st'+id

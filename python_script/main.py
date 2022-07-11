@@ -212,8 +212,8 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
         with open(logFilePath, 'r', encoding="utf-8") as file:
             logdata = file.read()
         g.sendActions([{"emailTemplate":('log', logdata)}])
-        htmllogdata = "<p>" + logdata.replace("\n", "<br>") + "</p>"
-        return htmllogdata
+        # htmllogdata = "<p>" + logdata.replace("\n", "<br>") + "</p>"
+        return
     
 def add_book(sId, book):
 

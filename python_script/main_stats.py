@@ -138,7 +138,7 @@ def user_distribution(param = None):
     return plt
 
 def periodical_users(period=None, cutoff=None, allReviews = None):
-    df = allReviews if allReviews else AllReviews.getReviewDataAll()
+    df = allReviews if type(allReviews)==pd.DataFrame else AllReviews.getReviewDataAll()
     if period=='w': 
         df['reviewTime'] = df['reviewTime'].apply(lambda x: x + dt.timedelta(days=6 - x.weekday()))
     elif period=='m': 
