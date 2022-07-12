@@ -1,3 +1,4 @@
+from cgi import MiniFieldStorage
 from os.path import expanduser, join, getmtime
 import numpy as np
 from numpy import NaN
@@ -302,8 +303,10 @@ def delays_analysis(param = None):
 
 def activation_funnel():
     d1 = activation_analysis1()
-    # d1 = d1[d1['followDate']>=dt.date(2022,5,15)]
-    # # d1 = d1[d1['followDate']<=today-dt.timedelta(days=10)]
+    # minDate = 
+    # maxDate = 
+    # d1 = d1[d1['followDate']>=minDate]
+    # d1 = d1[d1['followDate']<=maxDate]
     # d1 = d1[d1['followDate']<dt.date(2022,6,15)]
     # d1 = d1[d1['followDate']<=d1['followDate'].min()+dt.timedelta(days=30)]
     df = {}
@@ -321,9 +324,6 @@ def activation_funnel():
     # df.update({"activated": len(d1[d1['state'] == 'active'])})
     # df.update({"1 rev": len(d1[d1['minRev'].notnull()])})
     # df.update({"active user": len(d1[d1['minCutoff'].notnull()])})
-    # # Create dataset
-    # height = [3, 12, 5, 18, 45]
-    # bars = ('A', 'B', 'C', 'D', 'E')
     x_pos = np.arange(len(df))
     print(df.keys(), df.values())
     # Create bars
@@ -336,6 +336,7 @@ def activation_funnel():
     # ax.set_title('MTC Automated flashcards activation funnel')
     
     # ax.legend()
+    plt.title("activation funnel - total users: "+str(tot)+"\n")
     plt.show()
 
     # print(df)
