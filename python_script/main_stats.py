@@ -294,12 +294,12 @@ def delays_analysis(param = None):
     plt.gca().set_xlabel(lbl)
     plt.gca().set_title('MTC Automated flashcards\ndelay analysis')
     plt.gca().invert_yaxis()
-    plt.show()
+    # plt.show()
     return plt
     # print(df)
-# delays_analysis('activation delay')
-# delays_analysis('1st rev delay')
-# delays_analysis('reach threshhold delay')
+# delays_analysis('activation delay').savefig(db.technicalFilesPath+"activation delay.png", bbox_inches='tight')
+# delays_analysis('1st rev delay').savefig(db.technicalFilesPath+"1st rev delay.png", bbox_inches='tight')
+# delays_analysis('reach threshhold delay').savefig(db.technicalFilesPath+"reach threshhold delay.png", bbox_inches='tight')
 
 def activation_funnel():
     d1 = activation_analysis1()
@@ -307,8 +307,9 @@ def activation_funnel():
     # maxDate = 
     # d1 = d1[d1['followDate']>=minDate]
     # d1 = d1[d1['followDate']<=maxDate]
-    # d1 = d1[d1['followDate']<dt.date(2022,6,15)]
-    # d1 = d1[d1['followDate']<=d1['followDate'].min()+dt.timedelta(days=30)]
+    d1 = d1[d1['followDate']>=dt.date(2022,3,1)]
+    d1 = d1[d1['followDate']<=d1['followDate'].min()+dt.timedelta(days=30)]
+    d1 = d1[d1['followDate']<=dt.date(2022,6,1)]
     df = {}
     tot = len(d1)
     # df.update({"Line Follow": tot})
@@ -325,7 +326,7 @@ def activation_funnel():
     # df.update({"1 rev": len(d1[d1['minRev'].notnull()])})
     # df.update({"active user": len(d1[d1['minCutoff'].notnull()])})
     x_pos = np.arange(len(df))
-    print(df.keys(), df.values())
+    # print(df.keys(), df.values())
     # Create bars
     plt.bar(x_pos, df.values())
 
@@ -337,10 +338,11 @@ def activation_funnel():
     
     # ax.legend()
     plt.title("activation funnel - total users: "+str(tot)+"\n")
-    plt.show()
+    # plt.show()
 
-    # print(df)
-activation_funnel()
+    print(tot, df)
+    return plt
+activation_funnel().savefig(db.technicalFilesPath+"act_funnel.png", bbox_inches='tight')
 
 def activation(): #combine mail loc and status date for historic activations
     df1 = g.getStudents()
