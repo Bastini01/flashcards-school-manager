@@ -150,7 +150,12 @@ def get_sup_hours_log():
     columnNames = data.pop(0)
     df = pd.DataFrame(data, columns=columnNames)
     return df
-# (get_sup_hours_log())    
+
+def get_line_log():
+    data = get_gsheet("'LINE'")
+    columnNames = data.pop(0)
+    df = pd.DataFrame(data, columns=columnNames)
+    return df
 
 def get_student_sup_hours(supHoursLog, studentId):
     df=supHoursLog
@@ -164,11 +169,6 @@ def get_student_sup_hours(supHoursLog, studentId):
 def getActionsTemplate(): #not used, documentation only
     columns={"studentIndex":[], "statusUpdate":[], "chapterUpdate":[],"emailTemplate":[]}
     return columns
-
-def tesactions():
-    actions=[{"studentIndex":2, "emailTemplate":"suppHours24"}]
-    actionsJSON=pd.DataFrame(actions).to_json(orient="index")
-    print(actionsJSON)
 
 def sendActions(actions, profileName=None):
 

@@ -1,4 +1,6 @@
 from os.path import expanduser, join, getmtime
+import numpy as np
+from numpy import NaN
 import pandas as pd
 import anki_db as db
 import config_notes, mtc_info, AllReviews
@@ -7,6 +9,9 @@ import class_stats, mtc_info
 import google_apps as g
 import matplotlib.pyplot as plt
 from matplotlib.ticker import PercentFormatter
+import json
+
+today = dt.datetime.now().date()
 
 def classOverview():
 
@@ -75,12 +80,7 @@ def vocAnalysis(chapter=None):
     df.to_csv(join(db.technicalFilesPath,'vocAnalysis.txt'))
     return
 
-# print(AllReviews.getReviewDataAll())
-
-def hookoffs(cutoff=None, recent=None):
-    cutoff = cutoff if cutoff else 0
-    recent = recent if recent else 90
-    today = dt.datetime.now().date()
+def reviews_mm30():
     df = AllReviews.getReviewDataAll()
     df = df.groupby([df['reviewTime'].dt.date, 'student']).agg({'cardID':'count'}).reset_index()
     def mm30days(x):
@@ -89,8 +89,16 @@ def hookoffs(cutoff=None, recent=None):
             (dft['reviewTime']<=x['reviewTime'])]
         return dft.cardID.sum()/30
     df['MM30days'] = df.apply(mm30days, 1)
-    before = df[(df['MM30days']>cutoff) & (df['reviewTime']<today-dt.timedelta(days=recent))]['student'].unique()
-    recently = df[df['reviewTime']>today-dt.timedelta(days=recent)]['student'].unique()
+    df = df.rename(columns={'student':'profileName'})
+    return df
+# print(reviews_mm30())
+
+def hookoffs(cutoff=None, recent=None):
+    cutoff = cutoff if cutoff else 0
+    recent = recent if recent else 90
+    df = reviews_mm30()
+    before = df[(df['MM30days']>cutoff) & (df['reviewTime']<today-dt.timedelta(days=recent))]['profileName'].unique()
+    recently = df[df['reviewTime']>today-dt.timedelta(days=recent)]['profileName'].unique()
     hookoffs = [x for x in before if x not in recently]
     # print(str(len(before))+" users have reached at least "+str(cutoff)+" "\
     #     "reviews per day on average on a period of 30 days, at some point more than "+str(recent)+" days ago. "\
@@ -178,7 +186,7 @@ def trendWeekly(allReviews = None):
     # df.to_csv(filePath)
     print(df)
 
-def active_users(totalReviews = 30, term = None):
+def active_users(totalReviews = 30, term = None): #obsolete
     dates = (None, None)
     if term: 
         dts = mtc_info.get_term_dates(term)
@@ -204,19 +212,144 @@ def save_g_data():
     g.getStudents().to_pickle(db.technicalFilesPath+'studentsDF.pkl')
     g.getEmailLog().to_pickle(db.technicalFilesPath+'emailsLogDF.pkl')
 
-def activation():
+def line_follow_date():
+    df = g.get_line_log()
+
+    def line_event(x): 
+        x = json.loads(json.loads(x)['postData']['contents'])['events']
+        return x[0] if len(x)>0 else None
+    df = df['full'].apply(line_event)
+    df = df[df.notnull()]
+    df1 = pd.DataFrame()
+    df1['type'] = df.apply(lambda x: x['type'])
+    df1['followDate'] = df.apply(lambda x: dt.datetime.fromtimestamp(x['timestamp']/1000).date())
+    df1['Line ID'] = df.apply(lambda x: x['source']['userId'])
+    df1 = df1[df1['type'] == 'follow']
+    df1 = df1.groupby('Line ID', as_index=False).agg({'followDate':'min'})
+    # df1 = df1[df1['dateTime']>dt.datetime(2022,5,1)]
+
+    # print(df1)
+    return df1
+
+# print(line_follow_date())
+
+def student_activation_date(): #first activation date by student
+    df = g.getEmailLog()
+    # df = pd.read_pickle(db.technicalFilesPath+'emailsLogDF.pkl')
+    df = df[df['emailTemplate'] == 'activated_template']
+    df = df.groupby('recipientId', as_index=False).agg(activDate=('date','min'))
+    df = df.rename(columns={'recipientId':'studentId'})
+    return df
+
+def activation_analysis1():
+    mm30 = reviews_mm30()
+    cutoff = 5
+    mm30cut = mm30[mm30['MM30days']>cutoff].rename(columns={'reviewTime': 'mm30Time'})
+
+    dfs = g.getStudents()
+    df = line_follow_date().merge(dfs, how='left', on='Line ID')
+    df = df.merge(student_activation_date(), how='left', on='studentId')
+    df = df.merge(mm30, how='left', on='profileName')
+    df = df.merge(mm30cut, how='left', on='profileName')
+    # df = df.groupby(['Line ID', 'state', 'dateTime', 'date']
+    df = df.groupby(['Line ID', 'state', 'followDate', 'activDate'], dropna=False
+        ).agg(minRev=('reviewTime', 'min'),
+            minCutoff=('mm30Time', 'min')).reset_index()
+    def func1(x):
+        if type(x) == float: return True
+        elif x[0] == 't': return False
+        else: return True
+    df = df[df['state'].apply(func1)]
+    # df = df[df['state'].apply(lambda x: type(x)) == float]
+    def activ_delay(x, param):
+        if type(x[param]) != dt.date: return NaN
+        else: return (x[param]-x['followDate']).days 
+    df['activation delay'] = df.apply(lambda x: activ_delay(x, 'activDate'), 1)
+    df['1st rev delay'] = df.apply(lambda x: activ_delay(x, 'minRev'), 1)
+    df['reach threshhold delay'] = df.apply(lambda x: activ_delay(x, 'minCutoff'), 1)
+    # df = df[df['followDate']>=dt.date(2022,5,1)]
+    # df['state'] = df['state'].apply(lambda x: x[:-1])
+    # df = df.groupby('state').agg({'Line ID':'nunique'})
+
+    # df['percentage'] = df['Line ID'].apply(lambda x: round(x/df['Line ID'].sum(),2))
+    # print(df)
+    return df
+# activation_analysis1()
+
+def delays_analysis(param = None):
+    df = activation_analysis1()
+    if param == 'activation delay':
+        lbl = 'account activation delay'; lim = [0,40]
+    elif param == '1st rev delay':
+        lbl = 'delay between line follow and 1st review'; lim = [0,40]
+    else:
+        lbl = 'delay between line follow and reaching activity threshold'; lim = [0,40]
+    df = df[df[param].notnull()][param]
+    plt.hist(df, bins=1000, cumulative=True, density=True, histtype='step', orientation='vertical')
+    plt.xlim(lim)
+    plt.ylim([0,1])
+    plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
+    plt.gca().set_ylabel('cumulative percentange of active users')
+    plt.gca().set_xlabel(lbl)
+    plt.gca().set_title('MTC Automated flashcards\ndelay analysis')
+    plt.gca().invert_yaxis()
+    plt.show()
+    return plt
+    # print(df)
+# delays_analysis('activation delay')
+# delays_analysis('1st rev delay')
+# delays_analysis('reach threshhold delay')
+
+def activation_funnel():
+    d1 = activation_analysis1()
+    # d1 = d1[d1['followDate']>=dt.date(2022,5,15)]
+    # # d1 = d1[d1['followDate']<=today-dt.timedelta(days=10)]
+    # d1 = d1[d1['followDate']<dt.date(2022,6,15)]
+    # d1 = d1[d1['followDate']<=d1['followDate'].min()+dt.timedelta(days=30)]
+    df = {}
+    tot = len(d1)
+    # df.update({"Line Follow": tot})
+    def func1(x):
+        if type(x) == float: return False
+        elif x[:-1] == 'reg': return False
+        else: return True
+    df.update({"registered": round(len(d1[d1['state'].apply(func1)])/tot, 2)})
+    df.update({"activated": round(len(d1[d1['state'] == 'active'])/tot, 2)})
+    df.update({"1 rev": round(len(d1[d1['minRev'].notnull()])/tot, 2)})
+    df.update({"active user": round(len(d1[d1['minCutoff'].notnull()])/tot, 2)})
+    # df.update({"registered": len(d1[d1['state'].apply(func1)])})
+    # df.update({"activated": len(d1[d1['state'] == 'active'])})
+    # df.update({"1 rev": len(d1[d1['minRev'].notnull()])})
+    # df.update({"active user": len(d1[d1['minCutoff'].notnull()])})
+    # # Create dataset
+    # height = [3, 12, 5, 18, 45]
+    # bars = ('A', 'B', 'C', 'D', 'E')
+    x_pos = np.arange(len(df))
+    print(df.keys(), df.values())
+    # Create bars
+    plt.bar(x_pos, df.values())
+
+    # Create names on the x-axis
+    plt.xticks(x_pos, df.keys())
+
+    # ax.set_ylabel('users %')
+    # ax.set_title('MTC Automated flashcards activation funnel')
+    
+    # ax.legend()
+    plt.show()
+
+    # print(df)
+activation_funnel()
+
+def activation(): #combine mail loc and status date for historic activations
     df1 = g.getStudents()
-    df2 = g.getEmailLog()
     # df1 = pd.read_pickle(db.technicalFilesPath+'studentsDF.pkl')
-    # df2 = pd.read_pickle(db.technicalFilesPath+'emailsLogDF.pkl')
-    df2 = df2[df2['emailTemplate'] == 'activated_template']
-    df2 = df2.groupby('recipientId', as_index=False).agg({'date':'min'})
-    df2 = df2.rename(columns={'recipientId':'studentId'})
+    df2 = student_activation_date()
     df = df1.merge(df2, how='left', on='studentId')
-    df['date'] = df['date'].apply(lambda x: x['statusDate'] if not x and x['state']=='active' else x)
+    df['activDate'] = df['activDate'].apply(lambda x: x['statusDate'] if not x and x['state']=='active' else x)
     df = df[df.date.notnull()]
-    df = df.groupby('studentId', as_index=False).agg({'date':'min'})
-    df = df.groupby('date', as_index=False).agg({'studentId':'count'})
+    df = df.groupby('studentId', as_index=False).agg({'activeDate':'min'})
+    df = df.groupby('activDate', as_index=False).agg({'studentId':'count'})
     df = df.rename(columns={'studentId' :'activations'})
     df['activations'] = df['activations'].cumsum()
     return df
