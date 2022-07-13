@@ -106,7 +106,7 @@ def getReviews(profileName, start = None, end = None):
             "INNER JOIN notes ON cards.nid = notes.id "\
             "WHERE revlog.id BETWEEN "+start+" AND "+end
 
-    try: reviewst = queryDb(profileName, query); print(reviewst[0])
+    try: reviewst = queryDb(profileName, query)
     except: return []
     #process TradChars date and unit
     reviewsl=[]

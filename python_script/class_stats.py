@@ -1,14 +1,7 @@
 import anki_db as db
-from mtc_info import unit_to_zh, get_current_term, get_term_dates
+from mtc_info import unit_to_zh, get_term_dates
 import google_apps as g
 import traceback
-
-# import google_apps as g
-# gStudent=g.getStudents()
-# gData=g.getData()
-# gClass=gData['class']
-# gs_c=gData['student_class']
-# gTeacher=gData['teacher']
 
 def class_report(class_id, week=False, st_cl_te = None):
     df=st_cl_te if st_cl_te is not None else g.st_cl_te()
@@ -62,5 +55,3 @@ def class_report(class_id, week=False, st_cl_te = None):
         'styler':stlr,
         'htmlReport':htmlReport
     }
-
-# print(class_report('41883', False))

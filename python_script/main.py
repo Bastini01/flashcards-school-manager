@@ -172,13 +172,13 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                 except Exception as e: 
                     tb = traceback.format_exc()
                     print(profileName, tb, e)
-                # if (time()-stdTime0 > 2):
-                #     print(profileName, "runtime: ",int(time()-stdTime0)," sec")
 
+            # SEND WEEKLY STATS
             if len(allReviews) > 0:
                 allReviewsDf=anki_db.rev_to_df(allReviews)
-                main_stats.trendWeekly(allReviewsDf)
-                # df.to_csv("allReviews.txt")
+                wstat = main_stats.trendWeekly(allReviewsDf)
+                htmlReport = wstat.style.set_caption("WEEKLY TREND").to_html()
+                g.sendActions([{"emailTemplate":('statsReport', htmlReport)}])
 
             print("STUDENTS DONE; "+str(amountSynced)+" synced")
         if cls and not new and not idFilter:
