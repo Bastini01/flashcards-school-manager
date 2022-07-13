@@ -32,11 +32,9 @@ def class_report(class_id, week=False, st_cl_te = None):
             return (None, {'chaps-words': [], 'top': []})
 
     df['本期複習的課'] = df.apply(
-        lambda x: report(x['profileName'])[1]['chaps-words'], 
-        axis=1)
+        lambda x: report(x['profileName'])[1]['chaps-words'], axis=1)
     df['最常被忘記的生詞'] = df.apply(
-        lambda x: report(x['profileName'])[1]['top'][:6], 
-        axis=1)
+        lambda x: report(x['profileName'])[1]['top'][:6], axis=1)
 
     df= df[df["最常被忘記的生詞"].str.len() != 0]
     df.reset_index(drop=True, inplace=True)

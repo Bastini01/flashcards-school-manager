@@ -28,8 +28,7 @@ def copyAnki2():
         except: pass
         try: copyfile(Anki2Dir+i+c, dst+c)
         except: continue
-
-copyAnki2()
+# copyAnki2()
 
 def dbPath(profileName):
     return Anki2Dir+profileName+"\\collection.anki2"
@@ -61,10 +60,6 @@ def unit(txt):
         elif r.group(3)=="II": p="2" 
         return [int(r.group(1)), int(r.group(2)), int(p)]
     except: return None
-    # return r.group(0)
-# (unit("Book5/Chapter02-II "))
-# (unit("Book5Chapter02-2 "))
-# (unit("heu???"))
 
 def timeText(time):
     mins=round(time/60000)
@@ -93,6 +88,12 @@ def queryDb(profileName, query):
 def date_to_stamp(date):
     return str(int(dt.datetime(date.year, date.month, date.day).timestamp()*1000))
 
+def extract_fields(x, profileName):
+    def extr(i): return strip_tags(x.split("\x1f")[i]).strip('"')
+    if profileName != "00239 Tenzin Topden": c = [0, 3]
+    else: c = [2 ,0]
+    return {'eng': extr(c[0]), 'trad': extr(c[1])}
+
 def getReviews(profileName, start = None, end = None):
     if start: start=date_to_stamp(start)
     else: start = date_to_stamp(dt.date(2021, 1, 1))
@@ -105,7 +106,7 @@ def getReviews(profileName, start = None, end = None):
             "INNER JOIN notes ON cards.nid = notes.id "\
             "WHERE revlog.id BETWEEN "+start+" AND "+end
 
-    try: reviewst = queryDb(profileName, query)
+    try: reviewst = queryDb(profileName, query); print(reviewst[0])
     except: return []
     #process TradChars date and unit
     reviewsl=[]
@@ -115,17 +116,20 @@ def getReviews(profileName, start = None, end = None):
         l.append(profileName)
         l.append(l[0])
         try:
-            l.append(strip_tags(l[9].split("\x1f")[0]).strip('"'))
-            l[9]=strip_tags(l[9].split("\x1f")[3]).strip('"')
+            l.append(extract_fields(l[9], profileName)['eng'])
+            l[9]=extract_fields(l[9], profileName)['trad']
             l[9]=HTMLParser().unescape(l[9])      
         except: pass           
         l[0]=dt.datetime.fromtimestamp(round(l[0]/1000.0))
         l[10]= unit(l[10])
     return reviewsl
-# getReviews("00026 Emmanuel Trenado",dt.date(2022, 5, 1) ,dt.date(2022, 6, 2))
+# r1=getReviews("00066 Klas Bergman",dt.date(2022, 7, 12))[0]
+# print(r1)
+# r2=getReviews("00239 Tenzin Topden",dt.date(2022, 7, 11),dt.date(2022, 7, 12))[0]
+# print(r2)
+# # a=[x[-1] for x in r]
 
 def review_mean_duration(reviews):
-    # t=textbook_new_word_review(reviews)['reviewDuration'].mean()
     if len(reviews)==0: return 0
     lst=[x[7] for x in reviews]
     return round(sum(lst)/len(lst)/1000)
@@ -139,10 +143,6 @@ def pending_learning(profileName):
             "WHERE tags LIKE '%Book%Chapter%' AND decks.name LIKE '%當代%'"\
             "GROUP BY cards.id"
     qresult = queryDb(profileName, query)
-    # ([
-    #     [dt.datetime.fromtimestamp(round(i[1]/1000.0)).date(), i[3]]
-    #        for i in qresult
-    # ])
     drtn=review_mean_duration(getReviews(profileName))
     def chap(x): return (unit(x)[0],unit(x)[1])
     chapters= sorted({chap(i[4]) for i in qresult})
@@ -182,10 +182,6 @@ def rev_to_df(reviews):
         'revId',
         'en'])
     return df
-# revnem=rev_to_df(getReviews("00017 Ali Watak"))
-# revnem.to_csv('Ali_watak.txt')
-# dafr=revnem[revnem['tags'] != None]
-# dafr=revnem.to_csv('revNemra.txt')
 
 def isSerious(threshhold, profileName, start=None, end=None):
     try: cnt=len(getReviews(profileName, start, end))
@@ -216,7 +212,7 @@ def topXdifficult(reviews, x=100):
                 if len(result)==x: return result
     
     return result
-# (topXdifficult(getReviews("00048 Nadia 敏 Chang 李"), 10))
+# (topXdifficult(getReviews("00239 Tenzin Topden"), 10))
 
 def textbook_new_word_review(reviews):
     revs1 = [x for x in reviews if x[10] != None]
@@ -224,14 +220,12 @@ def textbook_new_word_review(reviews):
     df2 = df1.groupby(['en']).revId.agg('min')
     df3 = df1.merge(df2, how='right', on='revId')
     return df3
-# (textbook_new_word_review("00007 洋娜 宋"))
 
 def chapter_1st_review(chapter, revs):
     df = textbook_new_word_review(revs)
     df['tags']=df['tags'].apply(lambda x: str([x[0], x[1]]))
     df2 = df[df['tags'] == str(chapter)]
     return df2
-# (len(chapter_1st_review([3, 8], "00007 洋娜 宋")))
 
 def cntOfNotes(profileName, vocabUnit):
     tag=config_notes.getVu(vocabUnit)[1]
@@ -342,7 +336,6 @@ def termReport(termStart, profileName, reviews):
     end= today
     report=periodReport(profileName, reviews, start, end)
     return 'termReport'+report[0], report[1]
-# (termReport(getReviews("00053 Paul H Nemra")))
 
 def month_report(profileName, reviews):
     start = dt.date(today.year, today.month, 1)
@@ -361,7 +354,7 @@ def weeklyReport(profileName, reviews):
     end= week_dates()[1]
     report=periodReport(profileName, reviews, start, end)
     return 'weekly'+report[0], report[1]
-# (weeklyReport("00053 Paul H Nemra", getReviews("00053 Paul H Nemra")))
+# print(weeklyReport("00239 Tenzin Topden", getReviews("00239 Tenzin Topden")))
 
 def weekly_send_conditions(reviews, weekly):
     if(weekly[1]['reviews'] > 1 or(
