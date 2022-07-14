@@ -12,13 +12,15 @@ from matplotlib.ticker import PercentFormatter
 import json
 
 today = dt.datetime.now().date()
+statsPath = join(db.technicalFilesPath, "stats\\")
+
 def d_2_str(x): 
     return dt.datetime.combine(
         x, dt.datetime.min.time()).strftime('%y%m%d')
 
 def classOverview(): #number of active users by class
 
-    df1=g.st_cl_te(mtc_info.get_current_term()['term'])
+    df1=g.st_cl_te(mtc_info.get_term(today)['term'])
     df1['serious']=df1.apply(lambda x: db.isSerious(150, x['profileName']), axis=1)
     df1['state']=df1['state'].apply(lambda x: x[:-1] if x[:3]=="con" else x)
     df1.loc[df1.serious==True, 'state']='active'
@@ -36,12 +38,12 @@ def classOverview(): #number of active users by class
         n=df3.iloc[i].name
         df3.loc[(n[0], n[1], '%')]= df3.iloc[i]/df3[:3].sum(axis=0)*100
     df3.sort_index(inplace=True, ascending=[True, False, True])
-    df3.to_html(join(db.technicalFilesPath,'classOverview.html'))
+    df3.to_html(join(statsPath,'classOverview.html'))
     return df3
 
 def print_class_reports(term = None):
-    path = db.technicalFilesPath+r'class_reports'
-    trm = mtc_info.get_current_term()['term'] if not term else term
+    path = statsPath+r'class_reports'
+    trm = mtc_info.get_term(today)['term'] if not term else term
     c=g.getData()['class']
     df=c[c['term']==trm]
     st_cl_te = g.st_cl_te(trm)
@@ -55,8 +57,7 @@ def print_class_reports(term = None):
             rep['teacherName']+
             '.html'))
 
-def vocAnalysis(chapter=None):
-    reviews = AllReviews.getReviewDataAll()
+def vocAnalysis(reviews, chapter=None):
     if chapter == None: voc = config_notes.getVocSource()
     else:
         voc1 = config_notes.getVu([chapter[0], chapter[1], 1])[0]
@@ -79,7 +80,33 @@ def vocAnalysis(chapter=None):
         ).buttonPressed.agg('mean')
     df=df.groupby(['TextbookChapter','Traditional Characters']).agg(['count', 'mean'])
     df['mean']=round(10-(df['mean']-1)*(10/3), 1)
-    df.to_csv(join(db.technicalFilesPath,'vocAnalysis.txt'))
+    return df
+
+def vocAnalysis(reviews, chapter=None):
+    df = reviews.groupby(['tradChars', 'tags', 'student']).buttonPressed.agg('mean')
+    # if chapter == None: voc = config_notes.getVocSource()
+    # else:
+    #     voc1 = config_notes.getVu([chapter[0], chapter[1], 1])[0]
+    #     voc2 = config_notes.getVu([chapter[0], chapter[1], 2])[0]
+    #     voc = pd.concat([voc1, voc2])
+    # for i in range(len(voc)): 
+    #     voc.loc[i,'TextbookChapter'] = str(db.unit(voc.loc[i,'TextbookChapter'])[:-1])
+    # for i in range(len(reviews)): 
+    #     r=reviews.loc[i,'tags']
+    #     if r: reviews.loc[i,'tags'] = str(r[:-1])   
+    # df=voc.merge(
+    #     reviews, 
+    #     how='left', 
+    #     left_on=['Traditional Characters', 'TextbookChapter'],
+    #     right_on=['tradChars', 'tags'])
+    # df=df.groupby([
+    #     'TextbookChapter',
+    #     'Traditional Characters', 
+    #     'student']
+    #     ).buttonPressed.agg('mean')
+    # df=df.groupby(['TextbookChapter','Traditional Characters']).agg(['count', 'mean'])
+    # df['mean']=round(10-(df['mean']-1)*(10/3), 1)
+    print(df)
     return
 
 def reviews_mm30():
@@ -94,28 +121,30 @@ def reviews_mm30():
     df = df.rename(columns={'student':'profileName'})
     return df
 
-def hookoffs(cutoff=None, recent=None): #number of users historically active and number of them no recently active
+def retention(cutoff=None, recent=None): #number of users historically active and number of them no recently active
     cutoff = cutoff if cutoff else 0
     recent = recent if recent else 90
     df = reviews_mm30()
     before = df[(df['MM30days']>cutoff) & (df['reviewTime']<today-dt.timedelta(days=recent))]['profileName'].unique()
     recently = df[df['reviewTime']>today-dt.timedelta(days=recent)]['profileName'].unique()
-    hookoffs = [x for x in before if x not in recently]
-    return {'before': len(before), 'hookoffs': len(hookoffs)}
+    retention = [x for x in before if x not in recently]
+    return {'before': len(before), 'retention': str(int(100-len(retention)/len(before)*100))+" %"}
 
-def hookoffs_detail():
-    cols = pd.MultiIndex.from_product([[30, 60, 90], ['were active', 'quit']])
-    df = pd.DataFrame(columns=cols , index=[0, 1, 5, 10, 20]
+def retention_detail():
+    # windows = [30, 60, 90]
+    windows = [(today-mtc_info.get_term_dates('21winter')['termEnd']).days]
+    cols = pd.MultiIndex.from_product([windows, ['nr active', 'retention']])
+    df = pd.DataFrame(columns=cols , index=[5, 10, 20]
             ).rename_axis(index='average reviews/day min. threshold', columns=['look back window', 'user cnt'])
     def appfunc(x):
         r = []
         for i in x.index.values:
             if x.name[1]==df.columns.levels[1][1]: n = 'before'
-            else: n = 'hookoffs'
-            r.append(hookoffs(i, int(x.name[0]))[n])
+            else: n = 'retention'
+            r.append(retention(i, int(x.name[0]))[n])
         return r
     df = df.apply(appfunc, result_type='broadcast')
-    df.style.to_html(db.technicalFilesPath+'Quit anaysis.html')
+    return df
 
 def user_distribution(param = None):
     df = AllReviews.getReviewDataAll()
@@ -138,10 +167,15 @@ def user_distribution(param = None):
 
 def periodical_users(period=None, cutoff=None, allReviews = None):
     df = allReviews if type(allReviews)==pd.DataFrame else AllReviews.getReviewDataAll()
+    def termDate(x):
+        r = mtc_info.get_term(x.date())['termStart'] + dt.timedelta(days=45)
+        return dt.datetime.combine(r, dt.datetime.min.time())
     if period=='w': 
         df['reviewTime'] = df['reviewTime'].apply(lambda x: x + dt.timedelta(days=6 - x.weekday()))
     elif period=='m': 
         df['reviewTime'] = df['reviewTime'].apply(lambda x: x.replace(day=15))
+    elif period=='term': 
+        df['reviewTime'] = df['reviewTime'].apply(termDate)
     df = df.groupby([df['reviewTime'].dt.date, 'student']).agg(
         {'cardID':'count', 
         'reviewDuration':lambda x: sum(x)/60000}
@@ -182,7 +216,7 @@ def active_users(totalReviews = 30, term = None): # to be replaced by mm30
     return df
 
 def active_user_os():
-    df=active_users(term = mtc_info.get_current_term()['term'])
+    df=active_users(term = mtc_info.get_term(today)['term'])
     df = df[['os', 'revs']]
     df = df.groupby(['os']).agg(['count', 'mean'])
     print(df)
@@ -194,6 +228,13 @@ def active_users_analysis():
 def save_g_data():
     g.getStudents().to_pickle(db.technicalFilesPath+'studentsDF.pkl')
     g.getEmailLog().to_pickle(db.technicalFilesPath+'emailsLogDF.pkl')
+
+def line_stats(): #registrations based on line csv export - obsolete
+    df = pd.read_csv(db.technicalFilesPath+'line_stats.csv')
+    df['date'] = pd.to_datetime(df['date'], format="%Y%m%d")
+    df['contacts'] = df['contacts'].apply(lambda x: x-df['contacts'].min())
+    df = df.rename(columns={'contacts':'registrations'})
+    return df
 
 def line_follow_date(lineLog):
     # df = g.get_line_log()
@@ -217,40 +258,44 @@ def clean_state(x):
     elif x[0] == 't': return False
     else: return True
 
-def follow_date(getStudents, lineLog): #combine line log and status date for historic activations
-    # df1 = g.getStudents()
-    # df1 = pd.read_pickle(db.technicalFilesPath+'studentsDF.pkl')
-    df2 = line_follow_date(lineLog)
-    df = getStudents.merge(df2, how='left', on='Line ID')
-    df['regDate'] = df['regDate'].apply(lambda x: x['Timestamp'] if not x else x)
-    df = df[(df.regDate.notnull() & df['state'].apply(clean_state))]
-    df = df.groupby(['profileName', 'state']).agg({'regDate':'min'}).reset_index()
-    return df
-# print(follow_date(g.getStudents(), g.get_line_log()))
-
 def activation_mail_date(emailLog): #first activation date by student from emailLog
-    # df = g.getEmailLog()
     df = emailLog[emailLog['emailTemplate'] == 'activated_template']
     df = df.groupby('recipientId', as_index=False).agg(activDate=('date','min'))
     df = df.rename(columns={'recipientId':'studentId'})
     return df
-# (activation_mail_date(g.getEmailLog()))   
 
 def student_activation_date(getStudents, emailLog): #combine mail loc and status date for historic activations
-    # df1 = g.getStudents()
-    # df1 = pd.read_pickle(db.technicalFilesPath+'studentsDF.pkl')
     df2 = activation_mail_date(emailLog)
     df = getStudents.merge(df2, how='left', on='studentId')
     df['activDate'] = df['activDate'].apply(lambda x: x['statusDate'] if not x and x['state']=='active' else x)
     df = df[df.activDate.notnull()]
     df = df.groupby('profileName', as_index=False).agg({'activDate':'min'})
     return df
-# (student_activation_date(g.getStudents(), g.getEmailLog()))
+
+def follow_date(s, e, l): #combine line log and status date for historic registrations and correct with activation date
+    df = s.merge(line_follow_date(l), how='left', on='Line ID')
+    df = df.merge(student_activation_date(s, e), how='left', on='profileName')
+    def func(x):
+        r = x['regDate']
+        if type(r) == float: r = g.str_2_d(x['Timestamp'])
+        if type(x['activDate']) != float: r = min(r, x['activDate'])
+        return r
+    df['regDate'] = df.apply(func, 1)
+    df = df[(df.regDate.notnull() & df['state'].apply(clean_state))]
+    df = df.groupby(['profileName', 'state']).agg({'regDate':'min'}).reset_index()
+    return df
+
+def regs_by_date(s, e, l):
+    df = follow_date(s, e, l)
+    df = df.groupby('regDate').agg(regs=('profileName', 'count')).reset_index()
+    df['regs'] = df['regs'].cumsum()
+    return df
+# print(regs_by_date(g.getStudents(), g.get_line_log()))
 
 def activation(getStudents, emailLog): #activations by date
     df = student_activation_date(getStudents, emailLog)
-    df = df.groupby('activDate', as_index=False).agg({'studentId':'count'})
-    df = df.rename(columns={'studentId' :'activations'})
+    df = df.groupby('activDate', as_index=False).agg({'profileName':'count'})
+    df = df.rename(columns={'profileName' :'activations'})
     df['activations'] = df['activations'].cumsum()
     return df
 # (activation(g.getStudents(), g.getEmailLog()))
@@ -259,9 +304,7 @@ def activation_analysis(s, e, l):
     mm30 = reviews_mm30()
     cutoff = 5
     mm30cut = mm30[mm30['MM30days']>cutoff].rename(columns={'reviewTime': 'mm30Time'})
-
-    # df = follow_date().merge(dfs, how='left', on='Line ID')
-    df = follow_date(s, l).merge(student_activation_date(s, e), how='left', on='profileName')
+    df = follow_date(s, e, l).merge(student_activation_date(s, e), how='left', on='profileName')
     df = df.merge(mm30, how='left', on='profileName')
     df = df.merge(mm30cut, how='left', on='profileName')
     df = df.groupby(['profileName','state', 'regDate', 'activDate'], dropna=False
@@ -296,10 +339,10 @@ def delays_analysis(s, e, l):
     plt.gca().invert_yaxis()
     return plt
 
-def activation_funnel(s, e, l, term=None):
+def activation_funnel(s, e, l, term='all'):
     d1 = activation_analysis(s, e, l)
-    minDate = d1['regDate'].min() if not term else mtc_info.get_term_dates(term)['termStart']
-    maxDate = today if not term else mtc_info.get_term_dates(term)['termEnd']
+    minDate = d1['regDate'].min() if term=='all' else mtc_info.get_term_dates(term)['termStart']
+    maxDate = today if term=='all' else mtc_info.get_term_dates(term)['termEnd']
     d1 = d1[d1['regDate']>=minDate]
     d1 = d1[d1['regDate']<=maxDate]
     df = {}; tot = len(d1)
@@ -324,23 +367,14 @@ def activation_funnel(s, e, l, term=None):
     else: title += d_2_str(minDate) +" - "+d_2_str(maxDate)
     plt.title(title)
     return plt
-# activation_funnel().savefig(db.technicalFilesPath+"act_funnel.png", bbox_inches='tight')
-# activation_funnel(g.getStudents(), g.getEmailLog(), g.get_line_log()).show()
-
-
-def line_stats():
-    df = pd.read_csv(db.technicalFilesPath+'line_stats.csv')
-    df['date'] = pd.to_datetime(df['date'], format="%Y%m%d")
-    df['contacts'] = df['contacts'].apply(lambda x: x-df['contacts'].min())
-    df = df.rename(columns={'contacts':'registrations'})
-    return df
-
-def plot_user_trend(period=None, cutoff=None):
-    dr = line_stats()
-    da = activation()
+    
+def plot_user_trend(s, e, l, period=None, cutoff=None):
+    # dr = line_stats()
+    dr = regs_by_date(s, e, l)
+    da = activation(s, e)
     ax = plt.subplots()[1]
-    ax.plot(dr.date, dr.registrations, linewidth=2, label='registered')
-    ax.plot(da.date, da.activations, linewidth=2, label='activated')
+    ax.plot(dr.regDate, dr.regs, linewidth=2, label='registered')
+    ax.plot(da.activDate, da.activations, linewidth=2, label='activated')
     ax.set_xlabel('time')
     ax.set_ylabel('cumulative')
     ax.set_title('MTC Automated flashcards user trend')
@@ -348,35 +382,47 @@ def plot_user_trend(period=None, cutoff=None):
     ax2 = ax.twinx()
     
     if period:
-        labelr = 'weekly unique users' if period == "w" else 'monthly unique users'
+        if period == "w": labelr = 'weekly unique users' 
+        elif period == "m": labelr = 'monthly unique users'
+        else: labelr = 'unique users per term'
     else:       
         x = 7; dfu = dfu.rolling(window=x).mean()
         labelr = "daily unique users ("+str(x)+" day MM)"
         
     ax2.plot(dfu.index, dfu.values, 'g', linestyle='dotted')       
-    ax2.set_ylabel(labelr+"\n(less than "+str(cutoff)+" reviews/day on average not counted)", color='g') 
+    ax2.set_ylabel(labelr+"\n(min "+str(cutoff)+" reviews/day on average)", color='g') 
     ax.legend()
     return plt
 
-def update_stats(s, e, l):
-    cutoff = 0
-    recent = 90
-    activation_funnel(s, e, l).savefig(db.technicalFilesPath+"act_funnel.png", bbox_inches='tight')
+def update_stats():
+    s = g.getStudents()
+    e = g.getEmailLog()
+    l = g.get_line_log()
+    # r = AllReviews.getReviewDataAll()
+    cutoff = 5
+    # recent = 90
+    for term in ['all','21winter', '22spring', '22summer']:
+        activation_funnel(s, e, l, term).savefig(statsPath+"act_funnel_"+term+".png", bbox_inches='tight')
+        plt.gcf().clear()
+    delays_analysis(s, e, l).savefig(statsPath+"delays analysis.png", bbox_inches='tight')
     plt.gcf().clear()
-    delays_analysis(s, e, l).savefig(db.technicalFilesPath+"delays analysis.png", bbox_inches='tight')
-    plt.gcf().clear()
-    # plot_user_trend(None, cutoff).savefig(db.technicalFilesPath+"user trend day.png", bbox_inches='tight')
-    # print("user trend day ok"); plt.gcf().clear()
-    # plot_user_trend('w', cutoff).savefig(db.technicalFilesPath+"user trend week.png", bbox_inches='tight')
-    # print("user trend week ok"); plt.gcf().clear()
-    # plot_user_trend('m', cutoff).savefig(db.technicalFilesPath+"user trend month.png", bbox_inches='tight')
-    # print("user trend month ok"); plt.gcf().clear()
-    # user_distribution().savefig(db.technicalFilesPath+"user analysis mean.png", bbox_inches='tight')
-    # print("user mean rev ok"); plt.gcf().clear()
-    # user_distribution('f').savefig(db.technicalFilesPath+"user analysis frequency.png", bbox_inches='tight')
-    # print("user freq ok"); plt.gcf().clear()
-    # hookoffs(cutoff, recent)
-# runAllStats(g.getStudents(), g.getEmailLog(), g.get_line_log())
+    plot_user_trend(s, e, l, None, cutoff).savefig(statsPath+"user trend day.png", bbox_inches='tight')
+    print("user trend day ok"); plt.gcf().clear()
+    plot_user_trend(s, e, l, 'w', cutoff).savefig(statsPath+"user trend week.png", bbox_inches='tight')
+    print("user trend week ok"); plt.gcf().clear()
+    plot_user_trend(s, e, l, 'm', cutoff).savefig(statsPath+"user trend month.png", bbox_inches='tight')
+    print("user trend month ok"); plt.gcf().clear()
+    plot_user_trend(s, e, l, 'term', cutoff).savefig(statsPath+"user trend term.png", bbox_inches='tight')
+    print("user trend term ok"); plt.gcf().clear()
+    user_distribution().savefig(statsPath+"user analysis mean.png", bbox_inches='tight')
+    print("user mean rev ok"); plt.gcf().clear()
+    user_distribution('f').savefig(statsPath+"user analysis frequency.png", bbox_inches='tight')
+    print("user freq ok"); plt.gcf().clear()
+    retention_detail().style.to_html(statsPath+'Retention analysis.html')
+    # vocAnalysis(r)#.to_csv(join(statsPath,'vocAnalysis.txt'))
+
+# update_stats(g.getStudents(), g.getEmailLog(), g.get_line_log())
+update_stats()
 
 
 

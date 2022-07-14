@@ -14,7 +14,7 @@ import class_stats, main_stats
 
 original_stdout = sys.stdout
 today=dt.datetime.now().date()
-term = mtc_info.get_current_term()['term']
+term = mtc_info.get_term(today)['term']
 
 def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=False):
     if log: 
@@ -195,7 +195,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                     print(classId, teacherId, tb, e)
 
             c=gClass
-            df=c[c['term']==mtc_info.get_current_term()['term']]
+            df=c[c['term']==mtc_info.get_term(today)['term']]
             df.apply(lambda x: class_actions(x['class_id'], x['teacher_id']), axis=1)
             
             print("CLASSES DONE")

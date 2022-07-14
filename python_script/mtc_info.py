@@ -30,30 +30,30 @@ doubleTen = dt.date( today.year, 10, 10 )
 
 bdc=np.busdaycalendar(holidays=[*nyJan, *cny, *springBreak, midAtumn, doubleTen, nyDec])
 
-def get_current_term():
-    if today.month==12:
-        termStart= dt.date( today.year, winterDate[0], winterDate[1])
-        termEnd= dt.date( today.year+1, springDate[0], springDate[1])
+def get_term(d):
+    if d.month==12:
+        termStart= dt.date( d.year, winterDate[0], winterDate[1])
+        termEnd= dt.date( d.year+1, springDate[0], springDate[1])
         term=str(termStart.year)[2:]+"winter"
-    elif today.month< 3 or today.month==3 and today.day< springDate[1]:
-        termStart= dt.date( today.year-1, winterDate[0], winterDate[1])
-        termEnd= dt.date( today.year, springDate[0], springDate[1])
+    elif d.month < 3 or d.month==3 and d.day< springDate[1]:
+        termStart= dt.date( d.year-1, winterDate[0], winterDate[1])
+        termEnd= dt.date( d.year, springDate[0], springDate[1])
         term=str(termStart.year)[2:]+"winter"
-    elif today < dt.date( today.year, summerDate[0],summerDate[1]):
-        termStart= dt.date( today.year, springDate[0], springDate[1])
-        termEnd= dt.date( today.year, summerDate[0],summerDate[1])
+    elif d < dt.date( d.year, summerDate[0],summerDate[1]):
+        termStart= dt.date( d.year, springDate[0], springDate[1])
+        termEnd= dt.date( d.year, summerDate[0],summerDate[1])
         term=str(termStart.year)[2:]+"spring"
-    elif today < dt.date( today.year, fallDate[0],fallDate[1]):
-        termStart= dt.date( today.year, summerDate[0], summerDate[1])
-        termEnd= dt.date( today.year, fallDate[0],fallDate[1])
+    elif d < dt.date( d.year, fallDate[0],fallDate[1]):
+        termStart= dt.date( d.year, summerDate[0], summerDate[1])
+        termEnd= dt.date( d.year, fallDate[0],fallDate[1])
         term=str(termStart.year)[2:]+"summer"
     else: 
-        termStart= dt.date( today.year, fallDate[0], fallDate[1])
-        termEnd= dt.date( winterDate[0], winterDate[1])
+        termStart= dt.date( d.year, fallDate[0], fallDate[1])
+        termEnd= dt.date( d.year, winterDate[0], winterDate[1])
         term=str(termStart.year)[2:]+"fall"
     return {'term': term, 'termStart': termStart, 'termEnd': termEnd}
 
-termStart = get_current_term()['termStart']
+termStart = get_term(today)['termStart']
 
 def get_term_dates(term):
     year = int("20"+term[:2])

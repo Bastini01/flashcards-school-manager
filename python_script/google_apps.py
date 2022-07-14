@@ -42,10 +42,13 @@ def getProfileName(data, i):
     # profileName=profileName.replace("/","")
     return profileName
 
+def str_2_d(x):
+    return dt(int(x.split('/')[2][:4]), int(x.split('/')[0]), int(x.split('/')[1])).date()
+
 def status_date(data, i):
     d0=data.loc[i, 'Last update date']
     if not d0: return None
-    d1=dt(int(d0.split('/')[2][:4]), int(d0.split('/')[0]), int(d0.split('/')[1])).date()
+    d1=str_2_d(d0)
     return d1
 
 def unit_date(data, i):
@@ -121,7 +124,6 @@ def getData():
 # (getData()['student_class'])
 
 def st_cl_te(term = None, studData = None, gData = None):
-    #term=get_current_term()['term'] if not trm else trm
     s = studData if studData is not None else getStudents()
     d= gData if gData is not None else getData()
     df=s.merge(d['student_class'], how='left', on='studentId')
