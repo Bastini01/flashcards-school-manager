@@ -422,7 +422,7 @@ def update_stats():
     # vocAnalysis(r)#.to_csv(join(statsPath,'vocAnalysis.txt'))
 
 # update_stats(g.getStudents(), g.getEmailLog(), g.get_line_log())
-update_stats()
+# update_stats()
 
 
 
