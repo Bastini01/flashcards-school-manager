@@ -1,6 +1,6 @@
 from os.path import expanduser, join, getmtime
 import numpy as np
-from numpy import NaN
+from numpy import NaN, count_nonzero
 import pandas as pd
 import anki_db as db
 import config_notes, mtc_info, AllReviews
@@ -8,6 +8,7 @@ import datetime as dt
 import class_stats, mtc_info
 import google_apps as g
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.ticker import PercentFormatter
 import json
 
@@ -57,57 +58,26 @@ def print_class_reports(term = None):
             rep['teacherName']+
             '.html'))
 
-def vocAnalysis(reviews, chapter=None):
+def vocAnalysis(df, chapter=None): #input allReviews
+    df = df[df['tags'].notnull()] 
+    df = df[df['student']!='00239 Tenzin Topden']
+    df['TextbookChapter'] = df['tags'].apply(lambda x: str(x[:-1]))
+    df = df.groupby(['tradChars', 'TextbookChapter', 'student']).agg({'buttonPressed':'mean'}).reset_index()
+    df = df.groupby(['tradChars', 'TextbookChapter']).agg(count=('student', 'count'), mean=('buttonPressed','mean')).reset_index()
+    df['mean'] = df['mean'].apply(lambda x: round(10-(x-1)*(10/3), 1))
+    df['count'] = df['count'].round(decimals=0).astype(object)
+
     if chapter == None: voc = config_notes.getVocSource()
     else:
         voc1 = config_notes.getVu([chapter[0], chapter[1], 1])[0]
         voc2 = config_notes.getVu([chapter[0], chapter[1], 2])[0]
         voc = pd.concat([voc1, voc2])
-    for i in range(len(voc)): 
-        voc.loc[i,'TextbookChapter'] = str(db.unit(voc.loc[i,'TextbookChapter'])[:-1])
-    for i in range(len(reviews)): 
-        r=reviews.loc[i,'tags']
-        if r: reviews.loc[i,'tags'] = str(r[:-1])   
-    df=voc.merge(
-        reviews, 
-        how='left', 
-        left_on=['Traditional Characters', 'TextbookChapter'],
-        right_on=['tradChars', 'tags'])
-    df=df.groupby([
-        'TextbookChapter',
-        'Traditional Characters', 
-        'student']
-        ).buttonPressed.agg('mean')
-    df=df.groupby(['TextbookChapter','Traditional Characters']).agg(['count', 'mean'])
-    df['mean']=round(10-(df['mean']-1)*(10/3), 1)
-    return df
-
-def vocAnalysis(reviews, chapter=None):
-    df = reviews.groupby(['tradChars', 'tags', 'student']).buttonPressed.agg('mean')
-    # if chapter == None: voc = config_notes.getVocSource()
-    # else:
-    #     voc1 = config_notes.getVu([chapter[0], chapter[1], 1])[0]
-    #     voc2 = config_notes.getVu([chapter[0], chapter[1], 2])[0]
-    #     voc = pd.concat([voc1, voc2])
-    # for i in range(len(voc)): 
-    #     voc.loc[i,'TextbookChapter'] = str(db.unit(voc.loc[i,'TextbookChapter'])[:-1])
-    # for i in range(len(reviews)): 
-    #     r=reviews.loc[i,'tags']
-    #     if r: reviews.loc[i,'tags'] = str(r[:-1])   
-    # df=voc.merge(
-    #     reviews, 
-    #     how='left', 
-    #     left_on=['Traditional Characters', 'TextbookChapter'],
-    #     right_on=['tradChars', 'tags'])
-    # df=df.groupby([
-    #     'TextbookChapter',
-    #     'Traditional Characters', 
-    #     'student']
-    #     ).buttonPressed.agg('mean')
-    # df=df.groupby(['TextbookChapter','Traditional Characters']).agg(['count', 'mean'])
-    # df['mean']=round(10-(df['mean']-1)*(10/3), 1)
-    print(df)
-    return
+    voc['TextbookChapter'] = voc['TextbookChapter'].apply(lambda x: str(db.unit(x)[:-1]))
+    df = df.rename(columns={'tradChars':'Traditional Characters'})   
+    df=voc.merge(df, how='left', on=['Traditional Characters', 'TextbookChapter'])
+    print(df[['TextbookChapter', 'Traditional Characters', 'count', 'mean']])
+    return df[['TextbookChapter', 'Traditional Characters', 'count', 'mean']]
+# vocAnalysis(AllReviews.getReviewDataAll())
 
 def reviews_mm30():
     df = AllReviews.getReviewDataAll()
@@ -264,6 +234,15 @@ def activation_mail_date(emailLog): #first activation date by student from email
     df = df.rename(columns={'recipientId':'studentId'})
     return df
 
+def  messaging_analysis(emailLog):
+    # df = emailLog[emailLog['type'] == 'gmail']
+    df = emailLog[emailLog['emailTemplate'].apply(lambda x: x[:2] == 'cw')]
+    df['date'] = df['date'].apply(lambda x: x.replace(day=1))
+    df = df.groupby('date', as_index=False).agg('count')
+    print(df)
+    print(df['type'].sum())
+# messaging_analysis(g.getEmailLog())
+
 def student_activation_date(getStudents, emailLog): #combine mail loc and status date for historic activations
     df2 = activation_mail_date(emailLog)
     df = getStudents.merge(df2, how='left', on='studentId')
@@ -362,7 +341,7 @@ def activation_funnel(s, e, l, term='all'):
     plt.gca().set_ylabel('users %')
     
     # ax.legend()
-    title = "activation funnel - total users: "+str(tot)+"\n Priod: "
+    title = "activation funnel - total users: "+str(tot)+"\n Period: "
     if term: title += term
     else: title += d_2_str(minDate) +" - "+d_2_str(maxDate)
     plt.title(title)
@@ -398,7 +377,7 @@ def update_stats():
     s = g.getStudents()
     e = g.getEmailLog()
     l = g.get_line_log()
-    # r = AllReviews.getReviewDataAll()
+    r = AllReviews.getReviewDataAll()
     cutoff = 5
     # recent = 90
     for term in ['all','21winter', '22spring', '22summer']:
@@ -419,7 +398,7 @@ def update_stats():
     user_distribution('f').savefig(statsPath+"user analysis frequency.png", bbox_inches='tight')
     print("user freq ok"); plt.gcf().clear()
     retention_detail().style.to_html(statsPath+'Retention analysis.html')
-    # vocAnalysis(r)#.to_csv(join(statsPath,'vocAnalysis.txt'))
+    vocAnalysis(r).to_csv(join(statsPath,'vocAnalysis.txt'))
 
 # update_stats(g.getStudents(), g.getEmailLog(), g.get_line_log())
 # update_stats()
