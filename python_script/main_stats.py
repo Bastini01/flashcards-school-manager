@@ -1,7 +1,9 @@
 from os.path import expanduser, join, getmtime
 import numpy as np
 from numpy import NaN, count_nonzero
+import re
 import pandas as pd
+import pdfkit
 import anki_db as db
 import config_notes, mtc_info, AllReviews
 import datetime as dt
@@ -10,7 +12,10 @@ import google_apps as g
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.ticker import PercentFormatter
+from matplotlib import cm
+from matplotlib.colors import ListedColormap
 import json
+import webbrowser
 
 today = dt.datetime.now().date()
 statsPath = join(db.technicalFilesPath, "stats\\")
@@ -58,12 +63,20 @@ def print_class_reports(term = None):
             rep['teacherName']+
             '.html'))
 
-def vocAnalysis(df, chapter=None): #input allReviews
+def str_to_unit(x):
+    rgx = re.compile("([1-5]), ([0-9]+), ([1-2])")
+    return [int(rgx.search(x)[i]) for i in range(1, 4)]
+
+def voc_analysis(df, min=None, max=None, chapter=None): #input allReviews
     df = df[df['tags'].notnull()] 
     df = df[df['student']!='00239 Tenzin Topden']
-    df['TextbookChapter'] = df['tags'].apply(lambda x: str(x[:-1]))
+    df['TextbookChapter'] = df['tags'].apply(lambda x: str(x))
     df = df.groupby(['tradChars', 'TextbookChapter', 'student']).agg({'buttonPressed':'mean'}).reset_index()
-    df = df.groupby(['tradChars', 'TextbookChapter']).agg(count=('student', 'count'), mean=('buttonPressed','mean')).reset_index()
+    df = df.groupby(['tradChars', 'TextbookChapter']).agg(
+        count=('student', 'count'), 
+        # mean=('buttonPressed',lambda x: x.head(3).mean())
+        mean=('buttonPressed','mean')
+        ).reset_index()
     df['mean'] = df['mean'].apply(lambda x: round(10-(x-1)*(10/3), 1))
     df['count'] = df['count'].round(decimals=0).astype(object)
 
@@ -72,12 +85,64 @@ def vocAnalysis(df, chapter=None): #input allReviews
         voc1 = config_notes.getVu([chapter[0], chapter[1], 1])[0]
         voc2 = config_notes.getVu([chapter[0], chapter[1], 2])[0]
         voc = pd.concat([voc1, voc2])
-    voc['TextbookChapter'] = voc['TextbookChapter'].apply(lambda x: str(db.unit(x)[:-1]))
+    voc['TextbookChapter'] = voc['TextbookChapter'].apply(lambda x: str(db.unit(x)))
     df = df.rename(columns={'tradChars':'Traditional Characters'})   
     df=voc.merge(df, how='left', on=['Traditional Characters', 'TextbookChapter'])
-    print(df[['TextbookChapter', 'Traditional Characters', 'count', 'mean']])
+    if min:
+        df = df[df['TextbookChapter'].apply(lambda x: mtc_info.unitNr(str_to_unit(x))>=mtc_info.unitNr(min))]
+    if max:
+        df = df[df['TextbookChapter'].apply(lambda x: mtc_info.unitNr(str_to_unit(x))<mtc_info.unitNr(max))]
     return df[['TextbookChapter', 'Traditional Characters', 'count', 'mean']]
-# vocAnalysis(AllReviews.getReviewDataAll())
+
+def voc_analysis_html(r, min=None, max=None):
+    df = voc_analysis(r, min, max)
+    df['TextbookChapter'] = df['TextbookChapter'].apply(
+        lambda x: str(str_to_unit(x)[0])+" 册 "+str(str_to_unit(x)[1])+" 課")
+    df = df.rename(columns={'Traditional Characters':'生詞',
+                'count': '學生人數', 'mean': '難度'})
+    dfr = pd.DataFrame()
+    meanCols = []
+    for i in df['TextbookChapter'].unique():
+        dfi = df[df['TextbookChapter']==i].drop('TextbookChapter', axis=1).reset_index(drop=True)
+        dfi.columns = pd.MultiIndex.from_tuples([(i, x) for x in dfi.columns.values])
+        dfr = pd.concat([dfr, dfi], axis=1)
+        meanCols.append((i, '難度'))
+    dfr[meanCols] = dfr[meanCols].fillna(0)
+    
+    def highlight_max(data):
+        attr = 'background-color: {}'.format('white') +'; color: %s' % 'white'
+        if data.ndim == 1:  # Series from .apply(axis=0) or axis=1
+            is_max = data == 0
+            return [attr if v else '' for v in is_max]
+        else:  # from .apply(axis=None)
+            is_max = data == 0
+            return pd.DataFrame(np.where(is_max, attr, ''),
+                                index=data.index, columns=data.columns)
+    
+    spacing = {(n[0],'生詞'):[{'selector':'','props':[('padding-left', '20px')]}] for n in meanCols}
+    capstyle = {'selector': 'caption', 'props': [('text-align', 'center'), ('font-size', '150%'), ('font-weight', 'bold')]}
+
+    stlr = dfr.style.format(precision=1, na_rep=''
+            ).background_gradient(cmap='RdYlGn_r', subset=meanCols, vmin=1, vmax=7
+            ).apply(highlight_max, axis=None, subset=meanCols
+            ).hide(axis='index').set_caption(
+                "「MTC 自動化字卡」計畫 ------ 當代中文詞彙分析 ------ "+d_2_str(today)+" 更新"
+            ).set_table_styles(spacing
+            )
+    return stlr
+
+def voc_analysis_pdf(r):
+    pgs = [[1, 1, 1], [1, 11, 1], [2, 6, 1], [3, 1, 1]]
+    path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+    config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
+
+    for i in range(len(pgs)-1):
+        voc_analysis_html(r, pgs[0+i], pgs[1+i]).to_html(statsPath+'vocantest_'+str(i)+'.html')
+
+    pdfkit.from_file([statsPath+'vocantest_'+str(i)+'.html' for i in range(len(pgs)-1)], statsPath+'vocantest.pdf', 
+        options={'orientation': 'landscape', 'encoding': 'UTF-8', 'zoom': 0.6}, 
+        configuration=config)
+voc_analysis_pdf(AllReviews.getReviewDataAll())
 
 def reviews_mm30():
     df = AllReviews.getReviewDataAll()
@@ -398,7 +463,9 @@ def update_stats():
     user_distribution('f').savefig(statsPath+"user analysis frequency.png", bbox_inches='tight')
     print("user freq ok"); plt.gcf().clear()
     retention_detail().style.to_html(statsPath+'Retention analysis.html')
-    vocAnalysis(r).to_csv(join(statsPath,'vocAnalysis.txt'))
+    voc_analysis(r).to_csv(join(statsPath,'vocAnalysis.txt'))
+    voc_analysis_pdf(r)
+
 
 # update_stats(g.getStudents(), g.getEmailLog(), g.get_line_log())
 # update_stats()

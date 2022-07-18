@@ -117,11 +117,9 @@ def listUnits(vocabUnit, numberOfUnits): #list of units ahead
 
 def vocabUnit(unitNr):
     return listUnits([1,1,1], 127)[unitNr]
-# print(vocabUnit(60))
 
 def unitNr(vocabUnit):
     return listUnits([1,1,1], 127).index(vocabUnit)
-# print(unitNr([3,1,1]))
 
 def countAllUnits():
     unit=[1,1,1]
