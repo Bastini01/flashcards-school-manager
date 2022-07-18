@@ -142,7 +142,6 @@ def voc_analysis_pdf(r):
     pdfkit.from_file([statsPath+'vocantest_'+str(i)+'.html' for i in range(len(pgs)-1)], statsPath+'vocantest.pdf', 
         options={'orientation': 'landscape', 'encoding': 'UTF-8', 'zoom': 0.6}, 
         configuration=config)
-voc_analysis_pdf(AllReviews.getReviewDataAll())
 
 def reviews_mm30():
     df = AllReviews.getReviewDataAll()
@@ -465,12 +464,6 @@ def update_stats():
     retention_detail().style.to_html(statsPath+'Retention analysis.html')
     voc_analysis(r).to_csv(join(statsPath,'vocAnalysis.txt'))
     voc_analysis_pdf(r)
-
-
-# update_stats(g.getStudents(), g.getEmailLog(), g.get_line_log())
-# update_stats()
-
-
 
 
 
