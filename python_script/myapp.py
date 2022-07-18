@@ -1,5 +1,5 @@
 import time
-from flask import Flask
+from flask import Flask, render_template
 from threading import Thread
 import main
 app = Flask(__name__)
@@ -36,6 +36,22 @@ class Compute(Thread):
             main.add_book(sId = self.setting[4:-1], book = self.setting[-1:])
         elif self.setting == 'all':
             main.main(std=True) 
+
+messages = [{'title': 'Message One',
+             'content': 'Message One Content'},
+            {'title': 'Message Two',
+             'content': 'Message Two Content'}
+            ]
+
+@app.route('/stats')
+def index():
+    return render_template('index.html', messages=messages)
+
+@app.route('/stats/voc')
+def run_stats():
+    import main_stats, AllReviews
+    r = AllReviews.getReviewDataAll()
+    return main_stats.voc_analysis_html(r).to_html()
 
 @app.route('/all')
 def run_main1():

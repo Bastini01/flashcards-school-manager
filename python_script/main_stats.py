@@ -71,10 +71,11 @@ def voc_analysis(df, min=None, max=None, chapter=None): #input allReviews
     df = df[df['tags'].notnull()] 
     df = df[df['student']!='00239 Tenzin Topden']
     df['TextbookChapter'] = df['tags'].apply(lambda x: str(x))
-    df = df.groupby(['tradChars', 'TextbookChapter', 'student']).agg({'buttonPressed':'mean'}).reset_index()
+    df = df.groupby(['tradChars', 'TextbookChapter', 'student']).agg(
+        {'buttonPressed':'mean'}).reset_index()
+        # {'buttonPressed':lambda x: x.head(3).mean()}).reset_index()
     df = df.groupby(['tradChars', 'TextbookChapter']).agg(
         count=('student', 'count'), 
-        # mean=('buttonPressed',lambda x: x.head(3).mean())
         mean=('buttonPressed','mean')
         ).reset_index()
     df['mean'] = df['mean'].apply(lambda x: round(10-(x-1)*(10/3), 1))
@@ -107,9 +108,10 @@ def voc_analysis_html(r, min=None, max=None):
         dfi.columns = pd.MultiIndex.from_tuples([(i, x) for x in dfi.columns.values])
         dfr = pd.concat([dfr, dfi], axis=1)
         meanCols.append((i, '難度'))
+
     dfr[meanCols] = dfr[meanCols].fillna(0)
     
-    def highlight_max(data):
+    def highlight_max(data): #hide NaN values
         attr = 'background-color: {}'.format('white') +'; color: %s' % 'white'
         if data.ndim == 1:  # Series from .apply(axis=0) or axis=1
             is_max = data == 0
@@ -121,14 +123,16 @@ def voc_analysis_html(r, min=None, max=None):
     
     spacing = {(n[0],'生詞'):[{'selector':'','props':[('padding-left', '20px')]}] for n in meanCols}
     capstyle = {'selector': 'caption', 'props': [('text-align', 'center'), ('font-size', '150%'), ('font-weight', 'bold')]}
+    tablestyle = {'selector':'', 'props':[('table-layout','fixed')]}
 
     stlr = dfr.style.format(precision=1, na_rep=''
             ).background_gradient(cmap='RdYlGn_r', subset=meanCols, vmin=1, vmax=7
             ).apply(highlight_max, axis=None, subset=meanCols
             ).hide(axis='index').set_caption(
                 "「MTC 自動化字卡」計畫 ------ 當代中文詞彙分析 ------ "+d_2_str(today)+" 更新"
-            ).set_table_styles(spacing
-            )
+            ).set_table_styles(spacing).set_table_styles([capstyle, tablestyle], overwrite=False
+            ).set_table_attributes(
+                'style="white-space: nowrap; table-layout: auto; width: 110%"')
     return stlr
 
 def voc_analysis_pdf(r):
@@ -137,11 +141,12 @@ def voc_analysis_pdf(r):
     config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
 
     for i in range(len(pgs)-1):
-        voc_analysis_html(r, pgs[0+i], pgs[1+i]).to_html(statsPath+'vocantest_'+str(i)+'.html')
+        voc_analysis_html(r, pgs[0+i], pgs[1+i]).to_html(statsPath+'voc_analysis_'+str(i)+'.html')
 
-    pdfkit.from_file([statsPath+'vocantest_'+str(i)+'.html' for i in range(len(pgs)-1)], statsPath+'vocantest.pdf', 
+    pdfkit.from_file([statsPath+'voc_analysis_'+str(i)+'.html' for i in range(len(pgs)-1)], statsPath+'voc_analysis.pdf', 
         options={'orientation': 'landscape', 'encoding': 'UTF-8', 'zoom': 0.6}, 
         configuration=config)
+# voc_analysis_pdf(AllReviews.getReviewDataAll())
 
 def reviews_mm30():
     df = AllReviews.getReviewDataAll()
