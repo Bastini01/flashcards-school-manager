@@ -4,13 +4,21 @@ import time
 import datetime as dt
 time1=time.time()
 import anki_db as db
+import mtc_info
 import pandas as pd
 
-def getReviewDataAll():
+def termFilter(df, term):
+    if term=='all': return df
+    else:
+        df = df[(df['reviewTime'].dt.date >= mtc_info.get_term_dates(term)['termStart']) &
+                (df['reviewTime'].dt.date < mtc_info.get_term_dates(term)['termEnd'])]
+    return df
+
+def getReviewDataAll(term='all'):
     revspath = db.technicalFilesPath+'allReviews.pkl'
     try: 
         if getmtime(revspath) > dt.datetime.now().replace(second=0, hour=0, minute=0).timestamp():       
-            return pd.read_pickle(revspath)
+            return termFilter(pd.read_pickle(revspath), term)
     except: pass
 
     profiles = [x for x in listdir(db.Anki2Dir) if x[0] == "0"]
@@ -25,8 +33,8 @@ def getReviewDataAll():
                 print(profileName+" EXCEPTION: extraction issue!", e)
                 continue
 
-    df= db.rev_to_df(allReviews)
+    df = db.rev_to_df(allReviews)
     df.to_pickle(revspath)   
-    return df
+    return termFilter(df, term)
 
-# print(len(getReviewDataAll()))
+# print(len(getReviewDataAll('22spring')))

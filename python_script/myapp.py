@@ -1,4 +1,5 @@
-import time
+from posixpath import split
+import time, re
 from flask import Flask, render_template
 from threading import Thread
 import main
@@ -37,21 +38,38 @@ class Compute(Thread):
         elif self.setting == 'all':
             main.main(std=True) 
 
-messages = [{'title': 'Message One',
-             'content': 'Message One Content'},
-            {'title': 'Message Two',
-             'content': 'Message Two Content'}
-            ]
 
 @app.route('/stats')
-def index():
-    return render_template('index.html', messages=messages)
 
-@app.route('/stats/voc')
-def run_stats():
+def index():
+    message = 'Hello'
+    return render_template('index.html', message=message)
+
+@app.route('/stats/voc/<term>')
+def run_stats_voc(term):
     import main_stats, AllReviews
-    r = AllReviews.getReviewDataAll()
-    return main_stats.voc_analysis_html(r).to_html()
+    r = AllReviews.getReviewDataAll(term)
+    message = 'Table insert'
+    terms = ['21winter', '22spring', '22summer', 'all']
+    terms.remove(term)
+    table = main_stats.voc_analysis_html(r, click=True).to_html()
+    temp = render_template('voctable.html', table=message, terms=terms, term=term)
+    temp = temp.replace('Table insert', table)
+    return temp
+
+@app.route('/stats/word/<chap>/<word>')
+def run_stats_word(chap, word):
+    import config_notes as nts
+    df = nts.getVocSource()
+    df = df[df['TextbookChapter'].apply(lambda x:x.split("-")[0]) == nts.vuName(
+            [chap.split('-')[0], chap.split('-')[1], 1]).split('-')[0]]
+    df = df[df['Traditional Characters'] == word]
+    tc = df['Traditional Characters'].values[0]
+    eng = df['Definition (en)'].values[0]
+    py = df['PinYin'].values[0]
+    ex = df['Examples'].values[0]
+    temp = render_template('word.html', tradChar= tc, eng=eng, PinYin=py, exSentence=ex)
+    return temp
 
 @app.route('/all')
 def run_main1():

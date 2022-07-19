@@ -7,7 +7,6 @@ u=expanduser("~")
 
 def getVocSource():
     return pd.read_excel(u+r'\OneDrive\SRL\TechnicalFiles\Dagdai voc 1-5 correct.xlsx')
-     
 
 def getSoundFileDir(vocabUnit):
     b=str(vocabUnit[0])
@@ -16,8 +15,11 @@ def getSoundFileDir(vocabUnit):
     soundFileDir=u+"\OneDrive\SRL\TechnicalFiles\Dangdai audio B1L1 - B3L8\ACICC B"+b+"_L"+c+"_V"+p+" Media\\"
     return soundFileDir
 
+def vuName(vocabUnit):
+    return "Book"+str(vocabUnit[0])+"Chapter"+str(vocabUnit[1]).zfill(2)+"-"+str(vocabUnit[2])
+
 def getVu(vocabUnit):
-    vuName="Book"+str(vocabUnit[0])+"Chapter"+str(vocabUnit[1]).zfill(2)+"-"+str(vocabUnit[2])
+    vuName=vuName(vocabUnit)
     vocSource = getVocSource()
     vu = vocSource[vocSource['TextbookChapter'] == vuName]
     vu = vu.replace(np.nan, '', regex=True)

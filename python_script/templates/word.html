@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block word %}
+<table style="width: 100%; height: 170px; font-size:calc(5px + 1.5vw); table-layout:auto">
+	<tr>
+		<td rowspan="3" style="font-size:80px">{{tradChar}}</td>
+		<td><b>英文:</b>&nbsp;{{eng}}</td>
+		<td rowspan="3">
+		<img alt="no image" src="../../../flashcards-school-manager/Pictures/B1_L01_V02/B1_L01_V02_08.jpg"/></td>
+	</tr>
+	<tr>
+		<td style="min-width: 100px"><b>拼音:</b>&nbsp; {{PinYin}}</td>
+	</tr>
+	<tr>
+		<td style="min-width: 100px"><b>例句:</b>&nbsp; {{exSentence}}</td>
+	</tr>
+</table>
+
+{% endblock %}

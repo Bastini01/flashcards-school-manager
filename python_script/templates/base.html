@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %} {% endblock %} - FlaskApp</title>
+    <title>MTC Data</title>
+    <script type = "text/javascript">  
+        function navigate(x) {  
+            window.location.href = '/run/stats/voc/'+x;
+            //    alert("You are Successfully "+x);  
+        }  
+    </script>  
     <style>
-        .message {
-            padding: 10px;
-            margin: 5px;
-            background-color: #f3f3f3
-        }
         nav a {
             color: #d64161;
             font-size: 3em;
@@ -20,12 +21,18 @@
 </head>
 <body>
     <nav>
-        <a href="{{ url_for('index') }}">FlaskApp</a>
-        <a href="#">About</a>
+        <a href="/run/stats/voc/all">MTC Data</a>
+        <select name="學期" onchange="navigate(this.options[this.selectedIndex].label);">
+            <option value="{{term}}" selected>{{term}}</option>
+            {% for t in terms %}
+              <option value="{{t}}">{{t}}</option>
+            {% endfor %}
+          </select>
     </nav>
     <hr>
-    <div class="content">
-        {% block content %} {% endblock %}
+    <div>
+        {% block voctable %} {% endblock %}
+        {% block word %} {% endblock %}
     </div>
 </body>
 </html>

@@ -95,7 +95,11 @@ def voc_analysis(df, min=None, max=None, chapter=None): #input allReviews
         df = df[df['TextbookChapter'].apply(lambda x: mtc_info.unitNr(str_to_unit(x))<mtc_info.unitNr(max))]
     return df[['TextbookChapter', 'Traditional Characters', 'count', 'mean']]
 
-def voc_analysis_html(r, min=None, max=None):
+def make_clickable(x):
+    b = '<a href=/run/stats/word/{}/{}>{}</a>'
+    return b.format(x.split("x")[1], x.split("x")[0], x.split("x")[0])
+
+def voc_analysis_html(r, min=None, max=None, click=False):
     df = voc_analysis(r, min, max)
     df['TextbookChapter'] = df['TextbookChapter'].apply(
         lambda x: str(str_to_unit(x)[0])+" 册 "+str(str_to_unit(x)[1])+" 課")
@@ -109,8 +113,13 @@ def voc_analysis_html(r, min=None, max=None):
         dfr = pd.concat([dfr, dfi], axis=1)
         meanCols.append((i, '難度'))
 
+    if click: 
+        tradcols = [(n[0],'生詞') for n in meanCols]
+        dfr[tradcols] = dfr[tradcols].apply(
+            lambda x: x+"x"+x.name[0][0]+"-"+x.name[0][4:len(x.name[0])-2])
+
     dfr[meanCols] = dfr[meanCols].fillna(0)
-    
+
     def highlight_max(data): #hide NaN values
         attr = 'background-color: {}'.format('white') +'; color: %s' % 'white'
         if data.ndim == 1:  # Series from .apply(axis=0) or axis=1
@@ -122,7 +131,7 @@ def voc_analysis_html(r, min=None, max=None):
                                 index=data.index, columns=data.columns)
     
     spacing = {(n[0],'生詞'):[{'selector':'','props':[('padding-left', '20px')]}] for n in meanCols}
-    capstyle = {'selector': 'caption', 'props': [('text-align', 'center'), ('font-size', '150%'), ('font-weight', 'bold')]}
+    capstyle = {'selector': 'caption', 'props': [('text-align', 'left'), ('font-size', '150%'), ('font-weight', 'bold')]}
     tablestyle = {'selector':'', 'props':[('table-layout','fixed')]}
 
     stlr = dfr.style.format(precision=1, na_rep=''
@@ -133,7 +142,14 @@ def voc_analysis_html(r, min=None, max=None):
             ).set_table_styles(spacing).set_table_styles([capstyle, tablestyle], overwrite=False
             ).set_table_attributes(
                 'style="white-space: nowrap; table-layout: auto; width: 110%"')
+    
+    if click:
+        stlr = stlr.format(make_clickable, subset=tradcols, na_rep='')
+
     return stlr
+
+# voc_analysis_html(AllReviews.getReviewDataAll(), min=None, max=None, click=True).to_html(db.technicalFilesPath + 'testest.html')
+# webbrowser.open(db.technicalFilesPath + 'testest.html')
 
 def voc_analysis_pdf(r):
     pgs = [[1, 1, 1], [1, 11, 1], [2, 6, 1], [3, 1, 1]]
