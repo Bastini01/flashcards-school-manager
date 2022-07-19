@@ -102,7 +102,7 @@ def voc_analysis_excel():
         voc_analysis(AllReviews.getReviewDataAll(x)).to_csv(db.technicalFilesPath+'voc_analysis_'+x+'.txt')
 
 def make_clickable(x):
-    b = '<a href=/run/stats/word/{}/{}>{}</a>'
+    b = '<a href=/autoflashcards/run/stats/word/{}/{}>{}</a>'
     return b.format(x.split("x")[1], x.split("x")[0], x.split("x")[0])
 
 def voc_analysis_html(r, min=None, max=None, click=False):
