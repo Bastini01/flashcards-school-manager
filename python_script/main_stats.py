@@ -97,8 +97,9 @@ def voc_analysis(df, min=None, max=None, chapter=None): #input allReviews
 
 def voc_analysis_excel():
     terms=['all', '21winter', '22spring', '22summer']
+    AllReviews.getReviewDataAll().to_csv(db.technicalFilesPath+'all_reviews.txt')
     for x in terms:
-        voc_analysis(AllReviews.getReviewDataAll(x)).to_excel(db.technicalFilesPath+'voc_analysis_'+x+'.xslx')
+        voc_analysis(AllReviews.getReviewDataAll(x)).to_csv(db.technicalFilesPath+'voc_analysis_'+x+'.txt')
 
 def make_clickable(x):
     b = '<a href=/run/stats/word/{}/{}>{}</a>'
