@@ -17,8 +17,15 @@ from matplotlib.colors import ListedColormap
 import json
 import webbrowser
 
+dfst = g.getStudents()
+
 today = dt.datetime.now().date()
 statsPath = join(db.technicalFilesPath, "stats\\")
+
+capstyle = {'selector': 'caption', 'props': [('text-align', 'left'), ('font-size', '150%'), ('font-weight', 'bold')]}
+tablestyle = {'selector':'', 'props':[('table-layout','fixed')]}
+tabelAttr = 'style="white-space: nowrap; table-layout: auto; width: 110%"'
+
 
 def d_2_str(x): 
     return dt.datetime.combine(
@@ -67,18 +74,22 @@ def str_to_unit(x):
     rgx = re.compile("([1-5]), ([0-9]+), ([1-2])")
     return [int(rgx.search(x)[i]) for i in range(1, 4)]
 
-def voc_analysis(df, min=None, max=None, chapter=None): #input allReviews
-    df = df[df['tags'].notnull()] 
+def voc_analysis_base(r): #input allReviews
+    df = r[r['tags'].notnull()] 
     df = df[df['student']!='00239 Tenzin Topden']
     df['TextbookChapter'] = df['tags'].apply(lambda x: str(x))
     df = df.groupby(['tradChars', 'TextbookChapter', 'student']).agg(
-        {'buttonPressed':'mean'}).reset_index()
-        # {'buttonPressed':lambda x: x.head(3).mean()}).reset_index()
+        難度=('buttonPressed','mean'),
+        複習次數=('cardID','count')).reset_index()
+    df['難度'] = df['難度'].apply(lambda x: round(10-(x-1)*(10/3), 1))
+    return df
+
+def voc_analysis(r, min=None, max=None, chapter=None):
+    df = voc_analysis_base(r)
     df = df.groupby(['tradChars', 'TextbookChapter']).agg(
         count=('student', 'count'), 
-        mean=('buttonPressed','mean')
+        mean=('難度','mean')
         ).reset_index()
-    df['mean'] = df['mean'].apply(lambda x: round(10-(x-1)*(10/3), 1))
     df['count'] = df['count'].round(decimals=0).astype(object)
 
     if chapter == None: voc = config_notes.getVocSource()
@@ -95,6 +106,27 @@ def voc_analysis(df, min=None, max=None, chapter=None): #input allReviews
         df = df[df['TextbookChapter'].apply(lambda x: mtc_info.unitNr(str_to_unit(x))<mtc_info.unitNr(max))]
     return df[['TextbookChapter', 'Traditional Characters', 'count', 'mean']]
 
+def word_student(r, chap, word, min=None, max=None):
+    df = voc_analysis_base(r)
+    df = df[df['TextbookChapter'].apply(lambda x: str(str_to_unit(x)[:-1])) == str(chap)]
+    df = df[df['tradChars'] == word]
+    df = df.drop(['TextbookChapter', 'tradChars'], axis=1
+        ).sort_values('複習次數', ascending=False)    
+    df['student'] = df['student'].apply(lambda x: dfst[dfst['profileName']==x]['studentId'].values[0])
+    tablestyle = {'selector':'', 'props':[('table-layout','fixed')]}
+    tabelAttr = 'style="white-space: nowrap; table-layout: auto; width: 400px; text-align: center; font-size:calc(5px + 1vw)"'
+
+    stlr = df.style.format(precision=1).background_gradient(cmap='RdYlGn_r', subset='難度', vmin=1, vmax=7
+            ).hide(axis='index').set_caption(
+                '用APP複習過 "'+word+'" 的名單'
+            ).set_table_styles([capstyle, tablestyle], overwrite=False
+            ).set_table_attributes(tabelAttr)
+    return stlr
+# print(word_student(AllReviews.getReviewDataAll(), [1, 2], "多"))
+# word_student(AllReviews.getReviewDataAll(), [1, 2], "多").to_html(db.technicalFilesPath + 'word_studtest.html')
+# webbrowser.open(db.technicalFilesPath + 'word_studtest.html')
+
+
 def voc_analysis_excel():
     terms=['all', '21winter', '22spring', '22summer']
     AllReviews.getReviewDataAll().to_csv(db.technicalFilesPath+'all_reviews.txt')
@@ -103,7 +135,19 @@ def voc_analysis_excel():
 
 def make_clickable(x):
     b = '<a href=/autoflashcards/run/stats/word/{}/{}>{}</a>'
-    return b.format(x.split("x")[1], x.split("x")[0], x.split("x")[0])
+    return b.format(x.split("x")[1], 
+            x.split("x")[0].encode('punycode'), 
+            x.split("x")[0])
+
+def highlight_max(data): #hide NaN values
+        attr = 'background-color: {}'.format('white') +'; color: %s' % 'white'
+        if data.ndim == 1:  # Series from .apply(axis=0) or axis=1
+            is_max = data == 0
+            return [attr if v else '' for v in is_max]
+        else:  # from .apply(axis=None)
+            is_max = data == 0
+            return pd.DataFrame(np.where(is_max, attr, ''),
+                                index=data.index, columns=data.columns)
 
 def voc_analysis_html(r, min=None, max=None, click=False):
     df = voc_analysis(r, min, max)
@@ -125,20 +169,8 @@ def voc_analysis_html(r, min=None, max=None, click=False):
             lambda x: x+"x"+x.name[0][0]+"-"+x.name[0][4:len(x.name[0])-2])
 
     dfr[meanCols] = dfr[meanCols].fillna(0)
-
-    def highlight_max(data): #hide NaN values
-        attr = 'background-color: {}'.format('white') +'; color: %s' % 'white'
-        if data.ndim == 1:  # Series from .apply(axis=0) or axis=1
-            is_max = data == 0
-            return [attr if v else '' for v in is_max]
-        else:  # from .apply(axis=None)
-            is_max = data == 0
-            return pd.DataFrame(np.where(is_max, attr, ''),
-                                index=data.index, columns=data.columns)
-    
+  
     spacing = {(n[0],'生詞'):[{'selector':'','props':[('padding-left', '20px')]}] for n in meanCols}
-    capstyle = {'selector': 'caption', 'props': [('text-align', 'left'), ('font-size', '150%'), ('font-weight', 'bold')]}
-    tablestyle = {'selector':'', 'props':[('table-layout','fixed')]}
 
     stlr = dfr.style.format(precision=1, na_rep=''
             ).background_gradient(cmap='RdYlGn_r', subset=meanCols, vmin=1, vmax=7
@@ -146,8 +178,7 @@ def voc_analysis_html(r, min=None, max=None, click=False):
             ).hide(axis='index').set_caption(
                 "「MTC 自動化字卡」計畫 ------ 當代中文詞彙分析 ------ "+d_2_str(today)+" 更新"
             ).set_table_styles(spacing).set_table_styles([capstyle, tablestyle], overwrite=False
-            ).set_table_attributes(
-                'style="white-space: nowrap; table-layout: auto; width: 110%"')
+            ).set_table_attributes(tabelAttr)
     
     if click:
         stlr = stlr.format(make_clickable, subset=tradcols, na_rep='')

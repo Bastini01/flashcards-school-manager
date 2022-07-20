@@ -2,7 +2,9 @@ from posixpath import split
 import time, re
 from flask import Flask, render_template
 from threading import Thread
-import main
+import main, main_stats, AllReviews
+import config_notes as nts
+
 app = Flask(__name__)
 app.debug = True
 
@@ -39,15 +41,9 @@ class Compute(Thread):
             main.main(std=True) 
 
 
-@app.route('/stats')
-
-def index():
-    message = 'Hello'
-    return render_template('index.html', message=message)
 
 @app.route('/stats/voc/<term>')
 def run_stats_voc(term):
-    import main_stats, AllReviews
     r = AllReviews.getReviewDataAll(term)
     message = 'Table insert'
     terms = ['21winter', '22spring', '22summer', 'all']
@@ -59,16 +55,20 @@ def run_stats_voc(term):
 
 @app.route('/stats/word/<chap>/<word>')
 def run_stats_word(chap, word):
-    import config_notes as nts
+    r = AllReviews.getReviewDataAll()
+    word = bytes(word[2: -1], 'utf8').decode('punycode')
+    chap = [int(chap.split('-')[0]), int(chap.split('-')[1])]
     df = nts.getVocSource()
     df = df[df['TextbookChapter'].apply(lambda x:x.split("-")[0]) == nts.vuName(
-            [chap.split('-')[0], chap.split('-')[1], 1]).split('-')[0]]
+            [chap[0], chap[1], 1]).split('-')[0]]
     df = df[df['Traditional Characters'] == word]
-    tc = df['Traditional Characters'].values[0]
     eng = df['Definition (en)'].values[0]
     py = df['PinYin'].values[0]
     ex = df['Examples'].values[0]
-    temp = render_template('word.html', tradChar= tc, eng=eng, PinYin=py, exSentence=ex)
+    table = main_stats.word_student(r, chap, word).to_html()
+    temp = render_template('word.html', 
+        tradChar=word, eng=eng, PinYin=py, exSentence=ex)
+    temp = temp.replace('Table insert', table)
     return temp
 
 @app.route('/all')
