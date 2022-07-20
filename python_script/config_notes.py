@@ -19,16 +19,16 @@ def vuName(vocabUnit):
     return "Book"+str(vocabUnit[0])+"Chapter"+str(vocabUnit[1]).zfill(2)+"-"+str(vocabUnit[2])
 
 def getVu(vocabUnit):
-    vuName=vuName(vocabUnit)
+    vun=vuName(vocabUnit)
     vocSource = getVocSource()
-    vu = vocSource[vocSource['TextbookChapter'] == vuName]
+    vu = vocSource[vocSource['TextbookChapter'] == vun]
     vu = vu.replace(np.nan, '', regex=True)
-    return vu, vuName
+    return vu, vun
 # print(getVu([3,1,1])[0].columns)
 
 def getNotes(deckName, vocabUnit, modelName):
     vu = getVu(vocabUnit)[0]
-    vuName = getVu(vocabUnit)[1]
+    vun = getVu(vocabUnit)[1]
     notesData = []
     mediaFiles = {'sound':[],'pics':[]}
     for i in range(len(vu.index)):
@@ -52,11 +52,11 @@ def getNotes(deckName, vocabUnit, modelName):
                     }
                 },
                 "tags": [
-                  vuName
+                  vun
                 ]
             }
         #####Add sound if available
-        fileName="B"+ vuName[4]+"_L"+vuName[12:14]+"_V0"+ vuName[-1]+"_"+str(i+1).zfill(2)
+        fileName="B"+ vun[4]+"_L"+vun[12:14]+"_V0"+ vun[-1]+"_"+str(i+1).zfill(2)
         audioLink = vu.iloc[i]["audio link"]
         if audioLink == True:
             audioName = fileName+".mp3"
@@ -74,9 +74,9 @@ def getNotes(deckName, vocabUnit, modelName):
     return notesData, mediaFiles
 
 def getNotesMax(deckName, vocabUnit):
-    vuName="Book"+str(vocabUnit[0])+"Chapter"+str(vocabUnit[1]).zfill(2)+"-"+str(vocabUnit[2])
+    vun=vuName(vocabUnit)
     vocSource = pd.read_excel(r'C:\Users\Pierre-Henry\OneDrive\SRL\TechnicalFiles\Dagdai voc 1-5 correct.xlsx')
-    vu = vocSource[vocSource['TextbookChapter'] == vuName]
+    vu = vocSource[vocSource['TextbookChapter'] == vun]
     notesData = []
     for i in range(len(vu.index)):
 
@@ -100,7 +100,7 @@ def getNotesMax(deckName, vocabUnit):
                     }
                 },
                 "tags": [
-                  vuName
+                  vun
                 ]
             }
         #####Add sound if available
