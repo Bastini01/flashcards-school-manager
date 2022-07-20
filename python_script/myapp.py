@@ -59,15 +59,15 @@ def run_stats_word(chap, word):
     word = bytes(word[2: -1], 'utf8').decode('punycode')
     chap = [int(chap.split('-')[0]), int(chap.split('-')[1])]
     df = nts.getVocSource()
-    df = df[df['TextbookChapter'].apply(lambda x:x.split("-")[0]) == nts.vuName(
-            [chap[0], chap[1], 1]).split('-')[0]]
+    df = nts.chap_filter(df, chap)
+    picSrc = nts.pic_url(df, chap, word)
     df = df[df['Traditional Characters'] == word]
     eng = df['Definition (en)'].values[0]
     py = df['PinYin'].values[0]
-    ex = df['Examples'].values[0]
+    ex = df['Examples'].values[0].replace("_x000D_", "")
     table = main_stats.word_student(r, chap, word).to_html()
     temp = render_template('word.html', 
-        tradChar=word, eng=eng, PinYin=py, exSentence=ex)
+        tradChar=word, eng=eng, PinYin=py, exSentence=ex, picSrc=picSrc)
     temp = temp.replace('Table insert', table)
     return temp
 

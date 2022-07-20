@@ -118,7 +118,7 @@ def word_student(r, chap, word, min=None, max=None):
 
     stlr = df.style.format(precision=1).background_gradient(cmap='RdYlGn_r', subset='難度', vmin=1, vmax=7
             ).hide(axis='index').set_caption(
-                '用APP複習過 "'+word+'" 的名單'
+                '用APP複習過 "'+word+'" 的學生'
             ).set_table_styles([capstyle, tablestyle], overwrite=False
             ).set_table_attributes(tabelAttr)
     return stlr

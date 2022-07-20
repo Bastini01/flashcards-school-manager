@@ -137,5 +137,23 @@ def getTestNote():
     print(noteData)
     return [noteData]
 
+def chap_filter(nts, chap):
+    df = nts[nts['TextbookChapter'].apply(lambda x:x.split("-")[0]
+    ) == vuName([chap[0], chap[1], 1]).split('-')[0]]
+    return df
+
+def pic_url(nts, chap, word):
+    unit = nts[nts['Traditional Characters'] == word]['TextbookChapter'].values[0][-1]
+    df = nts[nts['TextbookChapter'].apply(lambda x: x[-1]) == unit].reset_index()
+    unit = unit.zfill(2)
+    wordNr = str(df.index[df['Traditional Characters'] == word].values[0]+1).zfill(2)
+    book = str(chap[0])
+    chapter = str(chap[1]).zfill(2)
+    url = "http://35.206.234.133/Pictures/B{b}_L{l}_V{v}/B{b}_L{l}_V{v}_{w}.jpg"
+    url = url.format(b=book, l=chapter, v=unit, w=wordNr)
+    return url
+
+# print(pic_url(getVocSource(), [1, 2], "多"))
+
 #print(getTestNote())
 #print(getNotes("Book1Chapter01-1"))
