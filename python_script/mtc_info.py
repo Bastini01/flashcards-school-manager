@@ -37,7 +37,6 @@ def month_end():
    datePrint = x.astype(dt.datetime).strftime('%a %d-%b')
    dateReminder = np.busday_offset(monthLastDay, -5, roll='forward', busdaycal=bdc).astype(dt.date)
    return {'lastDay':dateLast, 'reminderDate':dateReminder, 'printDate':datePrint}
-print(month_end())
 
 def get_term(d):
     if d.month==12:
