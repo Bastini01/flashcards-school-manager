@@ -354,7 +354,6 @@ def weeklyReport(profileName, reviews):
     end= week_dates()[1]
     report=periodReport(profileName, reviews, start, end)
     return 'weekly'+report[0], report[1]
-# print(weeklyReport("00239 Tenzin Topden", getReviews("00239 Tenzin Topden")))
 
 def weekly_send_conditions(reviews, weekly):
     if(weekly[1]['reviews'] > 1 or(

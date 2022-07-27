@@ -258,6 +258,9 @@ function handleDesktopRequest(rq){
         }        
         else if (action["emailTemplate"]=="custom"){
           sendCustom(studentIndex)
+        }    
+        else if (action["emailTemplate"].slice(0, -10)=="monthEnd"){
+          sendMonthEndReminder(studentIndex, action["emailTemplate"].slice(-10))
         }
       }
     }

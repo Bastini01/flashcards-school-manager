@@ -292,17 +292,30 @@ function sendBookAdded(si, bookNr){
   var msgText="Hi "+getData(si).firstName+"!\n"+
           "All of book "+bookNr+" was added to your Ankiweb account.\n"+
           "https://ankiweb.net/decks/"
-
-  if (lineId){ pushMsg(lineId, msgText); type='line' }
-  
+  if (lineId){ pushMsg(lineId, msgText); type='line' } 
   else {
     var subject = "Book "+bookNr+" added"
     // var msgText = msgText.replace('😉', ";)")
     GmailApp.sendEmail(getData(si).email,`=?UTF-8?B?${Utilities.base64Encode(Utilities.newBlob(subject).getBytes())}?=`,msgText);
     type='gmail'
   }
-
   append_email_log(si, "book "+bookNr+" added", type);
+}
+
+function sendMonthEndReminder(si, date){
+  var lineId = getData(si).lineId
+  var msgText="Hi "+getData(si).firstName+"!\n"+
+          "Today is the last day to get supplementary class hours for this month.\n"+
+          "After today you can get hours again from the 1st of next month.\n"+
+          "https://ankiweb.net/decks/"
+  if (lineId){ pushMsg(lineId, msgText); type='line' } 
+  else {
+    var subject = "Last dat for supplementary class hours this month"
+    // var msgText = msgText.replace('😉', ";)")
+    GmailApp.sendEmail(getData(si).email,`=?UTF-8?B?${Utilities.base64Encode(Utilities.newBlob(subject).getBytes())}?=`,msgText);
+    type='gmail'
+  }
+  append_email_log(si, "monthEndReminder"+date, type);
 }
 
 function sendCustom(si){

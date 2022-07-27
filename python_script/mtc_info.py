@@ -30,6 +30,15 @@ doubleTen = dt.date( today.year, 10, 10 )
 
 bdc=np.busdaycalendar(holidays=[*nyJan, *cny, *springBreak, midAtumn, doubleTen, nyDec])
 
+def month_end():
+   monthLastDay = dt.date(today.year, today.month+1, 1)
+   dateLast = np.busday_offset(monthLastDay, -1, roll='forward', busdaycal=bdc).astype(dt.date)
+   x = np.busday_offset(monthLastDay, -3, roll='forward', busdaycal=bdc)
+   datePrint = x.astype(dt.datetime).strftime('%a %d-%b')
+   dateReminder = np.busday_offset(monthLastDay, -5, roll='forward', busdaycal=bdc).astype(dt.date)
+   return {'lastDay':dateLast, 'reminderDate':dateReminder, 'printDate':datePrint}
+print(month_end())
+
 def get_term(d):
     if d.month==12:
         termStart= dt.date( d.year, winterDate[0], winterDate[1])

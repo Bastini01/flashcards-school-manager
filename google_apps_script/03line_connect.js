@@ -52,7 +52,7 @@ function doPost(e) {
             if (sId){emailOptions['htmlBody'] += '<br>student id: '+sId+
               '<br>http://35.206.234.133/autoflashcards/run/sid/'+sId+
               '<br>https://forms.gle/QSUE43HjZQ2WUpaw6' //respond to line google form link
-              if (getData(si)['state']=='new'){run_afc(sId)}
+              // if (getData(si)['state']=='new'){run_afc(sId)}
             }
             if (messageType == 'image'){
               emailOptions['htmlBody'] += "<br>image:<img src='cid:mailImg'>"

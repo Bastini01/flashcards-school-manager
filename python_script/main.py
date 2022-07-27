@@ -127,7 +127,13 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                                 
                     #########NOTIFICATIONS&SUPPHOURS
                     if (status=='active' or status[:-1]=='custom') and syncResponse == 'ok':
-                        rvs=anki_db.getReviews(profileName)
+                        rvs = anki_db.getReviews(profileName)
+                        sh = g.get_student_sup_hours(supHoursLog, studentId)
+                        me = mtc_info.month_end()
+                        #########END OF MONTH
+                        if (classType==2 and sh<8 and today >= me['reminderDate'] and
+                            g.checkEmail(emailLog, studentId, "monthEndReminder"+me['printDate'])==False):
+                            actions.append({"studentIndex":i+2,"emailTemplate":'monthEnd'+me['printDate']})
                         #########NO REVIEWS REMINDERS
                         if ((len(rvs)==0 or 
                             anki_db.last_review_date(rvs)+dt.timedelta(weeks=5)<today) and
@@ -159,10 +165,9 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                                 len(daily[1]['completion'][1]) > 0 and
                                 len(rvs)<500):
                                     actions.append({"studentIndex":i+2,"emailTemplate":daily}) 
-                            ########SUPPLEMENTARY HOURS
-                            sh=g.get_student_sup_hours(supHoursLog, studentId)
+                            ########ADD SUPPLEMENTARY HOURS
                             h = month[1]['hours']-sh if sh+month[1]['hours']<=8 else 8-sh
-                            if h>0: actions.append({"studentIndex":i+2, 
+                            if (h>0 and classType==2 and today < me['lastDay']): actions.append({"studentIndex":i+2, 
                                 "emailTemplate":'suppHours'+str(h)+str(sh)}) 
                     #########SEND TO GAPPS
                     if len(actions)>0: g.sendActions(actions, profileName)
