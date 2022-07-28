@@ -43,8 +43,8 @@ def class_report(class_id, week=False, st_cl_te = None):
     df["本期複習的課"]=df["本期複習的課"].apply(lambda x: chap_name(x))
     df["本期複習的課"]=df["本期複習的課"].apply(lambda x: list_to_text(x))
     df["最常被忘記的生詞"]=df["最常被忘記的生詞"].apply(lambda x: list_to_text(x))
-    stlr = df.style.set_caption("班: "+class_id+" --- 老師: "+teacherName+" --- 期間: "+timeFrame)
-    htmlReport = stlr.to_html()
+    stlr = df.style.hide(axis='index')
+    htmlReport = stlr.set_caption("班: "+class_id+" --- 老師: "+teacherName+" --- 期間: "+timeFrame).to_html()
     return 'classWeekly',{
         'class': class_id,
         'teacherId': teacherId,
@@ -52,6 +52,7 @@ def class_report(class_id, week=False, st_cl_te = None):
         'teacherEmail': teacherEmail,
         'timeFrame': timeFrame,
         'empty': True if len(df)==0 else False,
+        'df': df,
         'styler':stlr,
         'htmlReport':htmlReport
     }

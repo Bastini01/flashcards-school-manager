@@ -4,16 +4,31 @@
     <meta charset="UTF-8">
     <title>MTC Data</title>
     <script type = "text/javascript">  
+        const f = document.getElementById('class_search');
+        const q = document.getElementById('query');
+        const statsRoot = '/autoflashcards/run/stats/';
         function navigate(x) {  
             window.location.href = x;
             //    alert("You are Successfully "+x);  
-        }  
+        }
+        function submitted() {
+        // event.preventDefault();
+        const url = statsRoot + 'class/' + q.value;
+        alert("You are Successfully "+url);
+        // navigate(url)
+        // const win = window.open(url, '_blank');
+        // win.focus();
+        }
+
+        // f.addEventListener('submit', submitted);
+
+          
     </script>  
     <style>
         nav a {
             color: #d64161;
             font-size: 3em;
-            margin-left: 50px;
+            margin-left: 30px;
             text-decoration: none;
         }
 
@@ -21,8 +36,14 @@
 </head>
 <body>
     <nav>
-        <a href="/autoflashcards/run/stats/voc/all">MTC Data</a>
-        <select name="學期" onchange="navigate(this.options[this.selectedIndex].label);">
+        <a href="/autoflashcards/run/stats/voc/all">當代中文詞彙圖</a>
+        <a href="/autoflashcards/run/stats/class">班級總攬</a>
+        <form id="class_search"> 
+            <input type="text" id="query" name="q" placeholder="輸入班號...">
+            <button onclick="submitted()">搜尋班級</button>
+          </form>
+        <label for="學季">學季:</label>
+        <select name="學季" onchange="navigate(this.options[this.selectedIndex].label);">
             <option value="{{term}}" selected>{{term}}</option>
             {% for t in terms %}
               <option value="{{t}}">{{t}}</option>

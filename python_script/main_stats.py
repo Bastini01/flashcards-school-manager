@@ -25,7 +25,7 @@ statsPath = join(db.technicalFilesPath, "stats\\")
 capstyle = {'selector': 'caption', 'props': [('text-align', 'left'), ('font-size', '150%'), ('font-weight', 'bold')]}
 tablestyle = {'selector':'', 'props':[('table-layout','fixed')]}
 tabelAttr = 'style="white-space: nowrap; table-layout: auto; width: 110%"'
-
+statsRoot = '/autoflashcards/run/stats/'
 
 def d_2_str(x): 
     return dt.datetime.combine(
@@ -53,6 +53,9 @@ def classOverview(): #number of active users by class
     df3.sort_index(inplace=True, ascending=[True, False, True])
     df3.to_html(join(statsPath,'classOverview.html'))
     return df3
+# classOverview().to_html(db.technicalFilesPath + 'testest.html')
+# webbrowser.open(db.technicalFilesPath + 'testest.html')
+
 
 def print_class_reports(term = None):
     path = statsPath+r'class_reports'
@@ -74,10 +77,14 @@ def str_to_unit(x):
     rgx = re.compile("([1-5]), ([0-9]+), ([1-2])")
     return [int(rgx.search(x)[i]) for i in range(1, 4)]
 
-def voc_analysis_base(r): #input allReviews
+def voc_analysis_base(r):
     df = r[r['tags'].notnull()] 
     df = df[df['student']!='00239 Tenzin Topden']
     df['TextbookChapter'] = df['tags'].apply(lambda x: str(x))
+    return df
+
+def voc_analysis_grpby_student(r): #input allReviews
+    df = voc_analysis_base(r)
     df = df.groupby(['tradChars', 'TextbookChapter', 'student']).agg(
         難度=('buttonPressed','mean'),
         複習次數=('cardID','count')).reset_index()
@@ -85,7 +92,7 @@ def voc_analysis_base(r): #input allReviews
     return df
 
 def voc_analysis(r, min=None, max=None, chapter=None):
-    df = voc_analysis_base(r)
+    df = voc_analysis_grpby_student(r)
     df = df.groupby(['tradChars', 'TextbookChapter']).agg(
         count=('student', 'count'), 
         mean=('難度','mean')
@@ -106,13 +113,17 @@ def voc_analysis(r, min=None, max=None, chapter=None):
         df = df[df['TextbookChapter'].apply(lambda x: mtc_info.unitNr(str_to_unit(x))<mtc_info.unitNr(max))]
     return df[['TextbookChapter', 'Traditional Characters', 'count', 'mean']]
 
-def word_student(r, chap, word, min=None, max=None):
-    df = voc_analysis_base(r)
+def word_students(r, chap, word, min=None, max=None):
+    def click(x): 
+        b = '<a href='+statsRoot+'word/{chap}/{word}/{x}>{x}</a>'
+        return b.format(chap=str(chap[0])+'-'+str(chap[1]), word=word.encode('punycode'), x=x)
+    df = voc_analysis_grpby_student(r)
     df = df[df['TextbookChapter'].apply(lambda x: str(str_to_unit(x)[:-1])) == str(chap)]
     df = df[df['tradChars'] == word]
     df = df.drop(['TextbookChapter', 'tradChars'], axis=1
         ).sort_values('複習次數', ascending=False)    
     df['student'] = df['student'].apply(lambda x: dfst[dfst['profileName']==x]['studentId'].values[0])
+    df['student'] = df['student'].apply(click)
     tablestyle = {'selector':'', 'props':[('table-layout','fixed')]}
     tabelAttr = 'style="white-space: nowrap; table-layout: auto; width: 400px; text-align: center; font-size:calc(5px + 1vw)"'
 
@@ -122,9 +133,45 @@ def word_student(r, chap, word, min=None, max=None):
             ).set_table_styles([capstyle, tablestyle], overwrite=False
             ).set_table_attributes(tabelAttr)
     return stlr
-# print(word_student(AllReviews.getReviewDataAll(), [1, 2], "多"))
-# word_student(AllReviews.getReviewDataAll(), [1, 2], "多").to_html(db.technicalFilesPath + 'word_studtest.html')
-# webbrowser.open(db.technicalFilesPath + 'word_studtest.html')
+
+def charfbutton(b):
+    if b == 1: return "忘記"
+    elif b == 2: return "很難"
+    elif b == 3: return "OK"
+    elif b == 4: return "容易"
+
+def button_color(b): #hide NaN values
+    attr = 'color: %s'
+    if b[0] == "忘記": return [attr % 'red']
+    elif b[0] == "很難": return [attr % 'orange']
+    elif b[0] == "OK": return [attr % 'green']
+    elif b[0] == "容易": return [attr % 'blue']
+
+
+def student_word(r, chap, word, sid, min=None, max=None):
+    df = voc_analysis_base(r)
+    df = df[df['TextbookChapter'].apply(lambda x: str(str_to_unit(x)[:-1])) == str(chap)]
+    df = df[df['tradChars'] == word]
+    df['student'] = df['student'].apply(lambda x: dfst[dfst['profileName']==x]['studentId'].values[0])
+    df = df[df['student'] == sid]
+    df = df[['reviewTime', 'buttonPressed']].rename(columns={'reviewTime': '複習時間', 'buttonPressed': '答案'}
+            ).sort_values('複習時間', ascending=False)
+    df['答案'] = df['答案'].apply(charfbutton)
+    tablestyle = {'selector':'', 'props':[('table-layout','fixed')]}
+    tabelAttr = 'style="white-space: nowrap; table-layout: auto; width: 400px; text-align: center; font-size:calc(5px + 1vw)"'
+    caption = """<a href={root}student/{sid}/all>{sid}</a> 學號: 
+              "<a href={root}word/{chap}/{wordc}/all/all>{word}</a>" 複習次序""" 
+    stlr = df.style.format(precision=1).hide(axis='index').set_caption(
+            caption.format(root = statsRoot, sid=sid, word = word,
+                chap=str(chap[0])+"-"+str(chap[1]), 
+                wordc = word.encode('punycode'))
+            ).set_table_styles([capstyle, tablestyle], overwrite=False
+            ).set_table_attributes(tabelAttr).apply(button_color, axis=1, subset='答案'
+            )
+    return stlr
+# print(student_word(AllReviews.getReviewDataAll(), [1, 3], "音樂", "220361127"))
+# student_word(AllReviews.getReviewDataAll(), [1, 3], "音樂", "220361127").to_html(db.technicalFilesPath + 'testest.html')
+# webbrowser.open(db.technicalFilesPath + 'testest.html')
 
 
 def voc_analysis_excel():
@@ -132,12 +179,6 @@ def voc_analysis_excel():
     AllReviews.getReviewDataAll().to_csv(db.technicalFilesPath+'all_reviews.txt')
     for x in terms:
         voc_analysis(AllReviews.getReviewDataAll(x)).to_csv(db.technicalFilesPath+'voc_analysis_'+x+'.txt')
-
-def make_clickable(x):
-    b = '<a href=/autoflashcards/run/stats/word/{}/{}>{}</a>'
-    return b.format(x.split("x")[1], 
-            x.split("x")[0].encode('punycode'), 
-            x.split("x")[0])
 
 def highlight_max(data): #hide NaN values
         attr = 'background-color: {}'.format('white') +'; color: %s' % 'white'
@@ -149,7 +190,7 @@ def highlight_max(data): #hide NaN values
             return pd.DataFrame(np.where(is_max, attr, ''),
                                 index=data.index, columns=data.columns)
 
-def voc_analysis_html(r, min=None, max=None, click=False):
+def voc_analysis_html(r, term='all', min=None, max=None, click=False):
     df = voc_analysis(r, min, max)
     df['TextbookChapter'] = df['TextbookChapter'].apply(
         lambda x: str(str_to_unit(x)[0])+" 册 "+str(str_to_unit(x)[1])+" 課")
@@ -160,8 +201,9 @@ def voc_analysis_html(r, min=None, max=None, click=False):
     for i in df['TextbookChapter'].unique():
         dfi = df[df['TextbookChapter']==i].drop('TextbookChapter', axis=1).reset_index(drop=True)
         dfi.columns = pd.MultiIndex.from_tuples([(i, x) for x in dfi.columns.values])
-        dfr = pd.concat([dfr, dfi], axis=1)
-        meanCols.append((i, '難度'))
+        if not dfi[dfi.columns.values[1]].isnull().all():
+            dfr = pd.concat([dfr, dfi], axis=1)
+            meanCols.append((i, '難度'))
 
     if click: 
         tradcols = [(n[0],'生詞') for n in meanCols]
@@ -176,12 +218,19 @@ def voc_analysis_html(r, min=None, max=None, click=False):
             ).background_gradient(cmap='RdYlGn_r', subset=meanCols, vmin=1, vmax=7
             ).apply(highlight_max, axis=None, subset=meanCols
             ).hide(axis='index').set_caption(
-                "「MTC 自動化字卡」計畫 ------ 當代中文詞彙分析 ------ "+d_2_str(today)+" 更新"
+                "「MTC 自動化字卡」計畫 ------ 當代中文詞彙圖 ------ "+d_2_str(today)+" 更新"
             ).set_table_styles(spacing).set_table_styles([capstyle, tablestyle], overwrite=False
             ).set_table_attributes(tabelAttr)
     
     if click:
-        stlr = stlr.format(make_clickable, subset=tradcols, na_rep='')
+        def clck(x):
+            if click=='w': r = 'all/'+term
+            elif click[0]=='s': r = click[1:]
+            else: b = r = click[1:]+'/'+term
+            b = '<a href='+statsRoot+'word/{ch}/{cw}/{r}>{w}</a>'
+            return b.format(ch=x.split("x")[1], cw=x.split("x")[0].encode('punycode'), w=x.split("x")[0], r=r)
+
+        stlr = stlr.format(clck, subset=tradcols, na_rep='')
 
     return stlr
 

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block word %}
+<table style="width: 100%; font-size:calc(5px + 1.3vw); table-layout:auto">
+	<tr>
+		<td rowspan="3" style="font-size:45px">班號: {{clss}}</td>
+		<td>學季: {{trm}}</td>
+		<td rowspan="3"><b>教師: </b>&nbsp;{{teacher}}</td>
+	</tr>
+	<tr>
+		<td>密集(1)/普通(2):</b>&nbsp; {{tp}}</td>
+	</tr>
+	<tr>
+		<td>註冊學生人數:</b>&nbsp; {{nrStudents}}</td>
+	</tr>
+</table>
+</br>
+<div>Table insert1</div>
+</br>
+<div>Table insert2</div>
+
+
+{% endblock %}
