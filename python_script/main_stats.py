@@ -12,8 +12,7 @@ import google_apps as g
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.ticker import PercentFormatter
-from matplotlib import cm
-from matplotlib.colors import ListedColormap
+from matplotlib import cm, colors
 import json
 import webbrowser
 
@@ -23,7 +22,7 @@ today = dt.datetime.now().date()
 statsPath = join(db.technicalFilesPath, "stats\\")
 
 capstyle = {'selector': 'caption', 'props': [('text-align', 'left'), ('font-size', '150%'), ('font-weight', 'bold')]}
-tablestyle = {'selector':'', 'props':[('table-layout','fixed')]}
+tablestyle = {'selector':'', 'props':[('table-layout','fixed'), ('text-align','center'), ]}
 tabelAttr = 'style="white-space: nowrap; table-layout: auto; width: 110%"'
 statsRoot = '/autoflashcards/run/stats/'
 
@@ -193,44 +192,53 @@ def highlight_max(data): #hide NaN values
 def voc_analysis_html(r, term='all', min=None, max=None, click=False):
     df = voc_analysis(r, min, max)
     df['TextbookChapter'] = df['TextbookChapter'].apply(
-        lambda x: str(str_to_unit(x)[0])+" 册 "+str(str_to_unit(x)[1])+" 課")
+        lambda x: str(str_to_unit(x)[0])+" 册 "+str(str_to_unit(x)[1]))
     df = df.rename(columns={'Traditional Characters':'生詞',
                 'count': '學生人數', 'mean': '難度'})
     dfr = pd.DataFrame()
+    chaps = df['TextbookChapter'].unique()
     meanCols = []
-    for i in df['TextbookChapter'].unique():
+    tradCols = []
+    for i in chaps:
         dfi = df[df['TextbookChapter']==i].drop('TextbookChapter', axis=1).reset_index(drop=True)
         dfi.columns = pd.MultiIndex.from_tuples([(i, x) for x in dfi.columns.values])
         if not dfi[dfi.columns.values[1]].isnull().all():
+            dfi = dfi.sort_values((i, '難度'), ascending=False).reset_index(drop=True)
             dfr = pd.concat([dfr, dfi], axis=1)
-            meanCols.append((i, '難度'))
+            meanCols.append((i,'難度')); tradCols.append((i,'生詞')) 
 
     if click: 
-        tradcols = [(n[0],'生詞') for n in meanCols]
-        dfr[tradcols] = dfr[tradcols].apply(
-            lambda x: x+"x"+x.name[0][0]+"-"+x.name[0][4:len(x.name[0])-2])
+        dfr[tradCols] = dfr[tradCols].apply(
+            lambda x: x+"x"+x.name[0][0]+"-"+x.name[0][4:])
 
-    dfr[meanCols] = dfr[meanCols].fillna(0)
-  
+    dfr = dfr.fillna(0)
+
     spacing = {(n[0],'生詞'):[{'selector':'','props':[('padding-left', '20px')]}] for n in meanCols}
 
     stlr = dfr.style.format(precision=1, na_rep=''
-            ).background_gradient(cmap='RdYlGn_r', subset=meanCols, vmin=1, vmax=7
-            ).apply(highlight_max, axis=None, subset=meanCols
             ).hide(axis='index').set_caption(
                 "「MTC 自動化字卡」計畫 ------ 當代中文詞彙圖 ------ "+d_2_str(today)+" 更新"
-            ).set_table_styles(spacing).set_table_styles([capstyle, tablestyle], overwrite=False
+            ).set_table_styles([capstyle, tablestyle], overwrite=False
             ).set_table_attributes(tabelAttr)
-    
+
     if click:
         def clck(x):
+            if x==0: return ''
             if click=='w': r = 'all/'+term
             elif click[0]=='s': r = click[1:]
             else: b = r = click[1:]+'/'+term
-            b = '<a href='+statsRoot+'word/{ch}/{cw}/{r}>{w}</a>'
+            b = '<a style="text-decoration: none; color: inherit; font-weight: bold" href='+statsRoot+'word/{ch}/{cw}/{r}>{w}</a>'
             return b.format(ch=x.split("x")[1], cw=x.split("x")[0].encode('punycode'), w=x.split("x")[0], r=r)
 
-        stlr = stlr.format(clck, subset=tradcols, na_rep='')
+        stlr = stlr.format(clck, subset=tradCols, na_rep='')
+
+
+    for i in meanCols:
+        stlr = stlr.background_gradient(
+            gmap=dfr[i], axis=0,  cmap='RdYlGn_r', subset=[(i[0],'生詞'), (i[0], '學生人數'), i], vmin=1, vmax=7)
+    stlr = stlr.apply(highlight_max, axis=None).hide(subset=meanCols+[(i[0], '學生人數') for i in meanCols], axis='columns'
+            ).hide_columns(level=1)
+
 
     return stlr
 
