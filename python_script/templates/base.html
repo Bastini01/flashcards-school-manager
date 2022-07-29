@@ -2,45 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>MTC Data</title>
-    <script type = "text/javascript">  
-        const f = document.getElementById('class_search');
-        const q = document.getElementById('query');
-        const statsRoot = '/autoflashcards/run/stats/';
+    <title>MTC 學習管理系統</title>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class=flashes>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    <script>  
         function navigate(x) {  
             window.location.href = x;
-            //    alert("You are Successfully "+x);  
+            // alert("You are Successfully "+x);  
         }
-        function submitted() {
-        // event.preventDefault();
-        const url = statsRoot + 'class/' + q.value;
-        alert("You are Successfully "+url);
-        // navigate(url)
-        // const win = window.open(url, '_blank');
-        // win.focus();
-        }
-
-        // f.addEventListener('submit', submitted);
-
           
     </script>  
     <style>
         nav a {
-            color: #d64161;
-            font-size: 3em;
+            /* color: #d64161; */
+            font-size: 2em;
             margin-left: 30px;
-            text-decoration: none;
+            /* text-decoration: none; */
         }
 
     </style>
 </head>
 <body>
     <nav>
-        <a href="/autoflashcards/run/stats/voc/all">當代中文詞彙圖</a>
+        <a href="/autoflashcards/run/stats/voc/all">詞彙圖</a>
         <a href="/autoflashcards/run/stats/class">班級總攬</a>
-        <form id="class_search"> 
-            <input type="text" id="query" name="q" placeholder="輸入班號...">
-            <button onclick="submitted()">搜尋班級</button>
+        <form action="/autoflashcards/run/stats/search" method="post"> 
+            <input type="text" name="name" placeholder="輸入班號或學號...">
+            <button>搜尋</button>
           </form>
         <label for="學季">學季:</label>
         <select name="學季" onchange="navigate(this.options[this.selectedIndex].label);">

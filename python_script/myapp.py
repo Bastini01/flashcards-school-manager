@@ -1,12 +1,13 @@
 from posixpath import split
 import time, re, pandas as pd
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, flash
 from threading import Thread
 import main, main_stats, AllReviews, google_apps as g
 import class_stats
 import config_notes as nts
 
 app = Flask(__name__)
+app.secret_key = b'_5#y2L"F4Q2z\n\xec]/'
 app.debug = True
 allTerms = ['21winter', '22spring', '22summer', 'all']
 def click_class(x): return '<a href='+main_stats.statsRoot+'class/'+x+'>'+x+'</a>'
@@ -109,7 +110,10 @@ def run_stats_student(sid, term):
     r = AllReviews.getReviewDataAll(term)
     st = g.getStudents()
     gd = g.getData()
-    profileName = st[st['studentId']==sid]['profileName'].values[0]
+    try: profileName = st[st['studentId']==sid]['profileName'].values[0]
+    except:
+        flash("抱歉, "+sid+" 學號的資料未在系統內")
+        return redirect(request.referrer)
     r = r[r['student'] == profileName]
 
     trm = None if term=='all' else term
@@ -169,7 +173,11 @@ def run_stats_class(clss):
     df = df1[df1['class_id']==clss]
     studList = df['profileName'].unique()
     df = df.groupby(['term', 'name', 'type']).agg({'studentId':'nunique'}).reset_index()
-    trm = df['term'].values[0]
+    try: trm = df['term'].values[0]
+    except:
+        flash("抱歉, "+clss+" 班號的資料未在系統內")
+        return redirect(request.referrer)
+
     teacher = df['name'].values[0]
     tp = df['type'].values[0]
     nrStudents = df['studentId'].values[0]
@@ -188,6 +196,21 @@ def run_stats_class(clss):
     temp = temp.replace('Table insert1', table1).replace('Table insert2', table2)
     return temp
 
+@app.route('/stats/search', methods=['GET', 'POST'])
+def stats_search():
+    query = request.form['name']
+    # query = request.form.keys()
+    print(query)
+    sidRegex = re.compile("[0-9]{9}")
+    classRegex = re.compile("[0-9]{5}")
+    if sidRegex.match(query): 
+        return redirect(main_stats.statsRoot+'student/'+query+'/all')
+    elif classRegex.match(query): 
+        return redirect(main_stats.statsRoot+'class/'+query)
+    else: 
+        flash(query+" 號碼錯誤, 請輸入學生號(9個號碼)或班號(5個號碼)")
+        return redirect(request.referrer) 
+        
 @app.route('/all')
 def run_main1():
     setting = 'all'
