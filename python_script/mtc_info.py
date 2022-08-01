@@ -16,7 +16,7 @@ today=now.date()
 businessDaysPerTerm=45 #actually 57, tweaked to match the actual speed of progress
 
  ####x days sooner to accomodate early registrations and adding rithm
-fallDate=[9, 1]
+fallDate=[9, 2]
 winterDate=[12, 1]
 springDate=[3, 5] #2 
 summerDate=[6, 6] #1
@@ -25,17 +25,18 @@ nyDec = dt.date( today.year, 12, 31 )
 nyJan = [dt.date( today.year, 1, 1 ), dt.date( today.year, 1, 2 )]
 cny = dateList(dt.date( today.year, 1, 29 ), dt.date( today.year, 2, 7))
 springBreak = dateList(dt.date( today.year, 4, 1 ), dt.date( today.year, 4, 7))
+summerHoliday = dateList(dt.date( today.year, 8, 25), dt.date( today.year, 9, 1))
 midAtumn = dt.date( today.year, 9, 9 )
 doubleTen = dt.date( today.year, 10, 10 )
 
-bdc=np.busdaycalendar(holidays=[*nyJan, *cny, *springBreak, midAtumn, doubleTen, nyDec])
+bdc=np.busdaycalendar(holidays=[*nyJan, *cny, *springBreak, *summerHoliday, midAtumn, doubleTen, nyDec])
 
 def month_end():
    monthLastDay = dt.date(today.year, today.month+1, 1)
-   dateLast = np.busday_offset(monthLastDay, -1, roll='forward', busdaycal=bdc).astype(dt.date)
+   dateLast = np.busday_offset(monthLastDay, -2, roll='forward', busdaycal=bdc).astype(dt.date)
    x = np.busday_offset(monthLastDay, -3, roll='forward', busdaycal=bdc)
    datePrint = x.astype(dt.datetime).strftime('%a %d-%b')
-   dateReminder = np.busday_offset(monthLastDay, -5, roll='forward', busdaycal=bdc).astype(dt.date)
+   dateReminder = np.busday_offset(monthLastDay, -6, roll='forward', busdaycal=bdc).astype(dt.date)
    return {'lastDay':dateLast, 'reminderDate':dateReminder, 'printDate':datePrint}
 
 def get_term(d):
