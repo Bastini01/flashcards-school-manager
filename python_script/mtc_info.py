@@ -275,7 +275,7 @@ def example_check(vocabUnit, numberOfUnits):
             if i: e=e+1
         result.append((u, e))
     return result
-# lst=[x[1] for x in example_check([1,1,1], 29)]
+# lst=[x[1] for x in example_check([4,1,1], 19)]
 # print(lst)
 # print(sum(lst)/len(lst)) 
 

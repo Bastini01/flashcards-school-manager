@@ -143,11 +143,11 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                             today >= statusDate+dt.timedelta(days=4)):
                                 actions.append({"studentIndex":i+2,"emailTemplate":'reminder0'})
                             #########ACCREMINDER
-                            accReport=mtc_info.acc_report(profileName, rvs, startUnit, classType)
-                            if (accReport and g.checkEmail(emailLog, studentId, accReport[0])==False and
-                            today >= statusDate+dt.timedelta(days=7)):
-                                actions.append({"studentIndex":i+2,
-                                    "emailTemplate":accReport})
+                            # accReport=mtc_info.acc_report(profileName, rvs, startUnit, classType)
+                            # if (accReport and g.checkEmail(emailLog, studentId, accReport[0])==False and
+                            # today >= statusDate+dt.timedelta(days=7)):
+                            #     actions.append({"studentIndex":i+2,
+                            #         "emailTemplate":accReport})
                         #########REVIEW REPORTS
                         elif len(rvs)>0 and today<anki_db.last_review_date(rvs)+dt.timedelta(weeks=5):
                             weekly=anki_db.weeklyReport(profileName, rvs)
