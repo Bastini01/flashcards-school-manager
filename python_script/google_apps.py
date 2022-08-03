@@ -172,7 +172,7 @@ def getActionsTemplate(): #not used, documentation only
     columns={"studentIndex":[], "statusUpdate":[], "chapterUpdate":[],"emailTemplate":[]}
     return columns
 
-def sendActions(actions, profileName=None):
+def sendActions(actions):
 
     service = build('script', 'v1', credentials=creds)
 
@@ -211,14 +211,12 @@ def sendActions(actions, profileName=None):
                 if response['done']==True: 
                     r="gAction done "
                     rs=str(response['response']['result'])[:200]
-                    # if profileName: print(profileName, r, rs)
-                    # else: print(r, rs)
                 else: print("gAction FAILED")    
-            except: print(response)
+            except: print(actions, response)
 
     except errors.HttpError as e:
         # The API encountered a problem before the script started executing.
-        print(e.content)
+        print('httpo error', actions, e.content)
 
 def send_test_action():
     action = [

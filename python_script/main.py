@@ -245,7 +245,7 @@ def add_book(sId, book):
         logdata = file.read()
 
     g.sendActions([{"emailTemplate":('log', logdata)}])
-    return
+    sys.exit()
     
 
 
