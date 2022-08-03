@@ -216,7 +216,7 @@ def sendActions(actions):
 
     except errors.HttpError as e:
         # The API encountered a problem before the script started executing.
-        print('httpo error', actions, e.content)
+        print('http error', actions, e.content)
 
 def send_test_action():
     action = [
