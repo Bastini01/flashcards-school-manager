@@ -62,7 +62,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                         if not regResp: continue
                         else: 
                             actions.append({"studentIndex":i+2, "emailTemplate":'regReminder',"statusUpdate":'reg'+regResp})
-                            g.sendActions(actions, profileName)
+                            g.sendActions(actions)
                             continue
                     
                     #########ASK CLASS DATA UPDATE
@@ -170,7 +170,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                             if (h>0 and classType==2 and today < me['lastDay']): actions.append({"studentIndex":i+2, 
                                 "emailTemplate":'suppHours'+str(h)+str(sh)}) 
                     #########SEND TO GAPPS
-                    if len(actions)>0: g.sendActions(actions, profileName)
+                    if len(actions)>0: g.sendActions(actions)
                     #########APPEND REVIEWS
                     if today.isoweekday() == 1:
                         allReviews = allReviews+anki_db.getReviews(profileName)
