@@ -38,7 +38,6 @@ def month_end():
    datePrint = x.astype(dt.datetime).strftime('%a %d-%b')
    dateReminder = np.busday_offset(monthLastDay, -6, roll='forward', busdaycal=bdc).astype(dt.date)
    return {'lastDay':dateLast, 'reminderDate':dateReminder, 'printDate':datePrint}
-print(month_end())
 
 def get_term(d):
     if d.month==12:
@@ -106,7 +105,6 @@ def nextUnit(vocabUnit):
 
     else: vu[1]=vu[1]+1
     return vu
-#print(nextUnit([3,10,2]))
 
 def unitAhead(vocabUnit, numberOfUnits=None):
     vu=vocabUnit
@@ -115,7 +113,6 @@ def unitAhead(vocabUnit, numberOfUnits=None):
     for i in range(numberOfUnits):
         vu=nextUnit(vu)
     return vu
-# print(unitAhead([2,8,1], 1))
 
 def listUnits(vocabUnit, numberOfUnits): #list of units ahead
     vu=vocabUnit
@@ -139,7 +136,6 @@ def countAllUnits():
             return x
         x=x+1
         unit=unitAhead(unit)
-# print(countAllUnits())
 
 def termStartUnit(vocabUnit): #doesn't work
     unit=[1,1,1]
@@ -151,8 +147,6 @@ def termStartUnit(vocabUnit): #doesn't work
         if unit==vocabUnit:
             break  
         unit=unitAhead(unit)
-    # print(tsu)
-#termStartUnit([3,10,1])      
 
 def addDays(startUnit, classType=2): # list [of int]
     bd = businessDaysPerTerm
@@ -169,70 +163,33 @@ def addDays(startUnit, classType=2): # list [of int]
         if d>=bd: break
         days.append([math.floor(d), u])
     return days 
-# print(addDays([1,6,1],2))
 
-def addDatesTerm(startUnit, classType): #####deprecated
-    addDates=[]
-    x=0
-    for d in dateList(termStart, termStart+dt.timedelta(days=100)):
-        bd=np.busday_count(termStart, d, busdaycal=bdc)
-        isbd=np.is_busday(d, busdaycal=bdc)
-        print(d,bd, isbd)
-        if (bd in addDays(startUnit, classType)) and isbd==True:
-                x=x+1
-                #print(d, x)
-                addDates.append(d)
-    return addDates
-
-def addDatesCustom(startUnit, startDate, classType):
+def addDates(startUnit, startDate, classType):
     dl=dateList(startDate, startDate+dt.timedelta(days=100))
     bdl=[dl[i] for i in range(len(dl)) if np.is_busday(dl[i], busdaycal=bdc)]
     units = addDays(startUnit, classType)
     return [[bdl[u[0]], u[1]] for u in units] 
-# print(addDatesCustom([1,6,1], dt.date( 2021, 12, 1 ), 2))
-
-def pAddDatesRandA(startUnit): #####deprecated
-    l=[]
-    for i in range(len(addDatesTerm(startUnit, 1))):
-        r= addDatesTerm(startUnit, 2)[i] if i < len(addDatesTerm(startUnit, 2)) else None
-        l.append([str(addDatesTerm(startUnit, 1)[i]),str(r)])
-    for i in l:
-        print(i)
-# pAddDatesRandA([1, 1, 1])
+# print(addDates([2,11,1], termStart,2))
 
 def currentUnit(date, startUnit, startDate, classType):
-    du=addDatesCustom(startUnit, startDate, classType)
+    du=addDates(startUnit, startDate, classType)
     for i in du:
         if i[0]<=date:
             u=i[1]
     return u
-# print(unitNr(currentUnit(today, [1,6,1], dt.date( 2021, 12, 1 ), 2)))
-
-def getUnitsToAddOld(profileName, startUnit, classType): 
-    #to do: change logic: compare 'to have' units with 'already have' units and add difference
-    # to avoid first units missing due to wrong 'satrt unit' entry 
-    date=today
-    startDate = termStart
-    lastUnit= anki_db.getLastUnit(profileName)
-    lastUnitNr= unitNr(lastUnit[1]) if lastUnit else unitNr(startUnit)-1
-    cuNr= unitNr(currentUnit(date, startUnit, startDate, classType))
-    n=cuNr-lastUnitNr
-    if n>0:
-        unitsToAdd=listUnits(vocabUnit(lastUnitNr+1), n-1)
-    else: unitsToAdd=[]
-    return unitsToAdd
+# print(currentUnit(today, [2,11,1], termStart, 2))
 
 def getUnitsToAdd(profileName, startUnit=None, classType=None, book=None): 
     date=today
     startDate = termStart
     presentUnits = [x[1] for x in anki_db.getUnits(profileName)]
     if not book:
-        unitsToGet = [vocabUnit(x) for x in range(unitNr([startUnit[0], 1, 1]), unitNr(currentUnit(date, startUnit, startDate, classType)))]
+        unitsToGet = [vocabUnit(x) for x in range(unitNr([startUnit[0], 1, 1]), unitNr(currentUnit(date, startUnit, startDate, classType))+1)]
     else:
         unitsToGet = [x for x in listUnits([1,1,1], 127) if x[0] == int(book)]
     unitsToAdd = [x for x in unitsToGet if x not in presentUnits]
     return unitsToAdd
-
+# print(getUnitsToAdd("00104 Arno Bouguennec", [2,11,1], 2))
 
 def acc_report(profileName, rvs, startUnit, classType):
     date=today #dt.date(2022, 2, 15)
@@ -253,7 +210,6 @@ def acc_report(profileName, rvs, startUnit, classType):
             "#Words": sum([x[1] for x in lst]),
             "time": anki_db.timeText(sum([x[1] for x in lst])*revTime),
             "list": lst})
-#(acc_report("00053 Paul H Nemra", anki_db.getReviews("00053 Paul H Nemra"), [1,6,1], 2))
 
 def audioFileCheck(vocabUnit, numberOfUnits):
     units=listUnits(vocabUnit, numberOfUnits)
@@ -265,7 +221,6 @@ def audioFileCheck(vocabUnit, numberOfUnits):
         if int(lastFile.split("_")[3][:2]) == vocLen: check="OK"
         l= [u, len(config_notes.getVu(u)[0].index), lastFile, check]
         print(l)
-# audioFileCheck([2, 1, 1], 29)
 
 def example_check(vocabUnit, numberOfUnits):
     units=listUnits(vocabUnit, numberOfUnits)
@@ -276,8 +231,5 @@ def example_check(vocabUnit, numberOfUnits):
             if i: e=e+1
         result.append((u, e))
     return result
-# lst=[x[1] for x in example_check([4,1,1], 19)]
-# print(lst)
-# print(sum(lst)/len(lst)) 
 
  
