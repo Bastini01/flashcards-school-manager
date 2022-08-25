@@ -37,4 +37,3 @@ def getReviewDataAll(term='all'):
     df.to_pickle(revspath)   
     return termFilter(df, term)
 
-# print(len(getReviewDataAll('22spring')))

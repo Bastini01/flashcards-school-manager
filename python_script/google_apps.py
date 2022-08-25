@@ -1,5 +1,6 @@
-from __future__ import print_function
+# from __future__ import print_function
 from datetime import datetime as dt, date as da
+import pickle
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -8,11 +9,10 @@ from googleapiclient import errors
 from httplib2 import Http
 from oauth2client import file as oauth_file, client, tools
 import pandas as pd
-import anki_db
+import anki_db as db
 
 today=dt.now().date()
 
-# Deployment_ID ='AKfycbyO5jRxSVwZ3yptJSQR4JSKXRG3umICDSO_ZrWaVBFXrMpLfR2uOxwnuvdRflbSPtsCZg'
 Script_ID ='1YTY8-oBmV3a9SChEDsYIPbmkINxQNitY8U5nAmAukBFXyu1nb0xjN6lE' ##script id
 
 # If modifying these scopes, delete the file token.json.
@@ -66,8 +66,9 @@ def get_gsheet(sheetName,
     sheet = service.spreadsheets()
     result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
                                 range=SAMPLE_RANGE_NAME).execute()
+    with open(db.technicalFilesPath+'gapps_backup_'+sheetName+'.pkl','wb') as fp:
+        pickle.dump(result, fp)
     return result.get('values', [])
-# print(get_gsheet("'Email log'"))
 
 def getStudents():
 
@@ -121,7 +122,6 @@ def getData():
         # return i
         result= {'teacher': l[0], 'class': l[1], 'student_class': l[2]}
         return result
-# (getData()['student_class'])
 
 def st_cl_te(term = None, studData = None, gData = None):
     s = studData if studData is not None else getStudents()
