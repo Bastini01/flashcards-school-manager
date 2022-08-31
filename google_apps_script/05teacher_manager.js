@@ -30,7 +30,7 @@ function send_teacher_promotion(){ //triggered (once per term or) manually
   var subject = "「MTC自動化字卡」20"+term.slice(0,2)+"年"+term.charAt(2)+"季推動計畫"
   // GmailApp.sendEmail(t[0], subject," ", {htmlBody: emailText, cc: 'shuhuafang@mtc.ntnu.edu.tw', attachments: [qrcode]})
   // GmailApp.sendEmail('pierrehenry.bastin@gmail.com', subject," ", {htmlBody: emailText, attachments: [qrcode]})
-  append_email_log('teacher'+t[2], templateName);
+  // append_email_log('teacher'+t[2], templateName);
   }
 }
 

@@ -15,11 +15,11 @@ today=now.date()
 
 businessDaysPerTerm=45 #actually 57, tweaked to match the actual speed of progress
 
- ####x days sooner to accomodate early registrations and adding rithm
+ ####x days sooner to accomodate early registrations
 fallDate=[9, 2]
 winterDate=[12, 1]
-springDate=[3, 5] #2 
-summerDate=[6, 6] #1
+springDate=[3, 7]
+summerDate=[6, 2]
 ########
 nyDec = dt.date( today.year, 12, 31 )
 nyJan = [dt.date( today.year, 1, 1 ), dt.date( today.year, 1, 2 )]
@@ -33,7 +33,7 @@ bdc=np.busdaycalendar(holidays=[*nyJan, *cny, *springBreak, *summerHoliday, midA
 
 def month_end():
    monthLastDay = dt.date(today.year, today.month+1, 1)
-   dateLast = np.busday_offset(monthLastDay, -2, roll='forward', busdaycal=bdc).astype(dt.date)
+   dateLast = np.busday_offset(monthLastDay, -2, roll='forward', busdaycal=bdc).astype(dt.date) #last day for getting supplementary hours+1 day
    x = np.busday_offset(monthLastDay, -3, roll='forward', busdaycal=bdc)
    datePrint = x.astype(dt.datetime).strftime('%a %d-%b')
    dateReminder = np.busday_offset(monthLastDay, -6, roll='forward', busdaycal=bdc).astype(dt.date)
