@@ -1,4 +1,5 @@
 # from __future__ import print_function
+from time import sleep
 from datetime import datetime as dt, date as da
 import pickle
 from googleapiclient.discovery import build
@@ -172,7 +173,7 @@ def getActionsTemplate(): #not used, documentation only
     columns={"studentIndex":[], "statusUpdate":[], "chapterUpdate":[],"emailTemplate":[]}
     return columns
 
-def sendActions(actions):
+def sendActions(actions, retry=True):
 
     service = build('script', 'v1', credentials=creds)
 
@@ -216,7 +217,11 @@ def sendActions(actions):
 
     except errors.HttpError as e:
         # The API encountered a problem before the script started executing.
-        print('http error', actions, e.content)
+        if retry: 
+            sleep(10)
+            sendActions(actions, False)
+        else: print('http error', actions, e.content)
+
 
 def send_test_action():
     action = [
