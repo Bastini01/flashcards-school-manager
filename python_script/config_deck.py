@@ -1,6 +1,8 @@
 
 def deckName(vocabUnit):
-    return "當代-"+str(vocabUnit[0])+"::第"+str(vocabUnit[1]).zfill(2)+"課"
+    if vocabUnit[0]<7: book = "當代-"; booknr = vocabUnit[0]
+    elif vocabUnit[0]==7: book = "新聞-"; booknr = 1
+    return book+str(booknr)+"::第"+str(vocabUnit[1]).zfill(2)+"課"
 
 def getConfig(deckName, configId):
     config= {

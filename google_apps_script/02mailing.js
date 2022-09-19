@@ -1,18 +1,23 @@
 function customSender () {
-  target= [186]
+  target = ['211110033', '220300232', '211010637', '220362232', '220360525', '220363264', '211220298', '211220313', '220661416', '220101040', '220320636', '220300141', '220711635', '220711320', '211010421', '211110025', '211010413', '220661292', '211221311', '211010059', '211010398', '211010603', '211010794', '211010330', '211010299', '211020511', '211020529', '211010314', '211010538', '211010249', '211110091', '220312055', '210612922', '211020199', '211010455', '211110083', '220362555', '220311099', '211010645', '220360567', '211010471', '220320826', '220361680', '211010041', '211010372', '211010439', '220711867', '211010611', '220361101', '211221452', '211212146', '220361432', '220300365', '220320305', '211212914', '220600092', '220360145', '220321303', '220361060', '170611528', '220360088', '220662026', '211010778', '211010744', '211221791', '211020298', '220320339', '220320719', '220321436', '190905068', '220320785', '220320058', '220660864', '220361614', '220650154', '220361119', '220710322', '220620470', '110308024', '220611271', '220611213', '220661820', '211220321']
+  // target = targt.slice(-35, -5)
   // target = autoArray()
+  Logger.log(target)
   for (var i = 0; i < target.length; i++){
+    Logger.log(target[i])
+    target[i] = get_si('studentId', parseFloat(target[i]))
+    Logger.log(target[i])
     Logger.log(target[i]+", "+ getData(target[i]).email+", "+ getData(target[i]).firstName)
     // sendWrongPasswordMail(target[i])
     // sendChapterUpdateMail(target[i], [1,9,2])
     // sendActivated(target[i])
     // sendNotActivated(target[i])
-    // sendCustom3(target[i])
     // sendReminder0(target[i])
     // sendAnkiInstructions(target[i])
     // sendTermUpdate(target[i])
     // sendTermUpdateReminder(target[i])
     // sendGformLink(target[i])
+    sendCustom4(target[i])
   }
   
 }
@@ -103,7 +108,7 @@ function sendAnkiInstructions(si){
           "next please create an Ankiweb account with\n"+
           "USERNAME: "+email+"\n"+
           "PASSWORD: 👉"+password+"👈\n"+
-          "Once you have activated the account please let us know by answering this message!\n"+
+          "Once you have activated the account you're all set, next morning the system will connect and upload the cards.\n"+
           "https://ankiweb.net/account/register"
 
   pushMsg(lineId, msgText); type='line'
@@ -396,6 +401,26 @@ function sendCustom3(si){
 
   append_email_log(si, "customSuppClassHours", type);
 }
+
+function sendCustom4(si){
+  var lineId = getData(si).lineId
+  var msgText=getData(si).firstName+" 你好\n"+
+          "The school is looking for students to participate in a study. "+
+          "You can get 300$ in Familiy Mart vouchers for it! "+
+          "If interested fill in the form below (limited places, first come first served)\n"+
+          "https://reurl.cc/3YKb3j"
+
+  if (lineId){ pushMsg(lineId, msgText); type='line' }
+  
+  else {
+    var subject = "School communication: participants needed for study"
+    GmailApp.sendEmail(getData(si).email,`=?UTF-8?B?${Utilities.base64Encode(Utilities.newBlob(subject).getBytes())}?=`,msgText);
+    type='gmail'
+  }
+
+  append_email_log(si, "customStudyCommunication", type);
+}
+
 
 function sendWReport(si, data){
   var lineId = getData(si).lineId
