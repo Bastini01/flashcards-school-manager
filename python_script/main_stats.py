@@ -12,7 +12,7 @@ import google_apps as g
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.ticker import PercentFormatter
-from matplotlib import cm, colors
+from matplotlib.dates import DateFormatter
 import json
 import webbrowser
 
@@ -528,13 +528,15 @@ def activation_funnel(s, e, l, term='all'):
     
 def plot_user_trend(s, e, l, period=None, cutoff=None):
     # dr = line_stats()
+    # plt.xticks(rotation=70)
+
     dr = regs_by_date(s, e, l)
     da = activation(s, e)
     ax = plt.subplots()[1]
     ax.plot(dr.regDate, dr.regs, linewidth=2, label='registered')
     ax.plot(da.activDate, da.activations, linewidth=2, label='activated')
-    ax.set_xlabel('time')
-    ax.set_ylabel('cumulative')
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Cumulative number of students')
     ax.set_title('MTC Automated flashcards user trend')
     dfu = periodical_users(period, cutoff).activeUserCount
     ax2 = ax.twinx()
@@ -550,6 +552,11 @@ def plot_user_trend(s, e, l, period=None, cutoff=None):
     ax2.plot(dfu.index, dfu.values, 'g', linestyle='dotted')       
     ax2.set_ylabel(labelr+"\n(min "+str(cutoff)+" reviews/day on average)", color='g') 
     ax.legend()
+    ax.tick_params(axis='x', rotation=45)
+    # myFmt = DateFormatter('%m-%Y')
+    # ax.xaxis.set_major_formatter(myFmt)
+    # for label in ax.get_xticklabels():
+    #     label.set_rotation(40)
     return plt
 
 def update_stats():
@@ -577,8 +584,8 @@ def update_stats():
     user_distribution('f').savefig(statsPath+"user analysis frequency.png", bbox_inches='tight')
     print("user freq ok"); plt.gcf().clear()
     retention_detail().style.to_html(statsPath+'Retention analysis.html')
-    voc_analysis(r).to_csv(join(statsPath,'vocAnalysis.txt'))
-    voc_analysis_pdf(r)
+    # voc_analysis(r).to_csv(join(statsPath,'vocAnalysis.txt'))
+    # voc_analysis_pdf(r)
 
 
 
