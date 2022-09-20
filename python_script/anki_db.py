@@ -51,8 +51,7 @@ def strip_tags(html):
     return s.get_data()
 
 def unit(txt):
-    reg = r'(?:Book.*([1-5])).*(?:Chapter.*([0-1][0-9])).*[^I]([1-2]|I+)'
-    # reg = r'Book([1-5])Chapter([0-1][0-9])-([1-2])'
+    reg = r'(?:Book.*([0-9])).*(?:Chapter.*([0-1][0-9])).*[^I]([1-2]|I+)'
     r=re.search(reg, txt)
     try:
         p=r.group(3)
