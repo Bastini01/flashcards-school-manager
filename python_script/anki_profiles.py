@@ -151,7 +151,7 @@ def sync(profileName):
     if len(c.ListFields())>1: 
         if c.ListFields()[1][1]==2 or c.ListFields()[1][1]==3:
             c=col.full_download(SyncAuth)
-            print(profileName+" FULL DOWNLOAD\n")
+            print(profileName+" FULL DOWNLOAD COMPLETE\n")
             # return "fullSync"
         else: 
             print(profileName+" FULL SYNC REQUIRED\n", c)

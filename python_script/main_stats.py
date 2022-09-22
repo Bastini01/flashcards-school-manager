@@ -73,7 +73,7 @@ def print_class_reports(term = None):
             '.html'))
 
 def str_to_unit(x):
-    rgx = re.compile("([1-5]), ([0-9]+), ([1-2])")
+    rgx = re.compile("([0-9]), ([0-9]+), ([1-2])")
     return [int(rgx.search(x)[i]) for i in range(1, 4)]
 
 def voc_analysis_base(r):
@@ -90,13 +90,14 @@ def voc_analysis_grpby_student(r): #input allReviews
     df['難度'] = df['難度'].apply(lambda x: round(10-(x-1)*(10/3), 1))
     return df
 
-def voc_analysis(r, min=None, max=None, chapter=None):
+def voc_analysis(r, min=None, max=None, chapter=None, round=False):
     df = voc_analysis_grpby_student(r)
     df = df.groupby(['tradChars', 'TextbookChapter']).agg(
         count=('student', 'count'), 
         mean=('難度','mean')
         ).reset_index()
     df['count'] = df['count'].round(decimals=0).astype(object)
+    if round: df['mean'] = df['mean'].round(decimals=1).astype(object)
 
     if chapter == None: voc = config_notes.getVocSource()
     else:
@@ -566,25 +567,25 @@ def update_stats():
     r = AllReviews.getReviewDataAll()
     cutoff = 5
     # recent = 90
-    for term in ['all','21winter', '22spring', '22summer']:
-        activation_funnel(s, e, l, term).savefig(statsPath+"act_funnel_"+term+".png", bbox_inches='tight')
-        plt.gcf().clear()
-    delays_analysis(s, e, l).savefig(statsPath+"delays analysis.png", bbox_inches='tight')
-    plt.gcf().clear()
-    plot_user_trend(s, e, l, None, cutoff).savefig(statsPath+"user trend day.png", bbox_inches='tight')
-    print("user trend day ok"); plt.gcf().clear()
-    plot_user_trend(s, e, l, 'w', cutoff).savefig(statsPath+"user trend week.png", bbox_inches='tight')
-    print("user trend week ok"); plt.gcf().clear()
-    plot_user_trend(s, e, l, 'm', cutoff).savefig(statsPath+"user trend month.png", bbox_inches='tight')
-    print("user trend month ok"); plt.gcf().clear()
-    plot_user_trend(s, e, l, 'term', cutoff).savefig(statsPath+"user trend term.png", bbox_inches='tight')
-    print("user trend term ok"); plt.gcf().clear()
-    user_distribution().savefig(statsPath+"user analysis mean.png", bbox_inches='tight')
-    print("user mean rev ok"); plt.gcf().clear()
-    user_distribution('f').savefig(statsPath+"user analysis frequency.png", bbox_inches='tight')
-    print("user freq ok"); plt.gcf().clear()
-    retention_detail().style.to_html(statsPath+'Retention analysis.html')
-    # voc_analysis(r).to_csv(join(statsPath,'vocAnalysis.txt'))
+    # for term in ['all','21winter', '22spring', '22summer']:
+    #     activation_funnel(s, e, l, term).savefig(statsPath+"act_funnel_"+term+".png", bbox_inches='tight')
+    #     plt.gcf().clear()
+    # delays_analysis(s, e, l).savefig(statsPath+"delays analysis.png", bbox_inches='tight')
+    # plt.gcf().clear()
+    # plot_user_trend(s, e, l, None, cutoff).savefig(statsPath+"user trend day.png", bbox_inches='tight')
+    # print("user trend day ok"); plt.gcf().clear()
+    # plot_user_trend(s, e, l, 'w', cutoff).savefig(statsPath+"user trend week.png", bbox_inches='tight')
+    # print("user trend week ok"); plt.gcf().clear()
+    # plot_user_trend(s, e, l, 'm', cutoff).savefig(statsPath+"user trend month.png", bbox_inches='tight')
+    # print("user trend month ok"); plt.gcf().clear()
+    # plot_user_trend(s, e, l, 'term', cutoff).savefig(statsPath+"user trend term.png", bbox_inches='tight')
+    # print("user trend term ok"); plt.gcf().clear()
+    # user_distribution().savefig(statsPath+"user analysis mean.png", bbox_inches='tight')
+    # print("user mean rev ok"); plt.gcf().clear()
+    # user_distribution('f').savefig(statsPath+"user analysis frequency.png", bbox_inches='tight')
+    # print("user freq ok"); plt.gcf().clear()
+    # retention_detail().style.to_html(statsPath+'Retention analysis.html')
+    voc_analysis(r, round=True).to_csv(join(statsPath,'vocAnalysis.txt'))
     # voc_analysis_pdf(r)
 
 
