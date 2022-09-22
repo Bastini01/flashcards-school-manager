@@ -237,14 +237,12 @@ def voc_analysis_html(r, term='all', min=None, max=None, click=False):
     for i in meanCols:
         stlr = stlr.background_gradient(
             gmap=dfr[i], axis=0,  cmap='RdYlGn_r', subset=[(i[0],'生詞'), (i[0], '學生人數'), i], vmin=1, vmax=7)
-    stlr = stlr.apply(highlight_max, axis=None).hide(subset=meanCols+[(i[0], '學生人數') for i in meanCols], axis='columns'
-            ).hide_columns(level=1)
+    stlr = stlr.apply(highlight_max, axis=None)
+            # ).hide(subset=meanCols+[(i[0], '學生人數') for i in meanCols], axis='columns'
+            # ).hide_columns(level=1)
 
 
     return stlr
-
-# voc_analysis_html(AllReviews.getReviewDataAll(), min=None, max=None, click=True).to_html(db.technicalFilesPath + 'testest.html')
-# webbrowser.open(db.technicalFilesPath + 'testest.html')
 
 def voc_analysis_pdf(r):
     pgs = [[1, 1, 1], [1, 11, 1], [2, 6, 1], [3, 1, 1]]
