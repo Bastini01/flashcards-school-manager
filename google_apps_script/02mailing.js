@@ -1,12 +1,11 @@
 function customSender () {
-  target = ['211110033', '220300232', '211010637', '220362232', '220360525', '220363264', '211220298', '211220313', '220661416', '220101040', '220320636', '220300141', '220711635', '220711320', '211010421', '211110025', '211010413', '220661292', '211221311', '211010059', '211010398', '211010603', '211010794', '211010330', '211010299', '211020511', '211020529', '211010314', '211010538', '211010249', '211110091', '220312055', '210612922', '211020199', '211010455', '211110083', '220362555', '220311099', '211010645', '220360567', '211010471', '220320826', '220361680', '211010041', '211010372', '211010439', '220711867', '211010611', '220361101', '211221452', '211212146', '220361432', '220300365', '220320305', '211212914', '220600092', '220360145', '220321303', '220361060', '170611528', '220360088', '220662026', '211010778', '211010744', '211221791', '211020298', '220320339', '220320719', '220321436', '190905068', '220320785', '220320058', '220660864', '220361614', '220650154', '220361119', '220710322', '220620470', '110308024', '220611271', '220611213', '220661820', '211220321']
+  target = [495]
   // target = targt.slice(-35, -5)
   // target = autoArray()
-  Logger.log(target)
   for (var i = 0; i < target.length; i++){
-    Logger.log(target[i])
-    target[i] = get_si('studentId', parseFloat(target[i]))
-    Logger.log(target[i])
+    // Logger.log(target[i])
+    // target[i] = get_si('studentId', parseFloat(target[i]))
+    // Logger.log(target[i])
     Logger.log(target[i]+", "+ getData(target[i]).email+", "+ getData(target[i]).firstName)
     // sendWrongPasswordMail(target[i])
     // sendChapterUpdateMail(target[i], [1,9,2])
@@ -16,8 +15,9 @@ function customSender () {
     // sendAnkiInstructions(target[i])
     // sendTermUpdate(target[i])
     // sendTermUpdateReminder(target[i])
-    // sendGformLink(target[i])
-    sendCustom4(target[i])
+    sendCustom(target[i])
+    sendGformLink(target[i])
+    // sendCustom4(target[i])
   }
   
 }
@@ -93,10 +93,6 @@ function sendGformLink(si, lineId = '', resp = null){
 
   pushMsg(lineId, msgText)
   append_email_log(get_si('lineId', lineId), "gformLink", 'line')
-}
-
-function testsendGformLink(){
-  sendGformLink(null, lineId = 'U25e50ba6fec7098f06c558d7b4ded397', resp = respFromLine('U25e50ba6fec7098f06c558d7b4ded397'))
 }
 
 function sendAnkiInstructions(si){
@@ -324,19 +320,19 @@ function sendMonthEndReminder(si, date){
 
 function sendCustom(si){
   var lineId = getData(si).lineId
-  var msgText="考試"
+  var msgText="Hi, it seems something went wrong during the registration.. sorry for that, the problem should be fixed now, please follow the instructions below."
 
   if (lineId){ pushMsg(lineId, msgText); type='line' }
   
   else {
-    var subject = "大考試加油!"
-    var msgText = msgText.replace(' 😉👇', " ;) :")
+    var subject = "registration error"
+    // var msgText = msgText.replace(' 😉👇', " ;) :")
     // var msgText = msgText.replace(' 🐯', "!:")
     GmailApp.sendEmail(getData(si).email,`=?UTF-8?B?${Utilities.base64Encode(Utilities.newBlob(subject).getBytes())}?=`,msgText);
     type='gmail'
   }
 
-  append_email_log(si, "customCNY", type);
+  append_email_log(si, "custom", type);
 
 }
 

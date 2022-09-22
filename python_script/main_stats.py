@@ -79,7 +79,9 @@ def str_to_unit(x):
 def voc_analysis_base(r):
     df = r[r['tags'].notnull()] 
     df = df[df['student']!='00239 Tenzin Topden']
+    # df = df[df['tags'].apply(lambda x: x[0] < 6)]
     df['TextbookChapter'] = df['tags'].apply(lambda x: str(x))
+    # print(df[df['TextbookChapter']=="[7, 1, 1]"])
     return df
 
 def voc_analysis_grpby_student(r): #input allReviews
@@ -105,6 +107,7 @@ def voc_analysis(r, min=None, max=None, chapter=None, round=False):
         voc2 = config_notes.getVu([chapter[0], chapter[1], 2])[0]
         voc = pd.concat([voc1, voc2])
     voc['TextbookChapter'] = voc['TextbookChapter'].apply(lambda x: str(db.unit(x)))
+    voc = voc[voc['TextbookChapter'].apply(lambda x: str_to_unit(x)[0] < 6)]
     df = df.rename(columns={'tradChars':'Traditional Characters'})   
     df=voc.merge(df, how='left', on=['Traditional Characters', 'TextbookChapter'])
     if min:
@@ -190,12 +193,15 @@ def highlight_max(data): #hide NaN values
             return pd.DataFrame(np.where(is_max, attr, ''),
                                 index=data.index, columns=data.columns)
 
-def voc_analysis_html(r, term='all', min=None, max=None, click=False):
+def vertical_border(data):
+    return ['border-right: 1px solid' for n in data]
+
+def voc_analysis_html(r, term='all', min=None, max=None, click=False, showNumbers=False):
     df = voc_analysis(r, min, max)
     df['TextbookChapter'] = df['TextbookChapter'].apply(
         lambda x: str(str_to_unit(x)[0])+" 册 "+str(str_to_unit(x)[1]))
     df = df.rename(columns={'Traditional Characters':'生詞',
-                'count': '學生人數', 'mean': '難度'})
+                'count': '人數', 'mean': '難度'})
     dfr = pd.DataFrame()
     chaps = df['TextbookChapter'].unique()
     meanCols = []
@@ -214,7 +220,7 @@ def voc_analysis_html(r, term='all', min=None, max=None, click=False):
 
     dfr = dfr.fillna(0)
 
-    spacing = {(n[0],'生詞'):[{'selector':'','props':[('padding-left', '20px')]}] for n in meanCols}
+    spacing = {(n[0],'生詞'):[{'selector':'','props':[('padding-left', '20px'), ("border-left", "1px solid")]}] for n in meanCols}
 
     stlr = dfr.style.format(precision=1, na_rep=''
             ).hide(axis='index').set_caption(
@@ -236,26 +242,34 @@ def voc_analysis_html(r, term='all', min=None, max=None, click=False):
 
     for i in meanCols:
         stlr = stlr.background_gradient(
-            gmap=dfr[i], axis=0,  cmap='RdYlGn_r', subset=[(i[0],'生詞'), (i[0], '學生人數'), i], vmin=1, vmax=7)
-    stlr = stlr.apply(highlight_max, axis=None)
-            # ).hide(subset=meanCols+[(i[0], '學生人數') for i in meanCols], axis='columns'
-            # ).hide_columns(level=1)
+            # gmap=dfr[i], axis=0,  cmap='RdYlGn_r', subset=[(i[0],'生詞'), (i[0], '人數'), i], vmin=1, vmax=7)
+            gmap=dfr[i], axis=0,  cmap='RdYlGn_r', subset=[(i[0],'生詞')], vmin=1, vmax=7)
 
+
+    stlr = stlr.apply(highlight_max, axis=None).apply(vertical_border, axis='columns', subset=meanCols)
+
+    if not showNumbers:
+        stlr = stlr.hide(subset=meanCols+[(i[0], '人數') for i in meanCols], axis='columns'
+            ).hide_columns(level=1)
+    
+    else:
+        tabelAttrx = 'style="white-space: nowrap; max-width: 3508px;"'
+        stlr = stlr.set_table_attributes(tabelAttrx)
 
     return stlr
 
-def voc_analysis_pdf(r):
-    pgs = [[1, 1, 1], [1, 11, 1], [2, 6, 1], [3, 1, 1]]
+def voc_analysis_pdf(r=None):
+    if not r: r=AllReviews.getReviewDataAll()
+    pgs = [[1, 1, 1], [1, 13, 1], [2, 11, 1]]
     path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
     config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
 
     for i in range(len(pgs)-1):
-        voc_analysis_html(r, pgs[0+i], pgs[1+i]).to_html(statsPath+'voc_analysis_'+str(i)+'.html')
+        voc_analysis_html(r, min=pgs[i], max=pgs[1+i], showNumbers=True).to_html(statsPath+'voc_analysis_'+str(i)+'.html')
 
     pdfkit.from_file([statsPath+'voc_analysis_'+str(i)+'.html' for i in range(len(pgs)-1)], statsPath+'voc_analysis.pdf', 
-        options={'orientation': 'landscape', 'encoding': 'UTF-8', 'zoom': 0.6}, 
+        options={'orientation': 'landscape', 'encoding': 'UTF-8', 'zoom': 1}, 
         configuration=config)
-# voc_analysis_pdf(AllReviews.getReviewDataAll())
 
 def reviews_mm30():
     df = AllReviews.getReviewDataAll()

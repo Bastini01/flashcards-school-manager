@@ -11,6 +11,15 @@ var form = FormApp.openById('1LUX5E3MmT8EbHD1wv0D8tOe3hBEuP0cKUapJKB4eWWw')
 
 defaultStudentId = '?'
 
+function printResponseID(){
+  date = new Date(1663647000000)
+  resp=form.getResponses(date)[3]
+  id = resp.getId()
+  respURL = resp.getEditResponseUrl()
+  Logger.log(id)
+  Logger.log(respURL)
+}
+
 function headers(){
   return ['','timestamp', 'email', 'firstName', 'lastName', 'studentId', 'teacherName', 'classNumber', 'classType', 'texbook', 'phoneOperatingSystem', 'startChapter','agreement', 'state', 'lastUpdateDate', 'lineId', 'optOutEmail'] } 
 
