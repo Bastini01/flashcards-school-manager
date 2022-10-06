@@ -508,7 +508,7 @@ function sendSuppHours(si, h, sh){
   var lineId = getData(si).lineId
   var tot = parseInt(h)+parseInt(sh)
   var msgText= "Hi "+getData(si).firstName+"!\n"+
-        "You earned "+h+" supplementary large group class hour(s), the school staff who validates is currently absent, the hours will be added to the attendance record after she returns on 26/9."
+        "You earned "+h+" supplementary large group class hour(s), it will be added to your study record asap (one or two work days)"
   if (sh!="0"){
     msgText=msgText+"\nThis month you have earned "+tot.toString()+" hours so far."
   }
