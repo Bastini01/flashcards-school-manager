@@ -24,7 +24,6 @@ def getVu(vocabUnit):
     vu = vocSource[vocSource['TextbookChapter'] == vun]
     vu = vu.replace(np.nan, '', regex=True)
     return vu, vun
-# print(getVu([3,1,1])[0].columns)
 
 def getNotes(deckName, vocabUnit, modelName):
     vu = getVu(vocabUnit)[0]

@@ -231,11 +231,12 @@ def createNote(collection, note):
             raise Exception('deck was not found: {}'.format(note['deckName']))
 
         ankiNote = Note(collection, model)
-        print(ankiNote.fields)
         ankiNote.note_type()['did'] = deck['id']
         if 'tags' in note:
             ankiNote.tags = note['tags']
 
+        print(note['fields'].items())
+        print(ankiNote.keys())
         for name, value in note['fields'].items():
             for ankiName in ankiNote.keys():
                 if name.lower() == ankiName.lower():
