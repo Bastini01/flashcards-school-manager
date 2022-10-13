@@ -299,10 +299,9 @@ def addNotes(profileName, notes):
     collection = getCollection(profileName)
 
     for note in notes:
-        try:
-            results.append(addNote(collection, note))
-        except:
-            results.append(None)
+        # try:
+        results.append(addNote(collection, note))
+        # except: pass
     collection.save()
     return results
 
