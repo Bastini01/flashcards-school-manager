@@ -26,12 +26,12 @@ def class_report(class_id, week=False, st_cl_te = None):
 
     df['本期複習的課'] = df.apply(
         lambda x: report(x['profileName'])[1]['chaps-words'], axis=1)
-    df['最常被忘記的生詞'] = df.apply(
+    df['最常忘記的生詞'] = df.apply(
         lambda x: report(x['profileName'])[1]['top'][:6], axis=1)
 
-    df= df[df["最常被忘記的生詞"].str.len() != 0]
+    df= df[df["最常忘記的生詞"].str.len() != 0]
     df.reset_index(drop=True, inplace=True)
-    df['最常被忘記的生詞'] = df['最常被忘記的生詞'].apply(lambda x: [i[0] for i in x])
+    df['最常忘記的生詞'] = df['最常忘記的生詞'].apply(lambda x: [i[0] for i in x])
     df.rename(columns={'studentId': '學號', 'profileName': '名字'}, inplace=True)
     df['名字']=df['名字'].apply(lambda x: x[5:])
     def chap_name(x): 
@@ -42,7 +42,7 @@ def class_report(class_id, week=False, st_cl_te = None):
         return txt[:-2]
     df["本期複習的課"]=df["本期複習的課"].apply(lambda x: chap_name(x))
     df["本期複習的課"]=df["本期複習的課"].apply(lambda x: list_to_text(x))
-    df["最常被忘記的生詞"]=df["最常被忘記的生詞"].apply(lambda x: list_to_text(x))
+    df["最常忘記的生詞"]=df["最常忘記的生詞"].apply(lambda x: list_to_text(x))
     stlr = df.style.hide(axis='index')
     htmlReport = stlr.set_caption("班: "+class_id+" --- 老師: "+teacherName+" --- 期間: "+timeFrame).to_html()
     return 'classWeekly',{
