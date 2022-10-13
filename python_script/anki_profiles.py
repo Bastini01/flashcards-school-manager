@@ -321,8 +321,8 @@ def isNoteDuplicateOrEmptyInScope(note, deck, collection, duplicateScope,
 
     # Primary field for uniqueness
     val = note.fields[0]
-    if not val.strip():
-        return 1
+    # if not val.strip():
+    #     return 1
     csum = fieldChecksum(val)
 
     # Create dictionary of deck ids
