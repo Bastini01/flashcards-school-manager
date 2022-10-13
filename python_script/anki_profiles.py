@@ -157,7 +157,6 @@ def sync(profileName):
             print(profileName+" FULL SYNC REQUIRED\n", c)
             return "fullSync"
     ##################""
-    # print(profileName+" SYNCED")
     col.save()
     col.close()
     return 'ok'    
@@ -235,8 +234,6 @@ def createNote(collection, note):
         if 'tags' in note:
             ankiNote.tags = note['tags']
 
-        print(note['fields'].items())
-        print(ankiNote.keys())
         for name, value in note['fields'].items():
             for ankiName in ankiNote.keys():
                 if name.lower() == ankiName.lower():
@@ -321,7 +318,7 @@ def isNoteDuplicateOrEmptyInScope(note, deck, collection, duplicateScope,
 
     # Primary field for uniqueness
     val = note.fields[0]
-    # if not val.strip():
+    # if not val.strip(): #leads to bug if the sound field happens to be first and empty...
     #     return 1
     csum = fieldChecksum(val)
 
@@ -443,7 +440,6 @@ def deleteDeck(profileName, vocabUnit):
     result=dm.remove([did])
     col.save()
     print(profileName, vocabUnit, "removed")
-    #print(result)
 
 def createBlankProfile(profileName):
 

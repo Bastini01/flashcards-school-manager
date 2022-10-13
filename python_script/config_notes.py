@@ -133,7 +133,6 @@ def getTestNote():
             ]
         }
 
-    print(noteData)
     return [noteData]
 
 def chap_filter(nts, chap):
@@ -151,8 +150,3 @@ def pic_url(nts, chap, word):
     url = "http://35.206.234.133/Pictures/B{b}_L{l}_V{v}/B{b}_L{l}_V{v}_{w}.jpg"
     url = url.format(b=book, l=chapter, v=unit, w=wordNr)
     return url
-
-# print(pic_url(getVocSource(), [1, 2], "多"))
-
-#print(getTestNote())
-#print(getNotes("Book1Chapter01-1"))
