@@ -231,6 +231,7 @@ def createNote(collection, note):
             raise Exception('deck was not found: {}'.format(note['deckName']))
 
         ankiNote = Note(collection, model)
+        print(ankiNote.fields)
         ankiNote.note_type()['did'] = deck['id']
         if 'tags' in note:
             ankiNote.tags = note['tags']
@@ -389,7 +390,6 @@ def add_notes(profileName, vocabUnit, startChapter=None):
     
     for i in range(startChapter, vocabUnit[1]+1):
         deckName=config_deck.deckName([vocabUnit[0], i])
-        print(deckName)
         n=[] #notes of one chapter
         m=[] #media files of one chapter
         if vocabUnit[0]>=3:
@@ -397,13 +397,10 @@ def add_notes(profileName, vocabUnit, startChapter=None):
 
             for j in range(part1,part2):
                 vocabUnit = [vocabUnit[0], i, j]
-                print(vocabUnit)
                 ra, ma=config_notes.getNotes(deckName, vocabUnit, "recall")
                 #random.shuffle(n)
                 n.extend(ra)
                 m.append(ma)
-                print(n)
-                print(m)
 
         if vocabUnit[0]<3:
             deckNameL=deckName+":: 聽"
