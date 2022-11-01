@@ -96,7 +96,6 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                                 "emailTemplate": 'notActivated', 
                                 "statusUpdate":'connection failed'+naResponse}]
 
-
                     #########ADD CARDS
                     if not anki_db.getLastUnit(profileName): anki_profiles.prep_profile(profileName)
                     if ((status=='active' or c==True) and classType):            

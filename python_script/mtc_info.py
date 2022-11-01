@@ -23,7 +23,7 @@ summerDate=[6, 2]
 ########
 nyDec = dt.date( today.year, 12, 31 )
 nyJan = [dt.date( today.year, 1, 1 ), dt.date( today.year, 1, 2 )]
-cny = dateList(dt.date( today.year, 1, 29 ), dt.date( today.year, 2, 7))
+cny = dateList(dt.date( today.year, 1, 20 ), dt.date( today.year, 1, 28))
 springBreak = dateList(dt.date( today.year, 4, 1 ), dt.date( today.year, 4, 7))
 summerHoliday = dateList(dt.date( today.year, 8, 25), dt.date( today.year, 9, 1))
 midAtumn = dt.date( today.year, 9, 9 )

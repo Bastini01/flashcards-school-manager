@@ -91,6 +91,10 @@ def getStudents():
     return(data)
 # getStudents().to_csv(anki_db.technicalFilesPath+'studentsDF.csv')
 
+def test_api():
+    df = getStudents()
+    df['studentId'].apply(lambda x: print(x))
+
 def getEmailLog():
     data = get_gsheet("'Email log'")
     columnNames = data.pop(0)
