@@ -5,9 +5,10 @@ function seeRowsData(){
 
 function current_term(l='en'){
   year = today.getFullYear().toString().slice(2,4)
-  if (today.getMonth() <=1 || today.getMonth()+1 == 11) {result = year+"winter"}
-  else if (today.getMonth() <=4) {result = year+"spring"}
-  else if (today.getMonth() <=7) {result = year+"summer"}
+  if (today.getMonth() <=2) {result = (+year-1).toString()+"winter"}
+  else if (today.getMonth() == 12) {result = year+"winter"}
+  else if (today.getMonth() <=5) {result = year+"spring"}
+  else if (today.getMonth() <=8) {result = year+"summer"}
   else {result = year+"fall"}
   if(l=='en'){return result}
   else{

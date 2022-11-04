@@ -19,17 +19,18 @@ businessDaysPerTerm=45 #actually 57, tweaked to match the actual speed of progre
 fallDate=[9, 2]
 winterDate=[12, 1]
 springDate=[3, 7]
-summerDate=[6, 2]
+summerDate=[6, 3]
 ########
 nyDec = dt.date( today.year, 12, 31 )
 nyJan = [dt.date( today.year, 1, 1 ), dt.date( today.year, 1, 2 )]
 cny = dateList(dt.date( today.year, 1, 20 ), dt.date( today.year, 1, 28))
-springBreak = dateList(dt.date( today.year, 4, 1 ), dt.date( today.year, 4, 7))
-summerHoliday = dateList(dt.date( today.year, 8, 25), dt.date( today.year, 9, 1))
+springBreak = dateList(dt.date( today.year, 4, 1 ), dt.date( today.year, 4, 5))
+midSummerFest = dateList(dt.date( today.year, 6, 22 ), dt.date( today.year, 6, 25)) #dragon boat holiday
+summerHoliday = dateList(dt.date( today.year, 8, 24), dt.date( today.year, 8, 31))
 midAtumn = dt.date( today.year, 9, 9 )
 doubleTen = dt.date( today.year, 10, 10 )
 
-bdc=np.busdaycalendar(holidays=[*nyJan, *cny, *springBreak, *summerHoliday, midAtumn, doubleTen, nyDec])
+bdc=np.busdaycalendar(holidays=[*nyJan, *cny, *springBreak, *midSummerFest, *summerHoliday, midAtumn, doubleTen, nyDec])
 
 def month_end():
    monthLastDay = dt.date(today.year, today.month+1, 1)

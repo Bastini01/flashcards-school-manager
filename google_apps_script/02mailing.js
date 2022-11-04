@@ -1,5 +1,5 @@
 function customSender () {
-  target = [495]
+  target = [513]
   // target = targt.slice(-35, -5)
   // target = autoArray()
   for (var i = 0; i < target.length; i++){
@@ -15,7 +15,7 @@ function customSender () {
     // sendAnkiInstructions(target[i])
     // sendTermUpdate(target[i])
     // sendTermUpdateReminder(target[i])
-    sendCustom(target[i])
+    // sendCustom(target[i])
     sendGformLink(target[i])
     // sendCustom4(target[i])
   }
