@@ -89,7 +89,7 @@ def getStudents():
         data.columns[3]: "os"}, 
         inplace=True)
     return(data)
-# getStudents().to_csv(anki_db.technicalFilesPath+'studentsDF.csv')
+getStudents().to_csv(db.technicalFilesPath+'studentsDF.csv')
 
 def test_api():
     df = getStudents()

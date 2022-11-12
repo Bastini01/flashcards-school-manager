@@ -284,6 +284,11 @@ function handleDesktopRequest(rq){
     else if (action["emailTemplate"][0]=="statsReport"){
       GmailApp.sendEmail('pierrehenry.bastin@gmail.com',"Auoflashcards stats","display error", {htmlBody: action["emailTemplate"][1]})
     }
+    else if (action["emailTemplate"][0]=="customEmail"){
+      d = action["emailTemplate"][1]
+      GmailApp.sendEmail(d["recipient"],d["subj"],d["message"], {htmlBody: d["htmlMessage"]})
+    }
+
 
     var time2 = new Date()
     var dif = Math.abs(time2-time1)
