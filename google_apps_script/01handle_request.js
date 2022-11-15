@@ -286,13 +286,17 @@ function handleDesktopRequest(rq){
     }
     else if (action["emailTemplate"][0]=="customEmail"){
       d = action["emailTemplate"][1]
-      GmailApp.sendEmail(d["recipient"],d["subj"],d["message"], {htmlBody: d["htmlMessage"]})
+      GmailApp.sendEmail(d["recipient"],`=?UTF-8?B?${Utilities.base64Encode(Utilities.newBlob(d["subj"]).getBytes())}?=`,d["message"], {htmlBody: d["htmlMessage"]})
+    }
+    else if (action["emailTemplate"][0]=="studyappSuppHours"){
+      // add_supp_hours(studentId, h)
     }
 
 
     var time2 = new Date()
     var dif = Math.abs(time2-time1)
-    if (dif<1000){Utilities.sleep(1000-dif)}
+    minInterval = 600
+    if (dif<minInterval){Utilities.sleep(minInterval-dif)}
     }
 
   

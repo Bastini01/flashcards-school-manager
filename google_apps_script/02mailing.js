@@ -159,13 +159,11 @@ function sendActivated(si) {
   var msgText="Hi "+getData(si).firstName+"!\n"+
           "Connection to your Ankiweb account was successful, you can now start reviewing👨‍🏫\n"+
           "https://ankiweb.net/decks/"
-
   if (lineId){
   pushMsg(lineId, msgText); type='line'
   append_email_log(si, 'activated_template', type);
   }
   else{
-
   var tn = 'activated_template';
   var template = HtmlService.createTemplateFromFile(tn);
   template.firstName=getData(si).firstName;
@@ -204,8 +202,7 @@ function sendNotActivated(si) {
   var msgText="Hi "+getData(si).firstName+"!\n"+
           "It seems your Ankiweb account is not activated yet, you still need to validate your email.\n"+
           "Please check your mail for an 'email verification' mail from Ankiweb and click the link inside it to verify your email address.\n"
-    if (lineId){ pushMsg(lineId, msgText); type='line' }
-  
+    if (lineId){ pushMsg(lineId, msgText); type='line' }  
   else {
     var subject = "Ankiweb email not yet validated"
     // var msgText = msgText.replace(' 🙃', "")
@@ -214,10 +211,8 @@ function sendNotActivated(si) {
     GmailApp.sendEmail(getData(si).email,`=?UTF-8?B?${Utilities.base64Encode(Utilities.newBlob(subject).getBytes())}?=`,msgText);
     type='gmail'
   }
-
   append_email_log(si, "notAcivated", type);
 }
-
 
 function sendWrongForm(si) {
   var tn = 'wrong_form_template';
@@ -229,7 +224,6 @@ function sendWrongForm(si) {
 }
 
 function sendChapterUpdate(si, vocabUnit) {
-
   var tn = 'voc_added_template';
   var template = HtmlService.createTemplateFromFile(tn);
   template.firstName=getData(si).firstName;
@@ -249,9 +243,7 @@ function sendReminder0(si){
           "with examples, images and sound\n"+
           "just one click away \u{1F609}\u{1F447}\n"+
           "https://ankiweb.net/decks/"
-
-  if (lineId){ pushMsg(lineId, msgText); type='line' }
-  
+  if (lineId){ pushMsg(lineId, msgText); type='line' } 
   else {
     var subject = "Remember me? 🙃"
     var msgText = msgText.replace(' 🙃', "")
@@ -321,9 +313,7 @@ function sendMonthEndReminder(si, date){
 function sendCustom(si){
   var lineId = getData(si).lineId
   var msgText="Hi, it seems something went wrong during the registration.. sorry for that, the problem should be fixed now, please follow the instructions below."
-
-  if (lineId){ pushMsg(lineId, msgText); type='line' }
-  
+  if (lineId){ pushMsg(lineId, msgText); type='line' }  
   else {
     var subject = "registration error"
     // var msgText = msgText.replace(' 😉👇', " ;) :")
@@ -331,9 +321,7 @@ function sendCustom(si){
     GmailApp.sendEmail(getData(si).email,`=?UTF-8?B?${Utilities.base64Encode(Utilities.newBlob(subject).getBytes())}?=`,msgText);
     type='gmail'
   }
-
   append_email_log(si, "custom", type);
-
 }
 
 function sendCustom1(si){
@@ -344,18 +332,15 @@ function sendCustom1(si){
           "Reminder just in case you have some last minute reviewing to do \u{1F609}\u{1F447}\n"+
           "https://ankiweb.net/decks/"
 
-  if (lineId){ pushMsg(lineId, msgText); type='line' }
-  
+  if (lineId){ pushMsg(lineId, msgText); type='line' }  
   else {
     var subject = "大考式加油!"
     var msgText = msgText.replace(' 😉👇', " ;) :")
     GmailApp.sendEmail(getData(si).email,`=?UTF-8?B?${Utilities.base64Encode(Utilities.newBlob(subject).getBytes())}?=`,msgText);
     type='gmail'
   }
-
   append_email_log(si, "customCNY", type);
 }
-
 
 function sendCustom2(si){
   var lineId = getData(si).lineId
@@ -366,7 +351,6 @@ function sendCustom2(si){
           "https://ankiweb.net/decks/"
 
   if (lineId){ pushMsg(lineId, msgText); type='line' }
-  
   else {
     var subject = "新年快樂! 🐯"
     var msgText = msgText.replace(' 😉👇', "!:")
@@ -374,7 +358,6 @@ function sendCustom2(si){
     GmailApp.sendEmail(getData(si).email,`=?UTF-8?B?${Utilities.base64Encode(Utilities.newBlob(subject).getBytes())}?=`,msgText);
     type='gmail'
   }
-
   append_email_log(si, "customCNY", type);
 }
 
@@ -386,15 +369,12 @@ function sendCustom3(si){
           "How does it work? Just do your reviews, as soon as you reach an hour of study you will be notified and the time will be added to your attendance record automatically, you can get up to 8 hours/month.\n"+
           "Don't hesitate to share this news with your friends! ;)\n"+
           "https://ankiweb.net/decks/"
-
   if (lineId){ pushMsg(lineId, msgText); type='line' }
-  
   else {
     var subject = "New: get supplementary class hours for self-study with Anki"
     GmailApp.sendEmail(getData(si).email,`=?UTF-8?B?${Utilities.base64Encode(Utilities.newBlob(subject).getBytes())}?=`,msgText);
     type='gmail'
   }
-
   append_email_log(si, "customSuppClassHours", type);
 }
 
@@ -416,7 +396,6 @@ function sendCustom4(si){
 
   append_email_log(si, "customStudyCommunication", type);
 }
-
 
 function sendWReport(si, data){
   var lineId = getData(si).lineId
@@ -443,9 +422,6 @@ function sendWReport(si, data){
     )
     }
   }
-  // if (report['completion'][0].length >0){
-  //   msgText=msgText+"\n\nYou reviewed every word at least once for "+report['completion'][0].length.toString()+" chapters so far."
-  // }
   if (report['completion'][1]){
     msgText=msgText+"\n\n🚩 Incomplete chapters:"
     report['completion'][1].forEach(
@@ -477,12 +453,6 @@ function sendDReport(si, data){
           msgText=msgText+"Yesterday you spent "+report['time']+" reviewing "
   if (report['tbWords']>0){msgText=msgText+report['tbWords']+" words from "+report['chaps']+" chapters 📚 "}
   if (report['otbWords']>0){msgText=msgText+"and "+report['otbWords']+" words from outside the textbook 🌄"}
-  // if (report['top'].length >0) {
-  //   msgText=msgText+"\n\n🚩 Difficult textbook words:"
-  //   report['top'].forEach(
-  //     w => msgText=msgText+"\n"+w[0]+" (book "+w[1][0]+" chapter "+w[1][1]+")"
-  //   )
-  //   }
   }
   if (report['completion'][1].length >0){
     msgText=msgText+"\n\nSome chapters you didn't finish yet:"
@@ -518,8 +488,7 @@ function sendSuppHours(si, h, sh){
   GmailApp.sendEmail(getData(si).email,`=?UTF-8?B?${Utilities.base64Encode(Utilities.newBlob(subject).getBytes())}?=`,msgText);
   type='gmail'
   }
-  append_email_log(si, "suppHours", type);
-}
+  append_email_log(si, "suppHours", type);}
 
 function sendTermProgressReport(si, data){
   var lineId = getData(si).lineId
@@ -534,32 +503,14 @@ function sendTermProgressReport(si, data){
     }
   msgText=msgText+"We recommend finishing reveiwing these chapters, then the app will make you practice the more difficult words"
   "\n\nGood job! 加油! 💪"
-
   if (lineId){ pushMsg(lineId, msgText); type='line' }
-
   else {
     var subject = "Your weekly report 📄"
     var msgText = msgText.replace(/(📚 |🚩 | 💪| 🌄)/g, "")
     GmailApp.sendEmail(getData(si).email,`=?UTF-8?B?${Utilities.base64Encode(Utilities.newBlob(subject).getBytes())}?=`,msgText);
     type='gmail'
   }
-
   append_email_log(si, data[0], type);
-}
-
-function testClassWeekly(){
-  data=[
-    'weekly220117', {'tbWords': 37, 'otbWords': 28, 'reviews': 162, 'top': [['浴室', [1, 11]], 
-['客廳', [1, 11]], ['帶', [1, 9]], ['租', [1, 11]], ['超市', [1, 11]], ['再', [1, 11]], ['走路', [1, 11]], ['套房', [1, 11]], ['空', [1, 11]], ['就', [1, 11]]], 'time': 'about 1 hour', 'chaps': 4}
-  ]
-  // sendWReport(3, data)
-  Logger.log(data[1]['top'][3].length.toString())
-  for (const [key, value] of Object.entries(data[1])) {
-    var a=key+value
-  Logger.log(a);
-  // Logger.log(value);
-}
-
 }
 
 function sendClassWeekly(data){
@@ -569,12 +520,10 @@ function sendClassWeekly(data){
   subject= "「MTC自動化字卡」- 班號: "+data['class']+" - 每周報告"
   GmailApp.sendEmail(data['teacherEmail'], subject," ", {htmlBody: emailText, cc: 'shuhuafang@mtc.ntnu.edu.tw'});
   // GmailApp.sendEmail("pierrehenry.bastin@gmail.com", subject," ", {htmlBody: emailText});
-
   var dataRange = emailLog.getRange(emailLog.getLastRow()+1, 1, 1, 5);
   var values = [[today, data['teacherId'], data['teacherName'], "cw"+data['class']+data['timeFrame'], 'gmail']];
   dataRange.setValues(values);
 }
-
 
 function sendCustomHtml(si) {
   var tn = 'custom_template';

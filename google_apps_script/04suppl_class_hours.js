@@ -23,11 +23,6 @@ function add_supp_hours(studentId, h){
     w => resp.withItemResponse(w)
   )
   resp = resp.submit()
-  // items=form.getItems()
-  // items.forEach(
-  //   w => Logger.log(w.asTextItem().getId()+w.asTextItem().getTitle())
-  // )
-
 }
 
 function handleSuppHoursSubmission(e){ //triggererd from supplementary hours submission form
