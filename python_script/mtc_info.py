@@ -21,16 +21,17 @@ winterDate=[12, 1]
 springDate=[3, 7]
 summerDate=[6, 3]
 ########
-nyDec = dt.date( today.year, 12, 31 )
-nyJan = [dt.date( today.year, 1, 1 ), dt.date( today.year, 1, 2 )]
-cny = dateList(dt.date( today.year, 1, 20 ), dt.date( today.year, 1, 28))
-springBreak = dateList(dt.date( today.year, 4, 1 ), dt.date( today.year, 4, 5))
-midSummerFest = dateList(dt.date( today.year, 6, 22 ), dt.date( today.year, 6, 25)) #dragon boat holiday
-summerHoliday = dateList(dt.date( today.year, 8, 24), dt.date( today.year, 8, 31))
-midAtumn = dt.date( today.year, 9, 9 )
-doubleTen = dt.date( today.year, 10, 10 )
-
-bdc=np.busdaycalendar(holidays=[*nyJan, *cny, *springBreak, *midSummerFest, *summerHoliday, midAtumn, doubleTen, nyDec])
+bdc=np.busdaycalendar(holidays = [
+    *[dt.date( today.year, 1, 1 ), dt.date( today.year, 1, 2 )], #'nyJan': 
+    *dateList(dt.date( today.year, 1, 20 ), dt.date( today.year, 1, 28)), #'cny': 
+    *dateList(dt.date( today.year, 4, 1 ), dt.date( today.year, 4, 5)), #'springBreak': 
+    *dateList(dt.date( today.year, 6, 22 ), dt.date( today.year, 6, 25)), #dragon boat holiday
+    *dateList(dt.date( today.year, 8, 24), dt.date( today.year, 8, 31)), #'summerHoliday' : 
+    dt.date( today.year, 9, 9 ), #'midAtumn' : 
+    dt.date( today.year, 10, 10 ), #'doubleTen' : 
+    *dateList(dt.date(today.year, 11, 24), dt.date(today.year, 11, 30)), #'fallBreak' : 
+    dt.date( today.year, 12, 31 ) #'nyDec' : 
+    ])
 
 def month_end():
    monthLastDay = dt.date(today.year, today.month+1, 1)
