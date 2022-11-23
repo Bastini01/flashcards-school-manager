@@ -166,8 +166,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                                     actions.append({"studentIndex":i+2,"emailTemplate":daily}) 
                             ########ADD SUPPLEMENTARY HOURS
                             h = month[1]['hours']-sh if sh+month[1]['hours']<=8 else 8-sh
-                            # if (h>0 and classType==2 and today <= me['lastDay']): 
-                            if (h>0 and classType==2): 
+                            if (h>0 and classType==2 and today <= me['lastDay']): 
                                 actions.append({"studentIndex":i+2, "emailTemplate":'suppHours'+str(h)+str(sh)}) 
                     #########SEND TO GAPPS
                     if len(actions)>0: g.sendActions(actions)
