@@ -8,7 +8,7 @@ import config_notes
 termStartUnits=[[1,1,1],[1,6,1],[2,1,1],[2,6,1],[2,11,1],[3,9,1],[4,1,1]]
 
 def dateList(sdate, edate):
-    return [sdate+dt.timedelta(days=x) for x in range((edate-sdate).days)]
+    return [sdate+dt.timedelta(days=x) for x in range((edate-sdate).days+1)]
 
 now=dt.datetime.now()
 today=now.date()
@@ -35,10 +35,10 @@ bdc=np.busdaycalendar(holidays = [
 
 def month_end():
    monthLastDay = dt.date(today.year, today.month+1, 1)
-   dateLast = np.busday_offset(monthLastDay, -2, roll='forward', busdaycal=bdc).astype(dt.date) #last day for getting supplementary hours+1 day
-   x = np.busday_offset(monthLastDay, -3, roll='forward', busdaycal=bdc)
+   dateLast = np.busday_offset(monthLastDay, -2, roll='backward', busdaycal=bdc).astype(dt.date) #last day for getting supplementary hours+1 day
+   x = np.busday_offset(monthLastDay, -3, roll='backward', busdaycal=bdc)
    datePrint = x.astype(dt.datetime).strftime('%a %d-%b')
-   dateReminder = np.busday_offset(monthLastDay, -6, roll='forward', busdaycal=bdc).astype(dt.date)
+   dateReminder = np.busday_offset(monthLastDay, -6, roll='backward', busdaycal=bdc).astype(dt.date)
    return {'lastDay':dateLast, 'reminderDate':dateReminder, 'printDate':datePrint}
 
 def get_term(d):
