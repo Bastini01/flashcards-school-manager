@@ -34,7 +34,7 @@ bdc=np.busdaycalendar(holidays = [
     ])
 
 def month_end():
-   monthLastDay = dt.date(today.year, today.month+1, 1)
+   monthLastDay = dt.date(today.year, today.month+1 if today.month != 12 else 1, 1)
    dateLast = np.busday_offset(monthLastDay, -2, roll='backward', busdaycal=bdc).astype(dt.date) #last day for getting supplementary hours+1 day
    x = np.busday_offset(monthLastDay, -3, roll='backward', busdaycal=bdc)
    datePrint = x.astype(dt.datetime).strftime('%a %d-%b')
