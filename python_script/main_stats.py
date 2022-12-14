@@ -579,11 +579,11 @@ def update_stats():
     r = AllReviews.getReviewDataAll()
     cutoff = 5
     recent = 90
-    for term in ['all','21winter', '22spring', '22summer']:
-        activation_funnel(s, e, l, term).savefig(statsPath+"act_funnel_"+term+".png", bbox_inches='tight')
-        plt.gcf().clear()
-    delays_analysis(s, e, l).savefig(statsPath+"delays analysis.png", bbox_inches='tight')
-    plt.gcf().clear()
+    # for term in ['all','21winter', '22spring', '22summer']:
+    #     activation_funnel(s, e, l, term).savefig(statsPath+"act_funnel_"+term+".png", bbox_inches='tight')
+    #     plt.gcf().clear()
+    # delays_analysis(s, e, l).savefig(statsPath+"delays analysis.png", bbox_inches='tight')
+    # plt.gcf().clear()
     plot_user_trend(s, e, l, None, cutoff).savefig(statsPath+"user trend day.png", bbox_inches='tight')
     print("user trend day ok"); plt.gcf().clear()
     plot_user_trend(s, e, l, 'w', cutoff).savefig(statsPath+"user trend week.png", bbox_inches='tight')
@@ -592,12 +592,12 @@ def update_stats():
     print("user trend month ok"); plt.gcf().clear()
     plot_user_trend(s, e, l, 'term', cutoff).savefig(statsPath+"user trend term.png", bbox_inches='tight')
     print("user trend term ok"); plt.gcf().clear()
-    user_distribution().savefig(statsPath+"user analysis mean.png", bbox_inches='tight')
-    print("user mean rev ok"); plt.gcf().clear()
-    user_distribution('f').savefig(statsPath+"user analysis frequency.png", bbox_inches='tight')
-    print("user freq ok"); plt.gcf().clear()
-    retention_detail().style.to_html(statsPath+'Retention analysis.html')
-    voc_analysis(r, round=True).to_csv(join(statsPath,'vocAnalysis.txt'))
+    # user_distribution().savefig(statsPath+"user analysis mean.png", bbox_inches='tight')
+    # print("user mean rev ok"); plt.gcf().clear()
+    # user_distribution('f').savefig(statsPath+"user analysis frequency.png", bbox_inches='tight')
+    # print("user freq ok"); plt.gcf().clear()
+    # retention_detail().style.to_html(statsPath+'Retention analysis.html')
+    # voc_analysis(r, round=True).to_csv(join(statsPath,'vocAnalysis.txt'))
     # voc_analysis_pdf(r)
 
 
