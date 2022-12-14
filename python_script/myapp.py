@@ -50,8 +50,17 @@ class Compute(Thread):
 
 @app.errorhandler(HTTPException)
 def handle_exception(e):
+    response = e.get_response()
+    # replace the body with JSON
+    response.data = json.dumps({
+        "code": e.code,
+        "name": e.name,
+        "description": e.description,
+    })
+    response.content_type = "application/json"
+    return response
     # return e.get_response()
-    return render_template("500_generic.html", e=e), 500
+    # return render_template("500_generic.html", e=e), 500
 
 @app.route('/stats/voc/<term>')
 def run_stats_voc(term):
