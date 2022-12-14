@@ -50,7 +50,8 @@ class Compute(Thread):
 
 @app.errorhandler(HTTPException)
 def handle_exception(e):
-    return e.get_response()
+    # return e.get_response()
+    return render_template("500_generic.html", e=e), 500
 
 @app.route('/stats/voc/<term>')
 def run_stats_voc(term):
