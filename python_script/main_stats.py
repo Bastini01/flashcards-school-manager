@@ -285,7 +285,7 @@ def reviews_mm(mmx=30):
 
 def total_active(x=5, mm=30): #total number of users who reached an average of more than x reviews/day during at least one month
     df = reviews_mm(mm)
-    return len(df[(df['MMXdays']>x)].groupby(['student']))
+    return len(df[(df['MMXdays']>x)]['profileName'].unique())
 
 def retention(cutoff=None, recent=None): #number of users historically active and number of them no recently active
     cutoff = cutoff if cutoff else 0
