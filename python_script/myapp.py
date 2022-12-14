@@ -1,3 +1,6 @@
+from flask import json
+from werkzeug.exceptions import HTTPException
+
 from posixpath import split
 import time, re, pandas as pd
 from flask import Flask, render_template, request, redirect, flash
@@ -9,7 +12,7 @@ import config_notes as nts
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q2z\n\xec]/'
 app.debug = True
-allTerms = ['21winter', '22spring', '22summer', 'all']
+allTerms = ['21winter', '22spring', '22summer', '22fall', '22winter', 'all']
 def click_class(x): return '<a href='+main_stats.statsRoot+'class/'+x+'>'+x+'</a>'
 
 
@@ -45,7 +48,9 @@ class Compute(Thread):
         elif self.setting == 'all':
             main.main(std=True) 
 
-
+@app.errorhandler(HTTPException)
+def handle_exception(e):
+    return e.get_response()
 
 @app.route('/stats/voc/<term>')
 def run_stats_voc(term):
