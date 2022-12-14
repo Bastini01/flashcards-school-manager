@@ -271,23 +271,27 @@ def voc_analysis_pdf(r=None):
         options={'orientation': 'landscape', 'encoding': 'UTF-8', 'zoom': 1}, 
         configuration=config)
 
-def reviews_mm30():
+def reviews_mm(mmx=30):
     df = AllReviews.getReviewDataAll()
     df = df.groupby([df['reviewTime'].dt.date, 'student']).agg({'cardID':'count'}).reset_index()
-    def mm30days(x):
+    def mmXdays(x):
         dft = df[df['student']==x['student']]
-        dft = dft[(dft['reviewTime']>=x['reviewTime']-dt.timedelta(days=30)) &
+        dft = dft[(dft['reviewTime']>=x['reviewTime']-dt.timedelta(days=mmx)) &
             (dft['reviewTime']<=x['reviewTime'])]
-        return dft.cardID.sum()/30
-    df['MM30days'] = df.apply(mm30days, 1)
+        return dft.cardID.sum()/mmx
+    df['MMXdays'] = df.apply(mmXdays, 1)
     df = df.rename(columns={'student':'profileName'})
     return df
+
+def total_active(x=5, mm=30): #total number of users who reached an average of more than x reviews/day during at least one month
+    df = reviews_mm(mm)
+    return len(df[(df['MMXdays']>x)].groupby(['student']))
 
 def retention(cutoff=None, recent=None): #number of users historically active and number of them no recently active
     cutoff = cutoff if cutoff else 0
     recent = recent if recent else 90
-    df = reviews_mm30()
-    before = df[(df['MM30days']>cutoff) & (df['reviewTime']<today-dt.timedelta(days=recent))]['profileName'].unique()
+    df = reviews_mm()
+    before = df[(df['MMXdays']>cutoff) & (df['reviewTime']<today-dt.timedelta(days=recent))]['profileName'].unique()
     recently = df[df['reviewTime']>today-dt.timedelta(days=recent)]['profileName'].unique()
     retention = [x for x in before if x not in recently]
     return {'before': len(before), 'retention': str(int(100-len(retention)/len(before)*100))+" %"}
@@ -475,9 +479,9 @@ def activation(getStudents, emailLog): #activations by date
 # (activation(g.getStudents(), g.getEmailLog()))
 
 def activation_analysis(s, e, l):
-    mm30 = reviews_mm30()
+    mm30 = reviews_mm()
     cutoff = 5
-    mm30cut = mm30[mm30['MM30days']>cutoff].rename(columns={'reviewTime': 'mm30Time'})
+    mm30cut = mm30[mm30['MMXdays']>cutoff].rename(columns={'reviewTime': 'mm30Time'})
     df = follow_date(s, e, l).merge(student_activation_date(s, e), how='left', on='profileName')
     df = df.merge(mm30, how='left', on='profileName')
     df = df.merge(mm30cut, how='left', on='profileName')
