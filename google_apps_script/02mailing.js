@@ -518,7 +518,7 @@ function sendClassWeekly(data){
   template.name=data['teacherName'][0];
   var emailText = data['htmlReport'] + template.evaluate().getContent();
   subject= "「MTC自動化字卡」- 班號: "+data['class']+" - 每周報告"
-  GmailApp.sendEmail(data['teacherEmail'], subject," ", {htmlBody: emailText, cc: 'shuhuafang@mtc.ntnu.edu.tw'});
+  GmailApp.sendEmail(data['teacherEmail'], subject," ", {htmlBody: emailText});
   // GmailApp.sendEmail("pierrehenry.bastin@gmail.com", subject," ", {htmlBody: emailText});
   var dataRange = emailLog.getRange(emailLog.getLastRow()+1, 1, 1, 5);
   var values = [[today, data['teacherId'], data['teacherName'], "cw"+data['class']+data['timeFrame'], 'gmail']];
