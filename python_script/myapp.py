@@ -72,6 +72,7 @@ def run_stats_voc(term):
     temp = temp.replace('Table insert', table)
     return temp
 
+@app.errorhandler(HTTPException)
 @app.route('/stats/word/<chap>/<word>/<clss>/<term>')
 def run_stats_word(chap, word, clss, term):
     r = AllReviews.getReviewDataAll(term)
