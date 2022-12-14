@@ -411,7 +411,7 @@ def line_follow_date(lineLog):
     df1['regDate'] = df.apply(lambda x: dt.datetime.fromtimestamp(x['timestamp']/1000).date())
     df1['source'] = df.apply(lambda x: x['source'])
     df1 = df1[df1['type'] == 'follow']
-    df1['Line ID'] = df1.apply(lambda x: x['source']['userId'])
+    df1['Line ID'] = df1['source'].apply(lambda x: x['userId'])
     # df1 = df1[df1['type'] == 'follow']
     df1 = df1.groupby('Line ID', as_index=False).agg({'regDate':'min'})
     return df1
