@@ -38,6 +38,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                 stdTime0 = time()
                 profileName=studData.loc[i, 'profileName']
                 studentId=studData.loc[i, 'studentId']
+                mtc = studentId[:2] != "10"
                 email=studData.loc[i, 'Email']
                 oth=studData.loc[i, 'other']
                 status=studData.loc[i, 'state']
@@ -130,7 +131,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                         sh = g.get_student_sup_hours(supHoursLog, studentId)
                         me = mtc_info.month_end()
                         #########END OF MONTH
-                        if (classType==2 and sh<8 and today >= me['reminderDate'] and
+                        if (mtc and classType==2 and sh<8 and today >= me['reminderDate'] and
                             g.checkEmail(emailLog, studentId, "monthEndReminder"+me['printDate'])==False):
                             actions.append({"studentIndex":i+2,"emailTemplate":'monthEnd'+me['printDate']})
                         #########NO REVIEWS REMINDERS
@@ -166,7 +167,7 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                                     actions.append({"studentIndex":i+2,"emailTemplate":daily}) 
                             ########ADD SUPPLEMENTARY HOURS
                             h = month[1]['hours']-sh if sh+month[1]['hours']<=8 else 8-sh
-                            if (h>0 and classType==2 and today <= me['lastDay']): 
+                            if (mtc and h>0 and classType==2 and today <= me['lastDay']): 
                                 actions.append({"studentIndex":i+2, "emailTemplate":'suppHours'+str(h)+str(sh)}) 
                     #########SEND TO GAPPS
                     if len(actions)>0: g.sendActions(actions)
