@@ -43,7 +43,9 @@ def getCollection(profileName):
 def createModel(profileName, modelName, css = None, isCloze = False):
         inOrderFields = config_models.getFields()
         cardTemplates = config_models.getTemplates(modelName)
-        collection = getCollection(profileName)
+        if type(profileName) == str:
+            collection = getCollection(profileName)
+        else: collection = profileName
         mm = ModelManager(collection)
 
         if len(inOrderFields) == 0:
@@ -223,7 +225,8 @@ def createNote(collection, note):
 
         model = collection.models.by_name(note['modelName'])
         if model is None:
-            raise Exception('model was not found: {}'.format(note['modelName']))
+            try: createModel(collection, note['modelName']) 
+            except: raise Exception('model was not found: {}'.format(note['modelName']))
 
         deck = collection.decks.by_name(note['deckName'])
         if deck is None:
