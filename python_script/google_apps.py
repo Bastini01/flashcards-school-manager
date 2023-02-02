@@ -171,7 +171,7 @@ def get_student_sup_hours(supHoursLog, studentId):
     df=df[df['Student number']==studentId]
     s = df['hours'].apply(lambda x: int(x)).sum()
     return s if s else 0
-# (get_student_sup_hours(get_sup_hours_log(), '220661359'))
+# (get_student_sup_hours(get_sup_hours_log(), '220312055'))
 
 def getActionsTemplate(): #not used, documentation only
     columns={"studentIndex":[], "statusUpdate":[], "chapterUpdate":[],"emailTemplate":[]}

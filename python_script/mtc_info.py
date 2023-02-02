@@ -24,6 +24,7 @@ summerDate=[6, 3]
 bdc=np.busdaycalendar(holidays = [
     *[dt.date( today.year, 1, 1 ), dt.date( today.year, 1, 2 )], #'nyJan': 
     *dateList(dt.date( today.year, 1, 20 ), dt.date( today.year, 1, 28)), #'cny': 
+    *dateList(dt.date( today.year, 2, 27 ), dt.date( today.year, 2, 28)), #'peace memorial day (228)': 
     *dateList(dt.date( today.year, 4, 1 ), dt.date( today.year, 4, 5)), #'springBreak': 
     *dateList(dt.date( today.year, 6, 22 ), dt.date( today.year, 6, 25)), #dragon boat holiday
     *dateList(dt.date( today.year, 8, 24), dt.date( today.year, 8, 31)), #'summerHoliday' : 
