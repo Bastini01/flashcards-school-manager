@@ -158,11 +158,9 @@ def pending_learning(profileName):
     for i in result: result[i][2]=timeText(result[i][2]*1000)
     result = [[[x[0], x[1]], result[x][0], result[x][1], result[x][2]] for x in result]
     return result
-# (pending_learning("00024 馬修 郭"))
 
 def last_review_date(reviews):
     return max([l[0] for l in reviews]).date()
-# (last_review_date(getReviews("00053 Paul H Nemra")))
 
 def rev_to_df(reviews):
     df=pd.DataFrame(reviews, columns=[

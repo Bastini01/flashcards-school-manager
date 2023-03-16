@@ -289,8 +289,12 @@ function handleDesktopRequest(rq){
       GmailApp.sendEmail(d["recipient"],`=?UTF-8?B?${Utilities.base64Encode(Utilities.newBlob(d["subj"]).getBytes())}?=`,d["message"], {htmlBody: d["htmlMessage"]})
     }
     else if (action["emailTemplate"][0]=="studyappSuppHours"){
-      // add_supp_hours(studentId, h)
-    }
+      add_supp_hours(
+        action["emailTemplate"][1]["studentId"], 
+        action["emailTemplate"][1]["h"])
+      // GmailApp.sendEmail("pierrehenry.bastin@gmail.com","testing", action["emailTemplate"][1]["studentId"]+" :"+action["emailTemplate"][1]["h"])
+      // GmailApp.sendEmail("pierrehenry.bastin@gmail.com","testing", "something came in")
+    }    
 
 
     var time2 = new Date()
