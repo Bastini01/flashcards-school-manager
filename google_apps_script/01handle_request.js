@@ -69,7 +69,7 @@ function registration_from_line(lineId, displayName){
   r.setValues([[resp.getId(), lineId]])
   Logger.log(lineId+" noted down")
   
-  sendGformLink(null, lineId=lineId, resp=resp)
+  // sendGformLink(null, lineId=lineId, resp=resp)
   
   //Simultanious line registrations bug fix (one registration will overwrite other one if no time gap)
   for (var i = 1; i < 200; i++){
@@ -77,7 +77,6 @@ function registration_from_line(lineId, displayName){
     Logger.log("registrations bugfix"+lineId+" attempt "+i)
     lineAndName = lineSheet.getRange(426, 2, lineSheet.getLastRow(), 2).getValues()
     lineAndName.reverse()
-    // Logger.log(lineAndName)
     for (const x of lineAndName) {if (x[0] == lineId) {
       Logger.log("registrations bugfix"+lineId+" attempt "+i+"OK"); return}}
     var r= lineSheet.getRange(lineSheet.getLastRow()+1, 2, 1, 3)
@@ -112,7 +111,7 @@ function form_submit(e){ //triggered from registration form
   var state = sheet.getRange(e.range['rowStart'],headers().indexOf("state")).getValue()
   
   if (studentId == defaultStudentId){ //automatic for response, link Line id to default form registration
-    sheet.getRange(e.range['rowStart'],headers().indexOf("state")).setValue("reg0")
+    sheet.getRange(e.range['rowStart'],headers().indexOf("state")).setValue("regx")
     sheet.getRange(e.range['rowStart'],headers().indexOf("lastUpdateDate")).setValue(today)
     //get lineId from LINE sheet
     loop1:
