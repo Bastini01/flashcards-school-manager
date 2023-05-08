@@ -48,15 +48,15 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                 actions=[]
                 c = False
                 
-                ######GENERAL FILTER
-                if status[0]=="t": continue
-                elif new==True: 
-                    if status[:3]!="new": continue
-                elif idFilter:
-                    if studentId!=idFilter: continue
-                if i < 14: continue
                 ###################
                 try:
+                ######GENERAL FILTER
+                    if status[0]=="t": continue
+                    elif new==True: 
+                        if status[:3]!="new": continue
+                    elif idFilter:
+                        if studentId!=idFilter: continue
+                    if i < 14: continue
                     #########SEND REGISTRATION REMINDER
                     if status[:-1] == 'reg':
                         regResp=anki_profiles.reminder_schedule(status, statusDate, False)
