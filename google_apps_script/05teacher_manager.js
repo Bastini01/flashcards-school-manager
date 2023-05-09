@@ -14,7 +14,7 @@ function updateTeacherList(){ //triggered once a month or manually
   Logger.log(teacherList)
   var updateForm = FormApp.openById('1XsN8z4uueZH0HZlu69sviR70yJrxwo9LBPvN47sHXF0')
   updateForm.getItemById(130655611).asListItem().setChoiceValues(teacherList)
-  form.getItemById(919431551).asListItem().setChoiceValues(teacherList)
+  getRegForm().getItemById(919431551).asListItem().setChoiceValues(teacherList)
 }
 
 function send_teacher_promotion(){ //triggered (once per term or) manually 

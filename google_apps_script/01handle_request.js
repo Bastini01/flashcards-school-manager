@@ -7,13 +7,13 @@ var studentLineSheet = ss.getSheetByName("student_line")
 var teSheet = ss.getSheetByName("teacher")
 var classSheet = ss.getSheetByName("class")
 var range = sheet.getRange(1, sheet.getLastRow(), 1, sheet.getLastColumn())
-var form = FormApp.openById('1LUX5E3MmT8EbHD1wv0D8tOe3hBEuP0cKUapJKB4eWWw')
+const getRegForm = () => FormApp.openById('1LUX5E3MmT8EbHD1wv0D8tOe3hBEuP0cKUapJKB4eWWw')
 
 defaultStudentId = '?'
 
 function printResponseID(){
   date = new Date(1663647000000)
-  resp=form.getResponses(date)[3]
+  resp=getRegForm().getResponses(date)[3]
   id = resp.getId()
   respURL = resp.getEditResponseUrl()
   Logger.log(id)
@@ -40,6 +40,8 @@ function get_si(type, value){
 }
 
 function registration_from_line(lineId, displayName){
+
+  const form = getRegForm()
 
   classTypeChoice = form.getItemById(1337875648).asMultipleChoiceItem().getChoices()[0].getValue()
   phoneOS = form.getItemById(840060439).asMultipleChoiceItem().getChoices()[0].getValue()
@@ -69,8 +71,6 @@ function registration_from_line(lineId, displayName){
   r.setValues([[resp.getId(), lineId]])
   Logger.log(lineId+" noted down")
   
-  // sendGformLink(null, lineId=lineId, resp=resp)
-  
   //Simultanious line registrations bug fix (one registration will overwrite other one if no time gap)
   for (var i = 1; i < 200; i++){
     Utilities.sleep(2000)
@@ -89,14 +89,14 @@ function respFromLine(lineId){ //=> resp
   lineIds = studentLineSheet.getRange(1, 2, studentLineSheet.getLastRow(), 1).getValues()
     for (var i = 1; i < lineIds.length; i++) { 
       if (lineId == lineIds[i]) {respId = studentLineSheet.getRange(i+1, 1, 1, 1).getValue(); break}}
-  return form.getResponse(respId)//.getEditResponseUrl()
+  return getRegForm().getResponse(respId)//.getEditResponseUrl()
 }
 
 function respUrlFromLine(lineId){ //=> respUrl
   lineIds = studentLineSheet.getRange(1, 2, studentLineSheet.getLastRow(), 1).getValues()
     for (var i = 1; i < lineIds.length; i++) { 
       if (lineId == lineIds[i]) {respId = studentLineSheet.getRange(i+1, 1, 1, 1).getValue(); break}}
-  return form.getResponse(respId).getEditResponseUrl()
+  return getRegForm().getResponse(respId).getEditResponseUrl()
 }
 
 function printRespUrl(){
@@ -135,8 +135,8 @@ function form_submit(e){ //triggered from registration form
 
   else if(state.slice(0,3) == 'reg'){ //1st manual form response
     respIds =studentLineSheet.getRange(1, 1,studentLineSheet.getLastRow(), 1).getValues()
-    item=form.getItemById(1438401958) //studentID
-    // item=form.getItemById(1080414757) // firstName
+    item=getRegForm().getItemById(1438401958) //studentID
+    // item=getRegForm().getItemById(1080414757) // firstName
     var classNumber = sheet.getRange(e.range['rowStart'],headers().indexOf("classNumber")).getValue()
     var classType = sheet.getRange(e.range['rowStart'],headers().indexOf("classType")).getValue()
     var textbook = sheet.getRange(e.range['rowStart'],headers().indexOf("texbook")).getValue()
