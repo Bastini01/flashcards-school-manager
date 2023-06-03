@@ -131,7 +131,8 @@ def main(log=True, std=True, cls=True, new=False, idFilter=None, forceConnect=Fa
                         sh = g.get_student_sup_hours(supHoursLog, studentId)
                         me = mtc_info.month_end()
                         #########END OF MONTH
-                        if (mtc and classType==2 and sh<8 and today >= me['reminderDate'] 
+                        if (
+                            mtc and classType==2 and sh<8 and today >= me['reminderDate'] 
                             and g.checkEmail(emailLog, studentId, "monthEndReminder"+me['printDate'])==False
                             ):
                             actions.append({"studentIndex":i+2,"emailTemplate":'monthEnd'+me['printDate']})
