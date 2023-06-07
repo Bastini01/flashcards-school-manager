@@ -23,63 +23,18 @@ function add_supp_hours(studentId, h){
     w => resp.withItemResponse(w)
   )
   resp = resp.submit()
+  send_to_mtc(studentId, h)
 }
 
-function handleSuppHoursSubmission(e){ //triggererd from supplementary hours submission form
-  var resp = e.values
-  var row = e.range['rowStart']
-
-  if (resp[3]=="自動化字卡"){
-    shSheet.getRange(row, 6).setValue(resp[2])
-    send_to_mtc(resp, resp[2])
-  }
-  
-  else {
-    var lastSubmission = last_submission(resp[1], row)
-    if (!lastSubmission){
-      if (resp[2]<200){shSheet.getRange(row, 6).setValue('-')}
-      else if (resp[2]<400){
-        shSheet.getRange(row, 6).setValue(1)
-        send_to_mtc(resp, 1, false)
-        }
-      else {
-        shSheet.getRange(row, 6).setValue(2)
-        send_to_mtc(resp, 2, false)
-      }
-    }
-    else{
-      if (resp[2]-lastSubmission<200){shSheet.getRange(row, 6).setValue('-')}
-      else if (resp[2]-lastSubmission<400){
-        shSheet.getRange(row, 6).setValue(1)
-        send_to_mtc(resp, 1, false)
-      }
-      else {
-        shSheet.getRange(row, 6).setValue(2)
-        send_to_mtc(resp, 2, false)
-      }
-    }
-  }
-}
-
-function send_to_mtc(resp, hours, auto=true){
-  var h = hours.toString()
-  
-  msgText="陳小姐您好,\n\n"+
-      "學生號 "+resp[1]+" 以字卡app自主學習獲得了 "+h+" 個小時必修時數.\n\n"
-  if (auto){
-    msgText=msgText+"其資料以MTC自動化字卡系統直接從學生的APP數據讀取."
-  }
-  else {
-    msgText=msgText+"總共複習次數: "+resp[2]+"\n"+
-    "已增加生詞量: "+resp[3]+"\n"+
-    "已學會生詞量: "+resp[4]
-  }
+function send_to_mtc(studentId, h){
+  msgText="陳小姐您好,\n\n"
+  msgText=msgText+"學生號 "+studentId+" 以字卡app自主學習獲得了 "+h+" 個小時必修時數.\n\n"
+  msgText=msgText+"其資料以MTC自動化字卡系統直接從學生的APP數據讀取."
   msgText=msgText+"\n\n謝謝"
   
   GmailApp.sendEmail(
     'mtcmtc@ntnu.edu.tw',
-    // 'pierrehenry.bastin@gmail.com',      
-    '自學時數: '+resp[1]+' - '+h+'小時',
+    '自學時數: '+studentId+' - '+h+'小時',
     msgText
     )
 }

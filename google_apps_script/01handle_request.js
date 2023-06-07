@@ -291,8 +291,6 @@ function handleDesktopRequest(rq){
       add_supp_hours(
         action["emailTemplate"][1]["studentId"], 
         action["emailTemplate"][1]["h"])
-      // GmailApp.sendEmail("pierrehenry.bastin@gmail.com","testing", action["emailTemplate"][1]["studentId"]+" :"+action["emailTemplate"][1]["h"])
-      // GmailApp.sendEmail("pierrehenry.bastin@gmail.com","testing", "something came in")
     }    
 
 
