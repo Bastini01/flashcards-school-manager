@@ -169,9 +169,8 @@ def get_student_sup_hours(supHoursLog, studentId):
     df=df[df['Timestamp'].apply(lambda x: dt.strptime(x, '%m/%d/%Y %H:%M:%S').year)==da.today().year]
     df=df[df['Timestamp'].apply(lambda x: dt.strptime(x, '%m/%d/%Y %H:%M:%S').month)==da.today().month]
     df=df[df['Student number']==studentId]
-    s = df['hours'].apply(lambda x: int(x)).sum()
+    s = df['1) Total reviews/repetitions'].apply(lambda x: int(x)).sum()
     return s if s else 0
-# (get_student_sup_hours(get_sup_hours_log(), '220312055'))
 
 def getActionsTemplate(): #not used, documentation only
     columns={"studentIndex":[], "statusUpdate":[], "chapterUpdate":[],"emailTemplate":[]}
